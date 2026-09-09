@@ -95,7 +95,7 @@ function settings_definitions(): array
         'appearance_look' => [
             'group' => 'appearance', 'label' => 'Look do site', 'max' => 32, 'type' => 'choice',
             'choices' => [
-                'obsidian', 'tech-glass', 'ash-glass', 'sharp-saas', 'ivory-soft', 'editorial',
+                'xhybrid-signature', 'obsidian', 'tech-glass', 'ash-glass', 'sharp-saas', 'ivory-soft', 'editorial',
                 'navy-depth', 'azure-blast', 'indigo-flare', 'ocean-vivid',
                 'neon-night', 'teal-rush',
                 'volt-lime',
@@ -103,7 +103,7 @@ function settings_definitions(): array
                 'blood-noir', 'crimson-volt', 'plum-ember',
                 'neon-orchid', 'violet-pulse', 'cyber-magenta', 'berry-pop', 'petal-sky',
             ],
-            'default' => 'tech-glass',
+            'default' => 'xhybrid-signature',
         ],
         'appearance_theme' => [
             'group' => 'appearance', 'label' => 'Cor / tema', 'max' => 32, 'type' => 'choice',
@@ -122,7 +122,7 @@ function settings_definitions(): array
                 'tech', 'soft', 'editorial', 'saas', 'mono', 'display',
                 'geometric', 'classic', 'rounded', 'condensed',
             ],
-            'default' => 'tech',
+            'default' => 'saas',
         ],
         'appearance_layout' => [
             'group' => 'appearance', 'label' => 'Molde', 'max' => 32, 'type' => 'choice',
@@ -320,6 +320,191 @@ function settings_definitions(): array
             'group' => 'contato_page', 'label' => 'Botão enviar', 'max' => 28, 'type' => 'short',
             'default' => 'Enviar mensagem',
         ],
+
+        /* Marca / identidade */
+        'brand_name' => [
+            'group' => 'brand', 'label' => 'Nome da marca', 'max' => 40, 'type' => 'short',
+            'default' => 'Xhybrid',
+        ],
+        'brand_tagline' => [
+            'group' => 'brand', 'label' => 'Slogan curto', 'max' => 80, 'type' => 'short',
+            'default' => 'Sites, manutenção e tecnologia',
+        ],
+        'brand_city' => [
+            'group' => 'brand', 'label' => 'Cidade / região', 'max' => 60, 'type' => 'short',
+            'default' => '',
+        ],
+        'brand_seo_title' => [
+            'group' => 'brand', 'label' => 'SEO — título da página', 'max' => 70, 'type' => 'short',
+            'default' => 'Xhybrid — Criação de sites, manutenção e tecnologia',
+        ],
+        'brand_seo_description' => [
+            'group' => 'brand', 'label' => 'SEO — descrição', 'max' => 160, 'type' => 'text',
+            'default' => 'Agência Xhybrid: criação de sites, manutenção e tecnologia para empresas. Orçamento rápido pelo WhatsApp.',
+        ],
+
+        /* Área e urgência */
+        'area_text' => [
+            'group' => 'brand', 'label' => 'Área de atendimento', 'max' => 200, 'type' => 'text',
+            'default' => '',
+        ],
+        'urgency_enabled' => [
+            'group' => 'brand', 'label' => 'Badge de urgência', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '0',
+        ],
+        'urgency_label' => [
+            'group' => 'brand', 'label' => 'Texto do badge (ex.: 24h)', 'max' => 24, 'type' => 'short',
+            'default' => '24h',
+        ],
+
+        /* Seções on/off */
+        'section_hero' => [
+            'group' => 'sections', 'label' => 'Hero', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'section_features' => [
+            'group' => 'sections', 'label' => 'O que fazemos', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'section_works' => [
+            'group' => 'sections', 'label' => 'Destaques / trabalhos', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'section_area' => [
+            'group' => 'sections', 'label' => 'Área de atendimento', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '0',
+        ],
+        'section_testimonials' => [
+            'group' => 'sections', 'label' => 'Depoimentos', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '0',
+        ],
+        'section_faq' => [
+            'group' => 'sections', 'label' => 'FAQ', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '0',
+        ],
+        'section_cta' => [
+            'group' => 'sections', 'label' => 'CTA final', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+
+        /* Depoimentos */
+        'testimonials_title' => [
+            'group' => 'testimonials', 'label' => 'Título da seção', 'max' => 40, 'type' => 'short',
+            'default' => 'O que dizem os clientes',
+        ],
+        'testimonial_1_name' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 1 — nome', 'max' => 40, 'type' => 'short',
+            'default' => '',
+        ],
+        'testimonial_1_city' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 1 — cidade', 'max' => 40, 'type' => 'short',
+            'default' => '',
+        ],
+        'testimonial_1_text' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 1 — texto', 'max' => 220, 'type' => 'text',
+            'default' => '',
+        ],
+        'testimonial_2_name' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 2 — nome', 'max' => 40, 'type' => 'short',
+            'default' => '',
+        ],
+        'testimonial_2_city' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 2 — cidade', 'max' => 40, 'type' => 'short',
+            'default' => '',
+        ],
+        'testimonial_2_text' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 2 — texto', 'max' => 220, 'type' => 'text',
+            'default' => '',
+        ],
+        'testimonial_3_name' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 3 — nome', 'max' => 40, 'type' => 'short',
+            'default' => '',
+        ],
+        'testimonial_3_city' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 3 — cidade', 'max' => 40, 'type' => 'short',
+            'default' => '',
+        ],
+        'testimonial_3_text' => [
+            'group' => 'testimonials', 'label' => 'Depoimento 3 — texto', 'max' => 220, 'type' => 'text',
+            'default' => '',
+        ],
+
+        /* FAQ */
+        'faq_title' => [
+            'group' => 'faq', 'label' => 'Título da seção', 'max' => 40, 'type' => 'short',
+            'default' => 'Perguntas frequentes',
+        ],
+        'faq_1_q' => [
+            'group' => 'faq', 'label' => 'FAQ 1 — pergunta', 'max' => 80, 'type' => 'short',
+            'default' => '',
+        ],
+        'faq_1_a' => [
+            'group' => 'faq', 'label' => 'FAQ 1 — resposta', 'max' => 280, 'type' => 'text',
+            'default' => '',
+        ],
+        'faq_2_q' => [
+            'group' => 'faq', 'label' => 'FAQ 2 — pergunta', 'max' => 80, 'type' => 'short',
+            'default' => '',
+        ],
+        'faq_2_a' => [
+            'group' => 'faq', 'label' => 'FAQ 2 — resposta', 'max' => 280, 'type' => 'text',
+            'default' => '',
+        ],
+        'faq_3_q' => [
+            'group' => 'faq', 'label' => 'FAQ 3 — pergunta', 'max' => 80, 'type' => 'short',
+            'default' => '',
+        ],
+        'faq_3_a' => [
+            'group' => 'faq', 'label' => 'FAQ 3 — resposta', 'max' => 280, 'type' => 'text',
+            'default' => '',
+        ],
+        'faq_4_q' => [
+            'group' => 'faq', 'label' => 'FAQ 4 — pergunta', 'max' => 80, 'type' => 'short',
+            'default' => '',
+        ],
+        'faq_4_a' => [
+            'group' => 'faq', 'label' => 'FAQ 4 — resposta', 'max' => 280, 'type' => 'text',
+            'default' => '',
+        ],
+
+        /* Plano comercial */
+        'site_plan' => [
+            'group' => 'plan', 'label' => 'Plano contratado', 'max' => 24, 'type' => 'choice',
+            'choices' => ['essencial', 'profissional', 'personalizado'],
+            'default' => 'profissional',
+        ],
+        'feature_page_sobre' => [
+            'group' => 'plan', 'label' => 'Mostrar página Sobre', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'feature_page_galeria' => [
+            'group' => 'plan', 'label' => 'Mostrar página Projetos', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'feature_page_contato' => [
+            'group' => 'plan', 'label' => 'Mostrar página Contato', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'feature_animations' => [
+            'group' => 'plan', 'label' => 'Animações no site', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'feature_looks_premium' => [
+            'group' => 'plan', 'label' => 'Looks premium (neon / cores fortes)', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '0',
+        ],
+        'feature_preset_nicho' => [
+            'group' => 'plan', 'label' => 'Preset de nicho liberado', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'], 'default' => '1',
+        ],
+        'limit_services' => [
+            'group' => 'plan', 'label' => 'Máx. serviços ativos', 'max' => 3, 'type' => 'short',
+            'default' => '6',
+        ],
+        'limit_gallery' => [
+            'group' => 'plan', 'label' => 'Máx. imagens na galeria', 'max' => 3, 'type' => 'short',
+            'default' => '12',
+        ],
     ];
 }
 
@@ -330,10 +515,15 @@ function settings_groups(): array
         'menu' => 'Menu (4 itens)',
         'footer' => 'Rodapé',
         'appearance' => 'Aparência',
+        'brand' => 'Marca e região',
+        'plan' => 'Plano e limites',
+        'sections' => 'Seções do site',
         'home' => 'Home',
         'sobre' => 'Sobre',
         'galeria' => 'Galeria',
         'contato_page' => 'Página Contato',
+        'testimonials' => 'Depoimentos',
+        'faq' => 'FAQ',
     ];
 }
 

@@ -91,6 +91,8 @@ function db(): PDO
     db_seed_images($pdo);
     require_once __DIR__ . '/settings.php';
     settings_seed($pdo);
+    require_once __DIR__ . '/services.php';
+    services_seed($pdo);
 
     return $pdo;
 }
@@ -173,6 +175,20 @@ function db_migrate(PDO $pdo): void
         );
         $pdo->exec('DROP TABLE settings_legacy_key');
     }
+
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS services (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL DEFAULT \'\',
+            description TEXT NOT NULL DEFAULT \'\',
+            image_slug TEXT NOT NULL DEFAULT \'\',
+            category TEXT NOT NULL DEFAULT \'\',
+            position INTEGER NOT NULL DEFAULT 0,
+            active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )'
+    );
 }
 
 function db_seed_images(PDO $pdo): void

@@ -6,6 +6,8 @@ require_once dirname(__DIR__) . '/lib/auth.php';
 require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/plans.php';
 
 auth_boot_session();
 $user = require_admin();
@@ -23,6 +25,8 @@ if ($id > 0) {
 }
 
 $error = '';
+$settings = settings_all(db());
+$limitGallery = plan_limit_int($settings, 'limit_gallery', 12);
 
 function normalize_slug(string $slug): string
 {
@@ -58,6 +62,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($title === '' || $slug === '' || $url === '') {
         $error = 'Preencha título, slug e URL.';
     } else {
+        $reserved = ['favicon', 'logo', 'hero', 'casal'];
+        $isReserved = in_array($slug, $reserved, true);
+        if ($active === 1 && !$isReserved) {
+            $countStmt = $pdo->query(
+                "SELECT COUNT(*) FROM images WHERE active = 1 AND slug NOT IN ('favicon','logo','hero','casal')"
+            );
+            $galleryCount = (int) $countStmt->fetchColumn();
+            $wasCounted = false;
+            if ($image && (int) ($image['active'] ?? 0) === 1) {
+                $oldSlug = (string) ($image['slug'] ?? '');
+                if (!in_array($oldSlug, $reserved, true)) {
+                    $wasCounted = true;
+                }
+            }
+            $would = $wasCounted ? $galleryCount : $galleryCount + 1;
+            if ($would > $limitGallery) {
+                $error = "Plano permite no máximo {$limitGallery} imagens na galeria (além de logo/favicon/hero/casal).";
+            }
+        }
+
+        if ($error === '') {
         try {
             if ($image) {
                 $stmt = $pdo->prepare(
@@ -117,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'active' => $active,
             ];
         }
+        }
     }
 }
 
@@ -128,7 +154,7 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Imagens</p>
         <h1 class="font-display"><?= $isEdit ? 'Editar imagem' : 'Nova imagem' ?></h1>
-        <p>Use slug fixos do site: <code>hero</code>, <code>casal</code>, <code>amigurumi</code>, <code>manta</code>, <code>sousplat</code>, <code>top</code>, <code>bolsa</code>, <code>bebe</code>, <code>favicon</code>. Descrição e preços aparecem na galeria (deixe vazios em <code>hero</code>/<code>casal</code>/<code>favicon</code>).</p>
+        <p>Slots fixos: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code>. Vídeos Signature: <code>video-home</code>, <code>video-sobre</code>, <code>video-galeria</code>, <code>video-contato</code> (URL .mp4/.webm). Serviços usam o slug em Serviços. Demais imagens ativas entram na galeria.</p>
       </header>
 
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>

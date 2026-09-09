@@ -21,7 +21,8 @@
   }
 
   function currentPreset() {
-    return LOOK_PRESETS.find((l) => l.id === state.look) || LOOK_PRESETS[0];
+    const allowed = typeof allowedLookPresets === "function" ? allowedLookPresets() : LOOK_PRESETS;
+    return allowed.find((l) => l.id === state.look) || allowed[0] || LOOK_PRESETS[0];
   }
 
   function syncFields() {
@@ -59,8 +60,9 @@
     const mount = document.getElementById("opt-looks");
     if (!mount) return;
 
+    const source = typeof allowedLookPresets === "function" ? allowedLookPresets() : LOOK_PRESETS;
     const groups = [];
-    LOOK_PRESETS.forEach((look) => {
+    source.forEach((look) => {
       const name = look.palette || "Outros";
       let group = groups.find((g) => g.name === name);
       if (!group) {
@@ -69,6 +71,10 @@
       }
       group.looks.push(look);
     });
+
+    if (!source.some((l) => l.id === state.look) && source[0]) {
+      state.look = source[0].id;
+    }
 
     mount.innerHTML = groups
       .map((group) => {
@@ -82,7 +88,7 @@
         <button type="button" class="admin-appearance__look${active ? " is-active" : ""}" data-look-id="${escapeHtml(look.id)}" aria-pressed="${active}">
           <span class="admin-appearance__look-swatch">${swatches}</span>
           <span class="admin-appearance__look-copy">
-            <span class="admin-appearance__look-name">${escapeHtml(look.nome)}</span>
+            <span class="admin-appearance__look-name">${escapeHtml(look.nome)}${look.agencyExclusive ? " · agência" : ""}</span>
             <span class="admin-appearance__look-desc">${escapeHtml(look.descricao)}</span>
           </span>
         </button>`;
@@ -98,7 +104,8 @@
   }
 
   function selectLook(id) {
-    if (!LOOK_PRESETS.some((l) => l.id === id)) return;
+    const source = typeof allowedLookPresets === "function" ? allowedLookPresets() : LOOK_PRESETS;
+    if (!source.some((l) => l.id === id)) return;
     state.look = id;
     renderLooks();
     syncFields();

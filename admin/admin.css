@@ -112,8 +112,21 @@ body[data-page="admin"] textarea.form-input:focus {
   box-shadow: none;
 }
 
-body[data-page="admin"] .admin-main {
-  padding: 2.5rem 1rem 4rem;
+body[data-page="admin"] .admin-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+body[data-page="admin"] .admin-checklist li {
+  color: #a3a3a3;
+  font-size: 0.9rem;
+}
+
+body[data-page="admin"] .admin-checklist li.is-done {
+  color: #e8e8e8;
 }
 
 body[data-page="admin"] .page-header h1 {

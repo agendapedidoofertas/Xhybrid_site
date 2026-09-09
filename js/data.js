@@ -25,10 +25,10 @@ const SITE_DEFAULTS = {
   footer_hours_line2: "Sábado: 9h – 13h",
   footer_hours_line3: "Domingo: fechado",
   appearance_theme: "preto",
-  appearance_font: "tech",
+  appearance_font: "saas",
   appearance_layout: "soft",
   appearance_media: "classic",
-  appearance_look: "tech-glass",
+  appearance_look: "xhybrid-signature",
   home_badge: "Sites & tecnologia",
   home_hero_title_1: "Seu negócio,",
   home_hero_title_2: "online de verdade.",
@@ -83,6 +83,50 @@ const SITE_DEFAULTS = {
   contact_form_title: "Escreva para nós",
   contact_form_intro: "Preencha abaixo e sua mensagem abre direto no seu e-mail.",
   contact_form_btn: "Enviar mensagem",
+  brand_name: "Xhybrid",
+  brand_tagline: "Sites, manutenção e tecnologia",
+  brand_city: "",
+  brand_seo_title: "Xhybrid — Criação de sites, manutenção e tecnologia",
+  brand_seo_description:
+    "Agência Xhybrid: criação de sites, manutenção e tecnologia para empresas. Orçamento rápido pelo WhatsApp.",
+  area_text: "",
+  urgency_enabled: "0",
+  urgency_label: "24h",
+  section_hero: "1",
+  section_features: "1",
+  section_works: "1",
+  section_area: "0",
+  section_testimonials: "0",
+  section_faq: "0",
+  section_cta: "1",
+  testimonials_title: "O que dizem os clientes",
+  testimonial_1_name: "",
+  testimonial_1_city: "",
+  testimonial_1_text: "",
+  testimonial_2_name: "",
+  testimonial_2_city: "",
+  testimonial_2_text: "",
+  testimonial_3_name: "",
+  testimonial_3_city: "",
+  testimonial_3_text: "",
+  faq_title: "Perguntas frequentes",
+  faq_1_q: "",
+  faq_1_a: "",
+  faq_2_q: "",
+  faq_2_a: "",
+  faq_3_q: "",
+  faq_3_a: "",
+  faq_4_q: "",
+  faq_4_a: "",
+  site_plan: "profissional",
+  feature_page_sobre: "1",
+  feature_page_galeria: "1",
+  feature_page_contato: "1",
+  feature_animations: "1",
+  feature_looks_premium: "0",
+  feature_preset_nicho: "1",
+  limit_services: "6",
+  limit_gallery: "12",
 };
 
 /** Estado vivo do site (defaults + API) */
@@ -118,7 +162,7 @@ function whatsappUrl() {
 
 function whatsappProduto(nome) {
   return whatsappLink(
-    `Olá! Me interessei pelo projeto "${nome}" da Xhybrid. Pode me passar mais detalhes?`,
+    `Olá! Me interessei por "${nome}" (${site("brand_name")}). Pode me passar mais detalhes?`,
   );
 }
 
@@ -138,12 +182,39 @@ function syncContactGlobals() {
 }
 
 function getNavLinks() {
-  return [
+  const links = [
     { href: "index.html", label: site("nav_index"), page: "index" },
-    { href: "sobre.html", label: site("nav_sobre"), page: "sobre" },
-    { href: "galeria.html", label: site("nav_galeria"), page: "galeria" },
-    { href: "contato.html", label: site("nav_contato"), page: "contato" },
   ];
+  if (site("feature_page_sobre") !== "0") {
+    links.push({ href: "sobre.html", label: site("nav_sobre"), page: "sobre" });
+  }
+  if (site("feature_page_galeria") !== "0") {
+    links.push({ href: "galeria.html", label: site("nav_galeria"), page: "galeria" });
+  }
+  if (site("feature_page_contato") !== "0") {
+    links.push({ href: "contato.html", label: site("nav_contato"), page: "contato" });
+  }
+  return links;
+}
+
+/** Looks liberados conforme plano / flag premium */
+function allowedLookPresets() {
+  const premium = site("feature_looks_premium") === "1";
+  const plan = site("site_plan") || "profissional";
+  if (premium || plan === "personalizado") {
+    return LOOK_PRESETS;
+  }
+  const basicPalettes =
+    plan === "essencial"
+      ? ["Neutro"]
+      : ["Neutro", "Azul", "Ciano", "Verde", "Quente"];
+  // Signature fica disponível na paleta Neutro (vitrine); pacotes Essencial/Profissional
+  // já forçam looks de cliente ao aplicar o plano (tech-glass / azure-blast).
+  return LOOK_PRESETS.filter((l) => basicPalettes.includes(l.palette || "Neutro"));
+}
+
+function isLookAllowed(lookId) {
+  return allowedLookPresets().some((l) => l.id === lookId);
 }
 
 const products = [
@@ -468,7 +539,19 @@ const MEDIA_PRESETS = [
  * Ordenados por paleta e, dentro dela, do mais escuro ao mais claro.
  */
 const LOOK_PRESETS = [
-  /* Neutro */
+  /* Neutro — vitrine Xhybrid primeiro */
+  {
+    id: "xhybrid-signature",
+    nome: "Xhybrid Signature",
+    descricao: "Vitrine premium — preto, glass transparente e motion",
+    palette: "Neutro",
+    theme: "preto",
+    font: "saas",
+    layout: "soft",
+    media: "classic",
+    agencyExclusive: true,
+    swatch: ["#050505", "rgba(255,255,255,0.2)", "#f4f4f5"],
+  },
   {
     id: "obsidian",
     nome: "Obsidian",
@@ -762,7 +845,7 @@ const DEFAULT_THEME = "preto";
 const DEFAULT_FONT = "tech";
 const DEFAULT_LAYOUT = "soft";
 const DEFAULT_MEDIA = "classic";
-const DEFAULT_LOOK = "tech-glass";
+const DEFAULT_LOOK = "xhybrid-signature";
 const THEME_STORAGE_KEY = "xhybrid-theme";
 const FONT_STORAGE_KEY = "xhybrid-font";
 const LAYOUT_STORAGE_KEY = "xhybrid-layout";
@@ -779,6 +862,24 @@ function bindProductImages() {
   });
 }
 
+/** Substitui o catálogo hardcoded pelos serviços do admin/API. */
+function applyServicesCatalog(rows) {
+  if (!Array.isArray(rows) || !rows.length) return false;
+  products.splice(0, products.length);
+  const max = Math.max(1, parseInt(site("limit_services") || "6", 10) || 6);
+  rows.slice(0, max).forEach((row) => {
+    products.push({
+      id: String(row.id ?? row.title ?? ""),
+      nome: String(row.title || "Serviço"),
+      descricao: String(row.description || ""),
+      imageKey: String(row.image_slug || ""),
+      categoria: String(row.category || "Serviço"),
+      imagem: "",
+    });
+  });
+  return products.length > 0;
+}
+
 /**
  * @param {Array} apiRows
  * @param {boolean} apiOk - true se /api/images.php respondeu com sucesso
@@ -786,7 +887,11 @@ function bindProductImages() {
 function rebuildGalleryPhotos(apiRows, apiOk) {
   if (apiOk) {
     galleryPhotos = (apiRows || [])
-      .filter((row) => row.slug && row.slug !== "favicon")
+      .filter((row) => {
+        if (!row.slug || row.slug === "favicon" || row.slug === "logo") return false;
+        if (String(row.slug).startsWith("video-")) return false;
+        return true;
+      })
       .map((row) => ({
         src: driveToSrc(row.url) || row.url,
         alt: row.title || row.slug,
@@ -794,8 +899,14 @@ function rebuildGalleryPhotos(apiRows, apiOk) {
         descricao: (row.description || "").trim(),
         preco: (row.price || "").trim(),
         precoPromo: (row.promo_price || "").trim(),
+        _slug: row.slug,
       }))
       .filter((foto) => Boolean(foto.src));
+
+    const maxExtra = Math.max(0, parseInt(site("limit_gallery") || "12", 10) || 12);
+    const core = galleryPhotos.filter((f) => f._slug === "hero" || f._slug === "casal");
+    const extras = galleryPhotos.filter((f) => f._slug !== "hero" && f._slug !== "casal").slice(0, maxExtra);
+    galleryPhotos = [...core, ...extras].map(({ _slug, ...rest }) => rest);
     return;
   }
 

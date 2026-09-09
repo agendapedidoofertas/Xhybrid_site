@@ -6,6 +6,8 @@ require_once dirname(__DIR__) . '/lib/auth.php';
 require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/services.php';
 
 auth_boot_session();
 
@@ -80,15 +82,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $ok = isset($_GET['ok']) ? (string) $_GET['ok'] : '';
-$images = db()->query('SELECT * FROM images ORDER BY position ASC, id ASC')->fetchAll();
+$pdo = db();
+$images = $pdo->query('SELECT * FROM images ORDER BY position ASC, id ASC')->fetchAll();
+$settings = settings_all($pdo);
+$servicesCount = (int) $pdo->query('SELECT COUNT(*) FROM services WHERE active = 1')->fetchColumn();
+$slugs = array_map(static fn ($img) => (string) $img['slug'], $images);
+$hasHero = in_array('hero', $slugs, true);
+$hasLogo = in_array('logo', $slugs, true) || in_array('favicon', $slugs, true);
+$hasWa = trim($settings['whatsapp_number'] ?? '') !== '' && $settings['whatsapp_number'] !== '5511999999999';
+$hasBrand = trim($settings['brand_name'] ?? '') !== '' && ($settings['brand_name'] ?? '') !== 'Xhybrid';
+$lookSaved = trim($settings['appearance_look'] ?? '') !== '';
+$editors = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'editor'")->fetchColumn();
+$planLabel = $settings['site_plan'] ?? 'profissional';
 
-admin_header('Imagens', $user);
+admin_header('Painel', $user);
 ?>
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;">
+      <?php if (user_is_admin($user)): ?>
+      <section class="contact-form admin-form admin-form--wide" style="margin-bottom:2rem;">
+        <h2 class="font-display" style="font-size:1.15rem;margin:0 0 0.75rem;">Checklist de entrega</h2>
+        <p class="text-muted" style="margin:0 0 0.75rem;">Plano atual: <strong><?= h($planLabel) ?></strong> · <a href="plan.php">alterar</a></p>
+        <ul class="admin-checklist">
+          <li class="<?= $hasBrand ? 'is-done' : '' ?>"><?= $hasBrand ? '✓' : '○' ?> Marca personalizada (não Xhybrid)</li>
+          <li class="<?= $hasWa ? 'is-done' : '' ?>"><?= $hasWa ? '✓' : '○' ?> WhatsApp real cadastrado</li>
+          <li class="<?= $hasHero ? 'is-done' : '' ?>"><?= $hasHero ? '✓' : '○' ?> Imagem <code>hero</code></li>
+          <li class="<?= $hasLogo ? 'is-done' : '' ?>"><?= $hasLogo ? '✓' : '○' ?> <code>logo</code> ou <code>favicon</code></li>
+          <li class="<?= $servicesCount >= 3 ? 'is-done' : '' ?>"><?= $servicesCount >= 3 ? '✓' : '○' ?> Pelo menos 3 serviços ativos</li>
+          <li class="<?= $lookSaved ? 'is-done' : '' ?>"><?= $lookSaved ? '✓' : '○' ?> Look de aparência definido</li>
+          <li class="<?= $editors > 0 ? 'is-done' : '' ?>"><?= $editors > 0 ? '✓' : '○' ?> Usuário editor (dono do site) criado</li>
+        </ul>
+        <p class="text-muted" style="margin:0.75rem 0 0;font-size:0.85rem;">
+          Atalhos:
+          <a href="plan.php">Plano</a> ·
+          <a href="preset.php">Preset</a> ·
+          <a href="brand.php">Marca</a> ·
+          <a href="appearance.php">Aparência</a> ·
+          <a href="users.php">Usuários</a>
+        </p>
+      </section>
+      <?php endif; ?>
+
+      <div id="imagens" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;">
         <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
           <p class="eyebrow">Catálogo</p>
           <h1 class="font-display">Imagens</h1>
-          <p>Gerencie URLs (Google Drive ou locais), ordem e visibilidade.</p>
+          <p>Slots fixos: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code> + vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>. Demais entram na galeria.</p>
         </header>
         <a href="image_edit.php" class="btn btn-primary">Adicionar imagem</a>
       </div>

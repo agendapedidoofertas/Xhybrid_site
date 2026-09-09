@@ -16,6 +16,7 @@ $error = '';
 $values = settings_all(db());
 
 $lookBundles = [
+    'xhybrid-signature' => ['theme' => 'preto', 'font' => 'saas', 'layout' => 'soft', 'media' => 'classic'],
     'tech-glass' => ['theme' => 'preto', 'font' => 'tech', 'layout' => 'soft', 'media' => 'classic'],
     'editorial' => ['theme' => 'branco', 'font' => 'editorial', 'layout' => 'editorial', 'media' => 'flip'],
     'sharp-saas' => ['theme' => 'graphite', 'font' => 'saas', 'layout' => 'sharp', 'media' => 'media-wide'],
@@ -45,9 +46,9 @@ $lookBundles = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
-    $look = (string) ($_POST['appearance_look'] ?? 'tech-glass');
+    $look = (string) ($_POST['appearance_look'] ?? 'xhybrid-signature');
     if (!isset($lookBundles[$look])) {
-        $look = 'tech-glass';
+        $look = 'xhybrid-signature';
     }
     $bundle = $lookBundles[$look];
     $input = [
@@ -71,9 +72,9 @@ if (isset($_GET['ok'])) {
     $flash = 'Aparência publicada no site.';
 }
 
-$look = $values['appearance_look'] ?? 'tech-glass';
+$look = $values['appearance_look'] ?? 'xhybrid-signature';
 if (!isset($lookBundles[$look])) {
-    $look = 'tech-glass';
+    $look = 'xhybrid-signature';
 }
 
 admin_header('Aparência', $user);
@@ -130,6 +131,13 @@ admin_header('Aparência', $user);
       </div>
 
       <script src="../js/data.js"></script>
+      <script>
+        applySiteSettings(<?= json_encode([
+            'site_plan' => $values['site_plan'] ?? 'profissional',
+            'feature_looks_premium' => $values['feature_looks_premium'] ?? '0',
+            'appearance_look' => $values['appearance_look'] ?? 'xhybrid-signature',
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>);
+      </script>
       <script src="appearance.js"></script>
 <?php
 admin_footer();

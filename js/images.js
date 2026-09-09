@@ -68,7 +68,17 @@ function applyImageCatalog(rows, options = {}) {
 
   (rows || []).forEach((row) => {
     if (!row || !row.slug) return;
-    const src = driveToSrc(row.url || "");
+    const raw = String(row.url || "").trim();
+    if (!raw) return;
+    // Vídeos: manter URL direta (.mp4/.webm) — não converter via CDN de imagem do Drive
+    if (
+      String(row.slug).startsWith("video-") ||
+      /\.(mp4|webm|ogg)(\?|#|$)/i.test(raw)
+    ) {
+      IMAGES[row.slug] = raw;
+      return;
+    }
+    const src = driveToSrc(raw);
     if (src) {
       IMAGES[row.slug] = src;
     }

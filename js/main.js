@@ -33,11 +33,12 @@ function isMediaId(v) {
 }
 
 function isLookId(v) {
-  return typeof v === "string" && LOOK_PRESETS.some((l) => l.id === v);
+  return typeof v === "string" && allowedLookPresets().some((l) => l.id === v);
 }
 
 function getLookPreset(lookId) {
-  return LOOK_PRESETS.find((l) => l.id === lookId) || LOOK_PRESETS[0];
+  const allowed = allowedLookPresets();
+  return allowed.find((l) => l.id === lookId) || allowed[0] || LOOK_PRESETS[0];
 }
 
 function escapeHtml(str) {
@@ -188,11 +189,21 @@ function renderHeader(currentPage) {
     return `<li><a href="${l.href}" class="${active.trim()}">${escapeHtml(l.label)}</a></li>`;
   }).join("");
 
+  const brand = site("brand_name") || "Xhybrid";
+  let logoInner;
+  if (IMAGES.logo) {
+    logoInner = `<img class="site-logo__img" src="${escapeHtml(IMAGES.logo)}" alt="${escapeHtml(brand)}" width="140" height="40">`;
+  } else if (brand.toLowerCase() === "xhybrid") {
+    logoInner = `X<span class="text-primary italic">hybrid</span>`;
+  } else {
+    logoInner = escapeHtml(brand);
+  }
+
   return `
     <header class="site-header">
       <div class="container site-header__inner">
-        <a href="index.html" class="site-logo" aria-label="Xhybrid — página inicial">
-          X<span class="text-primary italic">hybrid</span>
+        <a href="index.html" class="site-logo" aria-label="${escapeHtml(brand)} — página inicial">
+          ${logoInner}
         </a>
         <nav class="site-nav" aria-label="Navegação principal">${navLinks}</nav>
         <div class="header-actions">
@@ -212,6 +223,7 @@ function renderFooter() {
   const wa = whatsappUrl();
   const ig = site("instagram_url");
   const mail = site("email");
+  const brand = site("brand_name") || "Xhybrid";
   const hoursTitle = site("footer_hours_title");
   const hoursLines = ["footer_hours_line1", "footer_hours_line2", "footer_hours_line3"]
     .map((key) => site(key).trim())
@@ -227,34 +239,39 @@ function renderFooter() {
         </div>`
     : "";
 
+  const brandHtml =
+    brand.toLowerCase() === "xhybrid"
+      ? `X<span class="text-primary italic">hybrid</span>`
+      : escapeHtml(brand);
+
   return `
     <footer class="site-footer">
       <div class="container site-footer__grid">
         <div>
-          <p class="site-footer__brand">X<span class="text-primary italic">hybrid</span></p>
+          <p class="site-footer__brand">${brandHtml}</p>
           <p class="site-footer__tagline">${escapeHtml(site("footer_tagline"))}</p>
         </div>
         <nav aria-label="Links do rodapé">
           <p class="site-footer__heading">Navegue</p>
           <ul class="site-footer__links">
-            <li><a href="sobre.html">${escapeHtml(site("footer_link_sobre"))}</a></li>
-            <li><a href="galeria.html">${escapeHtml(site("nav_galeria"))}</a></li>
-            <li><a href="contato.html">${escapeHtml(site("nav_contato"))}</a></li>
+            ${site("feature_page_sobre") !== "0" ? `<li><a href="sobre.html">${escapeHtml(site("footer_link_sobre"))}</a></li>` : ""}
+            ${site("feature_page_galeria") !== "0" ? `<li><a href="galeria.html">${escapeHtml(site("nav_galeria"))}</a></li>` : ""}
+            ${site("feature_page_contato") !== "0" ? `<li><a href="contato.html">${escapeHtml(site("nav_contato"))}</a></li>` : ""}
           </ul>
         </nav>
         <div>
           <p class="site-footer__heading">Fale com a gente</p>
           <div class="social-links">
-            <a href="${escapeHtml(wa)}" target="_blank" rel="noreferrer" aria-label="WhatsApp da Xhybrid">${ICONS.messageCircle}</a>
-            <a href="${escapeHtml(ig)}" target="_blank" rel="noreferrer" aria-label="Instagram da Xhybrid">${ICONS.instagram}</a>
-            <a href="mailto:${escapeHtml(mail)}" aria-label="Enviar e-mail para a Xhybrid">${ICONS.mail}</a>
+            <a href="${escapeHtml(wa)}" target="_blank" rel="noreferrer" aria-label="WhatsApp">${ICONS.messageCircle}</a>
+            <a href="${escapeHtml(ig)}" target="_blank" rel="noreferrer" aria-label="Instagram">${ICONS.instagram}</a>
+            <a href="mailto:${escapeHtml(mail)}" aria-label="E-mail">${ICONS.mail}</a>
           </div>
           <p class="site-footer__tagline" style="margin-top:0.75rem">${escapeHtml(mail)}</p>
         </div>
         ${hoursBlock}
       </div>
       <div class="site-footer__bottom">
-        © ${year} Xhybrid — criação de sites, manutenção e tecnologia.
+        © ${year} ${escapeHtml(brand)}${site("brand_city") ? ` · ${escapeHtml(site("brand_city"))}` : ""}.
       </div>
     </footer>`;
 }
@@ -376,6 +393,7 @@ function setupGallery() {
 function setupHomeDestaques() {
   const grid = document.getElementById("destaques-grid");
   if (!grid) return;
+  grid.innerHTML = "";
 
   products
     .filter((p) => p.imagem)
@@ -396,6 +414,120 @@ function setupHomeDestaques() {
     });
 }
 
+function applyBrandMeta() {
+  const title = site("brand_seo_title");
+  const desc = site("brand_seo_description");
+  const brand = site("brand_name");
+  if (title) document.title = title;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc && desc) metaDesc.setAttribute("content", desc);
+  const author = document.querySelector('meta[name="author"]');
+  if (author && brand) author.setAttribute("content", brand);
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle && title) ogTitle.setAttribute("content", title);
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc && desc) ogDesc.setAttribute("content", desc);
+}
+
+function applySections() {
+  document.querySelectorAll("[data-section]").forEach((el) => {
+    const key = el.getAttribute("data-section");
+    if (!key) return;
+    const flag = site(`section_${key}`);
+    el.hidden = flag === "0";
+  });
+
+  const pageFlags = {
+    sobre: "feature_page_sobre",
+    galeria: "feature_page_galeria",
+    contato: "feature_page_contato",
+  };
+  document.querySelectorAll("[data-requires-page]").forEach((el) => {
+    const page = el.getAttribute("data-requires-page");
+    const flag = pageFlags[page];
+    if (!flag) return;
+    el.hidden = site(flag) === "0";
+  });
+
+  const urgency = document.querySelector("[data-urgency-badge]");
+  if (urgency) {
+    const on = site("urgency_enabled") === "1";
+    urgency.hidden = !on;
+    const label = urgency.querySelector("[data-site='urgency_label']");
+    if (label) label.textContent = site("urgency_label");
+  }
+
+  const areaBlock = document.querySelector("[data-section='area']");
+  if (areaBlock && !site("area_text").trim()) {
+    areaBlock.hidden = true;
+  }
+}
+
+function enforcePlanPages() {
+  const page = document.body.dataset.page || "index";
+  const map = {
+    sobre: "feature_page_sobre",
+    galeria: "feature_page_galeria",
+    contato: "feature_page_contato",
+  };
+  const flag = map[page];
+  if (flag && site(flag) === "0") {
+    window.location.replace("index.html");
+  }
+}
+
+function applyMotionPreference() {
+  const settingOn = site("feature_animations") === "1";
+  const prefersReduce =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const on = settingOn && !prefersReduce;
+  document.documentElement.classList.toggle("no-motion", !on);
+  document.documentElement.dataset.animations = on ? "1" : "0";
+}
+
+function setupTestimonials() {
+  const grid = document.getElementById("testimonials-grid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  let count = 0;
+  for (let i = 1; i <= 3; i += 1) {
+    const name = site(`testimonial_${i}_name`).trim();
+    const text = site(`testimonial_${i}_text`).trim();
+    if (!name || !text) continue;
+    count += 1;
+    const city = site(`testimonial_${i}_city`).trim();
+    const li = document.createElement("li");
+    li.className = "feature-card reveal";
+    li.innerHTML = `
+      <p>${escapeHtml(text)}</p>
+      <h3 style="margin-top:1rem">${escapeHtml(name)}</h3>
+      ${city ? `<p class="text-muted" style="margin:0.25rem 0 0">${escapeHtml(city)}</p>` : ""}`;
+    grid.appendChild(li);
+  }
+  const section = document.querySelector("[data-section='testimonials']");
+  if (section && count === 0) section.hidden = true;
+}
+
+function setupFaq() {
+  const list = document.getElementById("faq-list");
+  if (!list) return;
+  list.innerHTML = "";
+  let count = 0;
+  for (let i = 1; i <= 4; i += 1) {
+    const q = site(`faq_${i}_q`).trim();
+    const a = site(`faq_${i}_a`).trim();
+    if (!q || !a) continue;
+    count += 1;
+    const details = document.createElement("details");
+    details.className = "faq-item reveal";
+    details.innerHTML = `<summary>${escapeHtml(q)}</summary><p>${escapeHtml(a)}</p>`;
+    list.appendChild(details);
+  }
+  const section = document.querySelector("[data-section='faq']");
+  if (section && count === 0) section.hidden = true;
+}
+
 function setupContactForm() {
   const form = document.getElementById("contact-form");
   if (!form) return;
@@ -411,6 +543,11 @@ function setupContactForm() {
 }
 
 function initRevealAnimations() {
+  if (site("feature_animations") === "0") {
+    document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
+    return;
+  }
+
   const targets = document.querySelectorAll(
     ".hero__grid > div, .hero__figure, .feature-card, .product-card, .stat-card, .channel-card, .contact-form, .about-figure, .about-content, .cta-section, .section-header, .section-header-row, .page-header, .info-box"
   );
@@ -501,6 +638,136 @@ function applyImages() {
   });
 }
 
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg)(\?|#|$)/i.test(String(url || ""));
+}
+
+function motionAllowsMedia() {
+  return (
+    site("feature_animations") !== "0" &&
+    !document.documentElement.classList.contains("no-motion") &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
+/** Vídeo de capa — só no look Xhybrid Signature */
+function applyVideos() {
+  const isSignature =
+    document.documentElement.getAttribute("data-look") === "xhybrid-signature";
+  const canPlay = isSignature && motionAllowsMedia();
+
+  const firstGallerySrc = () => {
+    if (Array.isArray(galleryPhotos) && galleryPhotos.length) {
+      const src = galleryPhotos[0].src || galleryPhotos[0].url || "";
+      if (src && !isVideoUrl(src)) return src;
+    }
+    const skip = new Set([
+      "favicon",
+      "logo",
+      "video-home",
+      "video-sobre",
+      "video-galeria",
+      "video-contato",
+    ]);
+    for (const key of Object.keys(IMAGES)) {
+      if (skip.has(key) || String(key).startsWith("video-")) continue;
+      const src = IMAGES[key];
+      if (src && !isVideoUrl(src)) return src;
+    }
+    return IMAGES.hero || "";
+  };
+
+  document.querySelectorAll("[data-video]").forEach((video) => {
+    const slug = video.getAttribute("data-video");
+    const src = (slug && IMAGES[slug]) || "";
+    const media = video.closest(".hero__media, .page-cover__media");
+    const fallback = media ? media.querySelector("img") : null;
+
+    if (fallback && slug === "video-galeria") {
+      const poster = firstGallerySrc();
+      if (poster) {
+        fallback.hidden = false;
+        fallback.setAttribute("src", poster);
+        video.setAttribute("poster", poster);
+      }
+    }
+
+    const showFallback = () => {
+      video.removeAttribute("src");
+      try {
+        video.load();
+      } catch (_) {
+        /* ignore */
+      }
+      video.hidden = true;
+      if (fallback) fallback.hidden = false;
+    };
+
+    if (!canPlay || !isVideoUrl(src)) {
+      showFallback();
+      return;
+    }
+
+    video.hidden = false;
+    if (fallback) fallback.hidden = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.src = src;
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => showFallback());
+    }
+  });
+}
+
+/** Transição de saída entre páginas HTML (Signature + animações on) */
+function setupPageTransitions() {
+  const isSignature =
+    document.documentElement.getAttribute("data-look") === "xhybrid-signature";
+  if (!isSignature || !motionAllowsMedia()) return;
+
+  const page = document.querySelector(".page");
+  if (!page) return;
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (link.target && link.target !== "_self") return;
+      if (link.hasAttribute("download")) return;
+
+      let url;
+      try {
+        url = new URL(link.href, window.location.href);
+      } catch (_) {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+      if (!/\.html?$/i.test(url.pathname) && !/\/$/.test(url.pathname)) return;
+      if (
+        url.pathname === window.location.pathname &&
+        url.search === window.location.search &&
+        !url.hash
+      ) {
+        return;
+      }
+      if (url.hash && url.pathname === window.location.pathname) return;
+
+      event.preventDefault();
+      page.classList.add("is-leaving");
+      window.setTimeout(() => {
+        window.location.href = url.href;
+      }, 280);
+    },
+    true,
+  );
+}
+
 /** Resolve api/*.php a partir da pasta do site (funciona em subpasta) */
 function apiUrl(file) {
   const scripts = document.getElementsByTagName("script");
@@ -522,7 +789,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let apiRows = [];
   let apiOk = false;
 
-  const [imagesResult, settingsResult] = await Promise.allSettled([
+  const [imagesResult, settingsResult, servicesResult] = await Promise.allSettled([
     fetch(apiUrl("api/images.php"), {
       headers: { Accept: "application/json" },
       cache: "no-store",
@@ -543,6 +810,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       return data;
     }),
+    fetch(apiUrl("api/services.php"), {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    }).then(async (res) => {
+      if (!res.ok) throw new Error("API " + res.status);
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("Services inválido");
+      return data;
+    }),
   ]);
 
   if (imagesResult.status === "fulfilled") {
@@ -558,15 +834,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   syncContactGlobals();
 
+  if (servicesResult.status === "fulfilled") {
+    applyServicesCatalog(servicesResult.value);
+  }
+
   bindProductImages();
   rebuildGalleryPhotos(apiRows, apiOk);
   applyImages();
+  applyBrandMeta();
+  applyMotionPreference();
+  enforcePlanPages();
 
   const page = document.body.dataset.page || "index";
   setupLayout(page);
+  applyVideos();
   applySiteTexts();
+  applySections();
   setupHomeDestaques();
+  setupTestimonials();
+  setupFaq();
   setupGallery();
   setupContactForm();
   initRevealAnimations();
+  setupPageTransitions();
 });

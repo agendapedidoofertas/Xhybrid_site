@@ -11,7 +11,7 @@ require_once dirname(__DIR__) . '/lib/settings.php';
 auth_boot_session();
 $user = require_admin();
 
-$allowedTabs = ['menu', 'home', 'sobre', 'galeria', 'contato_page', 'footer'];
+$allowedTabs = ['menu', 'home', 'sobre', 'galeria', 'contato_page', 'footer', 'testimonials', 'faq'];
 $tab = (string) ($_GET['tab'] ?? 'menu');
 if (!in_array($tab, $allowedTabs, true)) {
     $tab = 'menu';
@@ -60,6 +60,8 @@ $tabLabels = [
     'galeria' => 'Galeria',
     'contato_page' => 'Pág. Contato',
     'footer' => 'Rodapé',
+    'testimonials' => 'Depoimentos',
+    'faq' => 'FAQ',
 ];
 
 admin_header('Textos do site', $user);
