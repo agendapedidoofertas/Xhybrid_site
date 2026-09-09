@@ -415,18 +415,75 @@ function setupHomeDestaques() {
 }
 
 function applyBrandMeta() {
-  const title = site("brand_seo_title");
-  const desc = site("brand_seo_description");
+  const page = document.body.dataset.page || "index";
+  const pageKey =
+    page === "sobre" ? "sobre" : page === "galeria" ? "galeria" : page === "contato" ? "contato" : "";
+  const pageTitle = pageKey ? site(`seo_${pageKey}_title`).trim() : "";
+  const pageDesc = pageKey ? site(`seo_${pageKey}_description`).trim() : "";
+  const title = pageTitle || site("brand_seo_title");
+  const desc = pageDesc || site("brand_seo_description");
   const brand = site("brand_name");
   if (title) document.title = title;
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc && desc) metaDesc.setAttribute("content", desc);
   const author = document.querySelector('meta[name="author"]');
   if (author && brand) author.setAttribute("content", brand);
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle && title) ogTitle.setAttribute("content", title);
-  const ogDesc = document.querySelector('meta[property="og:description"]');
-  if (ogDesc && desc) ogDesc.setAttribute("content", desc);
+
+  const ensureMeta = (attr, key, value) => {
+    if (!value) return;
+    let el = document.querySelector(`meta[${attr}="${key}"]`);
+    if (!el) {
+      el = document.createElement("meta");
+      el.setAttribute(attr, key);
+      document.head.appendChild(el);
+    }
+    el.setAttribute("content", value);
+  };
+
+  ensureMeta("property", "og:title", title);
+  ensureMeta("property", "og:description", desc);
+  ensureMeta("name", "twitter:title", title);
+  ensureMeta("name", "twitter:description", desc);
+
+  const ogSrc = IMAGES.hero || IMAGES.logo || IMAGES.favicon || "";
+  if (ogSrc) {
+    let absolute = ogSrc;
+    try {
+      absolute = new URL(ogSrc, window.location.href).href;
+    } catch (_) {
+      /* keep relative */
+    }
+    ensureMeta("property", "og:image", absolute);
+    ensureMeta("name", "twitter:image", absolute);
+    ensureMeta("name", "twitter:card", "summary_large_image");
+  }
+}
+
+function applyAnalytics() {
+  const ga = site("analytics_ga4_id").trim();
+  const pixel = site("analytics_meta_pixel_id").trim();
+  if (ga && /^G-[A-Z0-9]+$/i.test(ga) && !document.getElementById("xh-ga4")) {
+    const s = document.createElement("script");
+    s.id = "xh-ga4";
+    s.async = true;
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga)}`;
+    document.head.appendChild(s);
+    const inline = document.createElement("script");
+    inline.textContent =
+      "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config'," +
+      JSON.stringify(ga) +
+      ");";
+    document.head.appendChild(inline);
+  }
+  if (pixel && /^\d{5,20}$/.test(pixel) && !document.getElementById("xh-meta-pixel")) {
+    const inline = document.createElement("script");
+    inline.id = "xh-meta-pixel";
+    inline.textContent =
+      "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init'," +
+      JSON.stringify(pixel) +
+      ");fbq('track','PageView');";
+    document.head.appendChild(inline);
+  }
 }
 
 function applySections() {
@@ -447,6 +504,11 @@ function applySections() {
     const flag = pageFlags[page];
     if (!flag) return;
     el.hidden = site(flag) === "0";
+  });
+
+  document.querySelectorAll(".hero__actions").forEach((actions) => {
+    const visible = [...actions.children].filter((child) => !child.hidden);
+    actions.classList.toggle("hero__actions--single", visible.length <= 1);
   });
 
   const urgency = document.querySelector("[data-urgency-badge]");
@@ -532,13 +594,56 @@ function setupContactForm() {
   const form = document.getElementById("contact-form");
   if (!form) return;
 
-  form.addEventListener("submit", (e) => {
+  let status = form.querySelector(".form-status");
+  if (!status) {
+    status = document.createElement("p");
+    status.className = "form-status text-muted";
+    status.setAttribute("role", "status");
+    status.hidden = true;
+    form.appendChild(status);
+  }
+
+  if (!form.querySelector('[name="website"]')) {
+    const hp = document.createElement("input");
+    hp.type = "text";
+    hp.name = "website";
+    hp.tabIndex = -1;
+    hp.autocomplete = "off";
+    hp.setAttribute("aria-hidden", "true");
+    hp.style.cssText = "position:absolute;left:-9999px;opacity:0;height:0;width:0;";
+    form.appendChild(hp);
+  }
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const nome = form.nome.value.trim();
     const mensagem = form.mensagem.value.trim();
-    const assunto = encodeURIComponent(`Contato do site — ${nome}`);
-    const corpo = encodeURIComponent(`Olá! Sou ${nome}.\n\n${mensagem}`);
-    window.location.href = `mailto:${site("email")}?subject=${assunto}&body=${corpo}`;
+    const website = (form.website && form.website.value) || "";
+    const btn = form.querySelector('[type="submit"]');
+    if (btn) btn.disabled = true;
+    status.hidden = false;
+    status.textContent = "Enviando…";
+    status.classList.remove("form-status--error", "form-status--ok");
+
+    try {
+      const res = await fetch(apiUrl("api/contact.php"), {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, mensagem, website }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Não foi possível enviar.");
+      }
+      status.textContent = data.message || "Mensagem enviada. Obrigado!";
+      status.classList.add("form-status--ok");
+      form.reset();
+    } catch (err) {
+      status.textContent = err.message || "Falha no envio.";
+      status.classList.add("form-status--error");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   });
 }
 
@@ -842,6 +947,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   rebuildGalleryPhotos(apiRows, apiOk);
   applyImages();
   applyBrandMeta();
+  applyAnalytics();
   applyMotionPreference();
   enforcePlanPages();
 

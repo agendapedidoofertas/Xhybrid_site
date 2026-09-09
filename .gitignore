@@ -10,3 +10,8 @@ Thumbs.db
 # SQLite
 data/*.sqlite
 data/*.sqlite-journal
+# Rate limit / backups
+data/rate/
+data/backups/*
+!data/backups/.gitkeep
+

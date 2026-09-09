@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" role="img" aria-label="Xhybrid">
+  <rect width="280" height="64" rx="12" fill="#050505"/>
+  <g transform="translate(10,8)">
+    <path d="M10 8 L24 24 L10 40" stroke="#f4f4f5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M38 8 L24 24 L38 40" stroke="rgba(255,255,255,0.42)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  <text x="62" y="42" font-family="Outfit, Syne, Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="-0.04em" fill="#f4f4f5">X</text>
+  <text x="82" y="42" font-family="Outfit, Syne, Arial, sans-serif" font-size="28" font-weight="600" font-style="italic" letter-spacing="-0.03em" fill="rgba(255,255,255,0.72)">hybrid</text>
+</svg>

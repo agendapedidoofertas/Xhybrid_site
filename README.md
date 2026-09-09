@@ -2,12 +2,13 @@
 
 Site institucional da **Xhybrid** — agência de criação de sites, manutenção e tecnologia.
 
-O site público é **HTML/CSS/JS**. Textos e imagens ficam no **SQLite** e são lidos pela API PHP. Há um painel admin em `/admin`.
+O site público é **HTML/CSS/JS**. Textos e metadados ficam no **SQLite**; **arquivos de mídia** ficam em disco (`assets/uploads/`). Painel em `/admin`.
 
 ## Requisitos
 
 - PHP 8+ com extensão **pdo_sqlite**
 - Navegador moderno
+- Pasta `data/` e `assets/uploads/` graváveis pelo PHP
 
 ## Como rodar localmente
 
@@ -24,11 +25,36 @@ Abra:
 
 | O que mudar | Onde |
 |-------------|------|
-| Textos do site | `/admin/texts.php` |
-| WhatsApp, e-mail, Instagram | `/admin/contact.php` |
-| Imagens / portfólio | `/admin` |
-| Defaults (fallback) | `js/data.js` e `lib/settings.php` |
+| Textos | `/admin/texts.php` |
+| WhatsApp, e-mail, SMTP | `/admin/contact.php` |
+| Marca, SEO por página, Analytics | `/admin/brand.php` |
+| Imagens / upload / vídeos | `/admin` → Imagens |
+| Ocultar páginas/seções | `/admin/sections.php` |
+| Planos | `/admin/plan.php` |
+| Presets de nicho | `/admin/preset.php` |
+| Backup SQLite | `/admin/backup.php` ou `php scripts/backup_sqlite.php` |
+
+## Subdomínios leves (1 cliente = 1 site)
+
+Para `cliente.seudominio.com.br` **não** compartilhe o mesmo SQLite com vários clientes.
+
+**Modelo recomendado:**
+
+1. Uma cópia (ou deploy) do projeto por cliente **ou** código compartilhado + pastas privadas.
+2. Cada instância tem o próprio `data/atelier.sqlite` (só textos, flags, paths).
+3. Cada instância tem o próprio `assets/uploads/` (fotos/vídeos no disco).
+4. Apague a pasta do cliente para remover tudo — sem “peso” no banco da vitrine.
+
+Evite multi-tenant em um único SQLite (vários clientes no mesmo arquivo): cresce rápido, complica backup e isolamento.
+
+### Checklist de entrega por subdomínio
+
+- Aplicar preset + personalizar marca/WhatsApp
+- Subir logo/hero (upload)
+- Configurar SMTP se o formulário deve enviar e-mail
+- Baixar backup após go-live
+- Garantir que `data/` não é acessível via HTTP (já há `.htaccess` em `data/`)
 
 ## Publicar
 
-Hospede em servidor com **PHP + SQLite**. Garanta escrita em `data/` e bloqueie acesso HTTP a essa pasta.
+Hospede em servidor com **PHP + SQLite**. Garanta escrita em `data/` e `assets/uploads/`. Bloqueie acesso HTTP a `data/`.

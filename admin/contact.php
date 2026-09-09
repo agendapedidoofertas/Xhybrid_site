@@ -15,12 +15,13 @@ $flash = '';
 $error = '';
 $defs = settings_definitions();
 $values = settings_all(db());
+$groups = ['contact', 'smtp'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $input = [];
     foreach ($defs as $key => $def) {
-        if (($def['group'] ?? '') !== 'contact') {
+        if (!in_array($def['group'] ?? '', $groups, true)) {
             continue;
         }
         $input[$key] = (string) ($_POST[$key] ?? '');
@@ -38,7 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (isset($_GET['ok'])) {
-    $flash = 'Canais de contato salvos.';
+    $flash = 'Contato e SMTP salvos.';
+    $values = settings_all(db());
 }
 
 admin_header('Contato', $user);
@@ -46,7 +48,7 @@ admin_header('Contato', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Site</p>
         <h1 class="font-display">Contato</h1>
-        <p>WhatsApp, e-mail e Instagram usados no site inteiro (botão flutuante, rodapé e página Contato).</p>
+        <p>Canais do site e SMTP para o formulário enviar e-mail de verdade (sem gravar mensagens no SQLite).</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -54,6 +56,7 @@ admin_header('Contato', $user);
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <h2 class="admin-appearance__label">Canais</h2>
         <?php foreach ($defs as $key => $def): ?>
           <?php if (($def['group'] ?? '') !== 'contact') continue; ?>
           <div class="form-group">
@@ -61,10 +64,28 @@ admin_header('Contato', $user);
             <?php if (($def['type'] ?? '') === 'text' && (int) $def['max'] > 80): ?>
               <textarea id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" rows="2" maxlength="<?= (int) $def['max'] ?>"><?= h($values[$key] ?? '') ?></textarea>
             <?php else: ?>
-              <input id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" maxlength="<?= (int) $def['max'] ?>" value="<?= h($values[$key] ?? '') ?>">
+              <input id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" maxlength="<?= (int) $def['max'] ?>" value="<?= h($values[$key] ?? '') ?>"<?= $key === 'smtp_pass' || str_contains($key, 'pass') ? '' : '' ?>>
             <?php endif; ?>
           </div>
         <?php endforeach; ?>
+
+        <h2 class="admin-appearance__label" style="margin-top:1.5rem;">SMTP (formulário)</h2>
+        <p class="text-muted" style="margin:0 0 0.75rem;font-size:0.875rem;">Preencha host, usuário e senha. Destino vazio usa o e-mail do site. A senha fica no SQLite — use conta SMTP dedicada.</p>
+        <?php foreach ($defs as $key => $def): ?>
+          <?php if (($def['group'] ?? '') !== 'smtp') continue; ?>
+          <div class="form-group">
+            <label for="<?= h($key) ?>"><?= h($def['label']) ?></label>
+            <input
+              id="<?= h($key) ?>"
+              name="<?= h($key) ?>"
+              class="form-input"
+              maxlength="<?= (int) $def['max'] ?>"
+              value="<?= h($values[$key] ?? '') ?>"
+              <?= $key === 'smtp_pass' ? 'type="password" autocomplete="new-password"' : 'type="text"' ?>
+            >
+          </div>
+        <?php endforeach; ?>
+
         <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Salvar contato</button>
       </form>
       <script src="admin-limits.js"></script>

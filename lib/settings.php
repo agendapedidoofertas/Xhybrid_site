@@ -343,6 +343,68 @@ function settings_definitions(): array
             'default' => 'Agência Xhybrid: criação de sites, manutenção e tecnologia para empresas. Orçamento rápido pelo WhatsApp.',
         ],
 
+        /* SEO por página */
+        'seo_sobre_title' => [
+            'group' => 'seo', 'label' => 'Sobre — título', 'max' => 70, 'type' => 'short',
+            'default' => '',
+        ],
+        'seo_sobre_description' => [
+            'group' => 'seo', 'label' => 'Sobre — descrição', 'max' => 160, 'type' => 'text',
+            'default' => '',
+        ],
+        'seo_galeria_title' => [
+            'group' => 'seo', 'label' => 'Projetos — título', 'max' => 70, 'type' => 'short',
+            'default' => '',
+        ],
+        'seo_galeria_description' => [
+            'group' => 'seo', 'label' => 'Projetos — descrição', 'max' => 160, 'type' => 'text',
+            'default' => '',
+        ],
+        'seo_contato_title' => [
+            'group' => 'seo', 'label' => 'Contato — título', 'max' => 70, 'type' => 'short',
+            'default' => '',
+        ],
+        'seo_contato_description' => [
+            'group' => 'seo', 'label' => 'Contato — descrição', 'max' => 160, 'type' => 'text',
+            'default' => '',
+        ],
+
+        /* Analytics */
+        'analytics_ga4_id' => [
+            'group' => 'analytics', 'label' => 'Google Analytics 4 (G-XXXXXXXX)', 'max' => 24, 'type' => 'short',
+            'default' => '',
+        ],
+        'analytics_meta_pixel_id' => [
+            'group' => 'analytics', 'label' => 'Meta Pixel ID', 'max' => 24, 'type' => 'short',
+            'default' => '',
+        ],
+
+        /* SMTP */
+        'smtp_host' => [
+            'group' => 'smtp', 'label' => 'SMTP — host', 'max' => 120, 'type' => 'short',
+            'default' => '',
+        ],
+        'smtp_port' => [
+            'group' => 'smtp', 'label' => 'SMTP — porta', 'max' => 6, 'type' => 'short',
+            'default' => '587',
+        ],
+        'smtp_user' => [
+            'group' => 'smtp', 'label' => 'SMTP — usuário', 'max' => 120, 'type' => 'short',
+            'default' => '',
+        ],
+        'smtp_pass' => [
+            'group' => 'smtp', 'label' => 'SMTP — senha', 'max' => 120, 'type' => 'short',
+            'default' => '',
+        ],
+        'smtp_from' => [
+            'group' => 'smtp', 'label' => 'SMTP — e-mail remetente', 'max' => 80, 'type' => 'email',
+            'default' => '',
+        ],
+        'smtp_to' => [
+            'group' => 'smtp', 'label' => 'SMTP — e-mail destino (vazio = e-mail do site)', 'max' => 80, 'type' => 'email',
+            'default' => '',
+        ],
+
         /* Área e urgência */
         'area_text' => [
             'group' => 'brand', 'label' => 'Área de atendimento', 'max' => 200, 'type' => 'text',

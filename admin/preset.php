@@ -17,11 +17,35 @@ require_once dirname(__DIR__) . '/lib/settings.php';
 $settings = settings_all(db());
 $presetAllowed = ($settings['feature_preset_nicho'] ?? '1') === '1';
 
+$catalog = [
+    'xhybrid' => [
+        'title' => 'Xhybrid (agência)',
+        'desc' => 'Look Signature (preto + glass), textos de sites/tecnologia e serviços de criação.',
+        'agency' => true,
+    ],
+    'eletricista' => [
+        'title' => 'Eletricista',
+        'desc' => 'Azul elétrico, serviços elétricos, urgência 24h, área, depoimentos e FAQ.',
+    ],
+    'clinica' => [
+        'title' => 'Clínica',
+        'desc' => 'Look oceano, agendamento, especialidades e tom acolhedor.',
+    ],
+    'restaurante' => [
+        'title' => 'Restaurante',
+        'desc' => 'Look sunset, cardápio, reservas e delivery.',
+    ],
+    'advocacia' => [
+        'title' => 'Advocacia',
+        'desc' => 'Look navy, áreas jurídicas, consultoria e contencioso.',
+    ],
+];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $preset = (string) ($_POST['preset'] ?? '');
-    // Xhybrid é a vitrine da agência — sempre liberado para admin
-    if ($preset !== 'xhybrid' && !$presetAllowed) {
+    $isAgency = !empty($catalog[$preset]['agency']);
+    if (!$isAgency && !$presetAllowed) {
         $error = 'Preset de nicho não está liberado neste plano. Ative em Plano.';
     } else {
         try {
@@ -36,13 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['ok'])) {
     $ok = (string) $_GET['ok'];
-    if ($ok === 'xhybrid') {
-        $flash = 'Preset Xhybrid aplicado — marca, textos e look Signature.';
-    } elseif ($ok === 'eletricista') {
-        $flash = 'Preset Eletricista aplicado. Ajuste marca, WhatsApp e fotos.';
-    } else {
-        $flash = 'Preset aplicado.';
-    }
+    $label = $catalog[$ok]['title'] ?? $ok;
+    $flash = 'Preset “' . $label . '” aplicado. Ajuste marca, WhatsApp e fotos.';
 }
 
 admin_header('Preset', $user);
@@ -50,33 +69,27 @@ admin_header('Preset', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Admin</p>
         <h1 class="font-display">Presets</h1>
-        <p>Aplica de uma vez look, textos, seções e serviços. Use Xhybrid para a vitrine da agência; Eletricista para sites de cliente.</p>
+        <p>Aplica look, textos, seções e serviços. Xhybrid é a vitrine; os demais aceleram sites de cliente.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
 
-      <section class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
-        <h2 class="font-display" style="font-size:1.25rem;margin:0 0 0.5rem;">Xhybrid (agência)</h2>
-        <p class="text-muted" style="margin:0 0 1rem;">Look Signature (preto + glass transparente), textos de sites/tecnologia e serviços de criação.</p>
-        <form method="post" onsubmit="return confirm('Isso substitui textos, seções, look e serviços atuais pela vitrine Xhybrid. Continuar?');">
-          <?= csrf_field() ?>
-          <input type="hidden" name="preset" value="xhybrid">
-          <button type="submit" class="btn btn-primary">Aplicar preset Xhybrid</button>
-        </form>
-      </section>
-
-      <section class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
-        <h2 class="font-display" style="font-size:1.25rem;margin:0 0 0.5rem;">Eletricista</h2>
-        <p class="text-muted" style="margin:0 0 1rem;">Azul elétrico, serviços elétricos, urgência 24h, área, depoimentos e FAQ prontos.</p>
-        <form method="post" onsubmit="return confirm('Isso substitui textos, seções, look e serviços atuais. Continuar?');">
-          <?= csrf_field() ?>
-          <input type="hidden" name="preset" value="eletricista">
-          <button type="submit" class="btn btn-primary" <?= $presetAllowed ? '' : 'disabled' ?>>Aplicar preset Eletricista</button>
-        </form>
-        <?php if (!$presetAllowed): ?>
-          <p class="text-muted" style="margin-top:0.75rem;">Bloqueado pelo plano atual. Libere em <a href="plan.php">Plano</a>.</p>
-        <?php endif; ?>
-      </section>
+      <?php foreach ($catalog as $id => $meta): ?>
+        <section class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
+          <h2 class="font-display" style="font-size:1.25rem;margin:0 0 0.5rem;"><?= h($meta['title']) ?></h2>
+          <p class="text-muted" style="margin:0 0 1rem;"><?= h($meta['desc']) ?></p>
+          <form method="post" onsubmit="return confirm('Isso substitui textos, seções, look e serviços atuais. Continuar?');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="preset" value="<?= h($id) ?>">
+            <button type="submit" class="btn btn-primary" <?= (!empty($meta['agency']) || $presetAllowed) ? '' : 'disabled' ?>>
+              Aplicar preset <?= h($meta['title']) ?>
+            </button>
+          </form>
+          <?php if (empty($meta['agency']) && !$presetAllowed): ?>
+            <p class="text-muted" style="margin-top:0.75rem;">Bloqueado pelo plano. Libere em <a href="plan.php">Plano</a>.</p>
+          <?php endif; ?>
+        </section>
+      <?php endforeach; ?>
 <?php
 admin_footer();

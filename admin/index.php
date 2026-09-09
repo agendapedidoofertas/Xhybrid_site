@@ -118,6 +118,10 @@ admin_header('Painel', $user);
           <a href="appearance.php">Aparência</a> ·
           <a href="users.php">Usuários</a>
         </p>
+        <p class="text-muted" style="margin:0.5rem 0 0;font-size:0.85rem;">
+          <a href="backup.php">Baixar backup do SQLite</a>
+          · mídia fica em <code>assets/uploads/</code> (não no banco)
+        </p>
       </section>
       <?php endif; ?>
 

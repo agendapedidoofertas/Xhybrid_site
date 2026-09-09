@@ -62,17 +62,60 @@ body[data-page="admin"] .site-header {
   -webkit-backdrop-filter: blur(12px);
 }
 
+body[data-page="admin"] .site-header > .container.site-header__inner,
+body[data-page="admin"] .site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  max-width: 100%;
+  overflow: visible;
+}
+
+body[data-page="admin"] .site-logo {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 1.05rem;
+}
+
 body[data-page="admin"] .site-logo,
 body[data-page="admin"] .site-logo .text-primary {
   color: #f5f5f5;
 }
 
+body[data-page="admin"] .admin-user {
+  margin: 0 0 0 auto;
+  flex: 0 0 auto;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+body[data-page="admin"] .site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  order: 3;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.55rem 0 0.15rem;
+  margin: 0;
+  border-top: 1px solid #2a2a2a;
+  overflow: visible;
+}
+
 body[data-page="admin"] .site-nav a {
   color: #a3a3a3;
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.55rem;
+  white-space: nowrap;
+  border-radius: 0.35rem;
 }
 
 body[data-page="admin"] .site-nav a:hover {
   color: #f5f5f5;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 body[data-page="admin"] .btn-primary {
@@ -289,27 +332,7 @@ body[data-page="admin"] label .admin-charlimit {
   float: right;
 }
 
-/* Menu do admin no celular e tablet — site público não é afetado */
-@media (max-width: 1024px) {
-  body[data-page="admin"] .site-header__inner {
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
-  }
-  body[data-page="admin"] .site-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.85rem;
-    order: 3;
-    width: 100%;
-    padding-top: 0.65rem;
-    margin-top: 0.15rem;
-    border-top: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
-  }
-  body[data-page="admin"] .site-nav a {
-    font-size: 0.8125rem;
-  }
-}
+/* Menu do admin — segunda linha sempre (links muitos); evita overflow */
 
 body[data-page="admin"] .container.admin-main:has(.admin-appearance) {
   max-width: 92rem;

@@ -1420,6 +1420,33 @@ html.no-motion .reveal {
   margin-top: 1.85rem;
 }
 
+.hero__actions > [hidden] {
+  display: none !important;
+}
+
+.hero__actions--single {
+  gap: 0;
+}
+
+.hero__actions--single > :not([hidden]) {
+  flex: 1 1 auto;
+  max-width: 22rem;
+  justify-content: center;
+}
+
+.form-status {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.form-status--ok {
+  color: #86efac;
+}
+
+.form-status--error {
+  color: #fca5a5;
+}
+
 .hero__figure { position: relative; }
 .hero__figure::before {
   content: "";
@@ -3611,11 +3638,34 @@ html[data-look="xhybrid-signature"].no-motion .contact-grid {
 
 @media (max-width: 899px) {
   html[data-look="xhybrid-signature"] .hero {
-    min-height: min(88vh, 42rem);
-    padding-top: 4.5rem;
+    min-height: auto;
+    padding: 5rem 0 2.5rem;
+    justify-content: flex-end;
+  }
+  html[data-look="xhybrid-signature"] .hero__media {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: min(48vh, 22rem);
+  }
+  html[data-look="xhybrid-signature"] .hero__grid {
+    margin-top: min(36vh, 16rem);
+    padding-top: 0.5rem;
+  }
+  html[data-look="xhybrid-signature"] .hero h1 {
+    max-width: 14ch;
+    font-size: clamp(2.1rem, 9vw, 3rem);
   }
   html[data-look="xhybrid-signature"] .page-cover {
-    min-height: 42vh;
+    min-height: min(40vh, 18rem);
+    padding: 4.5rem 0 1.75rem;
+  }
+  html[data-look="xhybrid-signature"] .page-cover__media {
+    height: 100%;
+  }
+  html[data-look="xhybrid-signature"] .hero__actions--single > :not([hidden]),
+  html[data-look="xhybrid-signature"] .hero__actions .btn {
+    max-width: none;
+    width: 100%;
   }
 }
 

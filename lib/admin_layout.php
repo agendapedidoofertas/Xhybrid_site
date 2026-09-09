@@ -29,8 +29,9 @@ function admin_header(string $title, ?array $user = null): void
   <div class="page">
     <header class="site-header">
       <div class="container site-header__inner">
-        <a href="index.php" class="site-logo">X<span class="text-primary italic">hybrid</span> Admin</a>
+        <a href="index.php" class="site-logo">X<span class="text-primary italic">hybrid</span> <span style="font-style:normal;font-weight:600;opacity:0.7">Admin</span></a>
         <?php if ($user): ?>
+        <p class="admin-user"><?= h($user['username']) ?> · <?= user_is_admin($user) ? 'admin' : 'editor' ?></p>
         <nav class="site-nav" aria-label="Admin">
           <a href="index.php">Painel</a>
           <a href="index.php#imagens">Imagens</a>
@@ -41,6 +42,7 @@ function admin_header(string $title, ?array $user = null): void
           <a href="plan.php">Plano</a>
           <a href="brand.php">Marca</a>
           <a href="sections.php">Visibilidade</a>
+          <a href="backup.php">Backup</a>
           <a href="preset.php">Preset</a>
           <a href="appearance.php">Aparência</a>
           <a href="users.php">Usuários</a>
@@ -48,7 +50,6 @@ function admin_header(string $title, ?array $user = null): void
           <?php endif; ?>
           <a href="logout.php">Sair</a>
         </nav>
-        <p class="text-muted" style="font-size:0.875rem;margin:0;"><?= h($user['username']) ?> · <?= user_is_admin($user) ? 'admin' : 'editor' ?></p>
         <?php endif; ?>
       </div>
     </header>

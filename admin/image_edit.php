@@ -8,6 +8,7 @@ require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
+require_once dirname(__DIR__) . '/lib/uploads.php';
 
 auth_boot_session();
 $user = require_admin();
@@ -59,30 +60,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $now = gmdate('c');
     $pdo = db();
 
-    if ($title === '' || $slug === '' || $url === '') {
-        $error = 'Preencha título, slug e URL.';
-    } else {
+    if (!empty($_FILES['file']['name'])) {
+        $up = uploads_handle($_FILES['file'], $slug !== '' ? $slug : 'file');
+        if (!$up['ok']) {
+            $error = $up['error'] ?? 'Falha no upload.';
+        } else {
+            $url = (string) $up['path'];
+        }
+    }
+
+    if ($error === '' && ($title === '' || $slug === '' || $url === '')) {
+        $error = 'Preencha título, slug e URL — ou envie um arquivo.';
+    }
+
+    if ($error === '') {
         $reserved = ['favicon', 'logo', 'hero', 'casal'];
-        $isReserved = in_array($slug, $reserved, true);
+        $isReserved = in_array($slug, $reserved, true) || str_starts_with($slug, 'video-');
         if ($active === 1 && !$isReserved) {
             $countStmt = $pdo->query(
-                "SELECT COUNT(*) FROM images WHERE active = 1 AND slug NOT IN ('favicon','logo','hero','casal')"
+                "SELECT COUNT(*) FROM images WHERE active = 1 AND slug NOT IN ('favicon','logo','hero','casal') AND slug NOT LIKE 'video-%'"
             );
             $galleryCount = (int) $countStmt->fetchColumn();
             $wasCounted = false;
             if ($image && (int) ($image['active'] ?? 0) === 1) {
                 $oldSlug = (string) ($image['slug'] ?? '');
-                if (!in_array($oldSlug, $reserved, true)) {
+                if (!in_array($oldSlug, $reserved, true) && !str_starts_with($oldSlug, 'video-')) {
                     $wasCounted = true;
                 }
             }
             $would = $wasCounted ? $galleryCount : $galleryCount + 1;
             if ($would > $limitGallery) {
-                $error = "Plano permite no máximo {$limitGallery} imagens na galeria (além de logo/favicon/hero/casal).";
+                $error = "Plano permite no máximo {$limitGallery} imagens na galeria (além de logo/favicon/hero/casal/vídeos).";
             }
         }
+    }
 
-        if ($error === '') {
+    if ($error === '') {
         try {
             if ($image) {
                 $stmt = $pdo->prepare(
@@ -142,7 +155,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'active' => $active,
             ];
         }
-        }
+    } else {
+        $image = [
+            'id' => $image['id'] ?? 0,
+            'title' => $title,
+            'slug' => $slug,
+            'url' => $url,
+            'description' => $description,
+            'price' => $price,
+            'promo_price' => $promoPrice,
+            'position' => $position,
+            'active' => $active,
+        ];
     }
 }
 
@@ -154,12 +178,12 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Imagens</p>
         <h1 class="font-display"><?= $isEdit ? 'Editar imagem' : 'Nova imagem' ?></h1>
-        <p>Slots fixos: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code>. Vídeos Signature: <code>video-home</code>, <code>video-sobre</code>, <code>video-galeria</code>, <code>video-contato</code> (URL .mp4/.webm). Serviços usam o slug em Serviços. Demais imagens ativas entram na galeria.</p>
+        <p>Envie arquivo para <code>assets/uploads/</code> (não entra no SQLite) ou cole uma URL. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code>, vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>.</p>
       </header>
 
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
 
-      <form method="post" class="contact-form admin-form" style="margin-top:1.5rem;">
+      <form method="post" enctype="multipart/form-data" class="contact-form admin-form" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
         <div class="form-group">
           <label for="title">Título</label>
@@ -170,8 +194,13 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
           <input id="slug" name="slug" class="form-input" required pattern="[a-z0-9\-]+" value="<?= h((string) ($image['slug'] ?? '')) ?>">
         </div>
         <div class="form-group">
-          <label for="url">URL</label>
-          <input id="url" name="url" class="form-input" required value="<?= h((string) ($image['url'] ?? '')) ?>" placeholder="https://drive.google.com/file/d/.../view ou assets/foto.jpg">
+          <label for="file">Arquivo (upload)</label>
+          <input id="file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.svg,.gif,.mp4,.webm,image/*,video/mp4,video/webm">
+          <p class="text-muted" style="margin:0.35rem 0 0;font-size:0.8rem;">jpg, png, webp, svg, mp4, webm — até 40 MB. O path relativo é salvo no banco.</p>
+        </div>
+        <div class="form-group">
+          <label for="url">URL ou path (se não enviar arquivo)</label>
+          <input id="url" name="url" class="form-input" value="<?= h((string) ($image['url'] ?? '')) ?>" placeholder="assets/uploads/... ou https://...">
         </div>
         <div class="form-group">
           <label for="description">Descrição (galeria) <span class="admin-charlimit" data-for="description">0/250</span></label>
@@ -194,7 +223,15 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
           Ativa no site
         </label>
         <?php if (!empty($image['url'])): ?>
-          <img class="admin-preview" src="<?= h((string) $image['url']) ?>" alt="" referrerpolicy="no-referrer">
+          <?php
+            $preview = (string) $image['url'];
+            $isVideo = (bool) preg_match('/\.(mp4|webm)(\?|$)/i', $preview);
+          ?>
+          <?php if ($isVideo): ?>
+            <video class="admin-preview" src="<?= h($preview) ?>" controls muted playsinline style="max-width:100%;max-height:220px;"></video>
+          <?php else: ?>
+            <img class="admin-preview" src="<?= h($preview) ?>" alt="" referrerpolicy="no-referrer">
+          <?php endif; ?>
         <?php endif; ?>
         <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
           <button type="submit" class="btn btn-primary">Salvar</button>

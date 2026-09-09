@@ -89,6 +89,7 @@ function db(): PDO
     $pdo->exec('PRAGMA foreign_keys = ON');
     db_migrate($pdo);
     db_seed_images($pdo);
+    db_ensure_brand_assets($pdo);
     require_once __DIR__ . '/settings.php';
     settings_seed($pdo);
     require_once __DIR__ . '/services.php';
@@ -200,15 +201,16 @@ function db_seed_images(PDO $pdo): void
 
     $now = gmdate('c');
     $rows = [
-        ['favicon.svg', 'Favicon', 'favicon', 0],
-        ['assets/hero.jpg', 'Hero — desenvolvimento', 'hero', 1],
-        ['assets/casal.jpg', 'Equipe Xhybrid', 'casal', 2],
-        ['assets/amigurumi.jpg', 'Landing Page', 'amigurumi', 3],
-        ['assets/manta.jpg', 'Site Corporativo', 'manta', 4],
-        ['assets/sousplat.jpg', 'Loja Online', 'sousplat', 5],
-        ['assets/top.jpg', 'Manutenção Contínua', 'top', 6],
-        ['assets/bolsa.jpg', 'Integrações', 'bolsa', 7],
-        ['assets/bebe.jpg', 'Identidade Web', 'bebe', 8],
+        ['favicon.svg', 'Favicon Xhybrid', 'favicon', 0],
+        ['assets/logo-xhybrid.svg', 'Logo Xhybrid', 'logo', 1],
+        ['assets/hero.jpg', 'Hero — desenvolvimento', 'hero', 2],
+        ['assets/casal.jpg', 'Equipe Xhybrid', 'casal', 3],
+        ['assets/amigurumi.jpg', 'Landing Page', 'amigurumi', 4],
+        ['assets/manta.jpg', 'Site Corporativo', 'manta', 5],
+        ['assets/sousplat.jpg', 'Loja Online', 'sousplat', 6],
+        ['assets/top.jpg', 'Manutenção Contínua', 'top', 7],
+        ['assets/bolsa.jpg', 'Integrações', 'bolsa', 8],
+        ['assets/bebe.jpg', 'Identidade Web', 'bebe', 9],
     ];
 
     $stmt = $pdo->prepare(
@@ -218,6 +220,35 @@ function db_seed_images(PDO $pdo): void
 
     foreach ($rows as [$url, $title, $slug, $position]) {
         $stmt->execute([
+            ':url' => $url,
+            ':title' => $title,
+            ':slug' => $slug,
+            ':position' => $position,
+            ':created_at' => $now,
+            ':updated_at' => $now,
+        ]);
+    }
+}
+
+/** Garante logo/favicon padrão em bancos já existentes */
+function db_ensure_brand_assets(PDO $pdo): void
+{
+    $now = gmdate('c');
+    $defaults = [
+        'favicon' => ['favicon.svg', 'Favicon Xhybrid', 0],
+        'logo' => ['assets/logo-xhybrid.svg', 'Logo Xhybrid', 1],
+    ];
+    $check = $pdo->prepare('SELECT id FROM images WHERE slug = :slug LIMIT 1');
+    $insert = $pdo->prepare(
+        'INSERT INTO images (url, title, slug, position, active, created_at, updated_at)
+         VALUES (:url, :title, :slug, :position, 1, :created_at, :updated_at)'
+    );
+    foreach ($defaults as $slug => [$url, $title, $position]) {
+        $check->execute([':slug' => $slug]);
+        if ($check->fetch()) {
+            continue;
+        }
+        $insert->execute([
             ':url' => $url,
             ':title' => $title,
             ':slug' => $slug,

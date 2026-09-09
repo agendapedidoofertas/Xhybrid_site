@@ -88,6 +88,7 @@ admin_header('Seções', $user);
         <?php endforeach; ?>
 
         <button type="submit" class="btn btn-primary" style="margin-top:1.25rem;">Salvar visibilidade</button>
+        <a href="../index.html" class="btn btn-outline" style="margin-top:1.25rem;margin-left:0.5rem;" target="_blank" rel="noopener">Pré-visualizar site</a>
       </form>
 <?php
 admin_footer();
