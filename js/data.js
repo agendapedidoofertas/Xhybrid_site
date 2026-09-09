@@ -28,6 +28,7 @@ const SITE_DEFAULTS = {
   appearance_font: "tech",
   appearance_layout: "soft",
   appearance_media: "classic",
+  appearance_look: "tech-glass",
   home_badge: "Sites & tecnologia",
   home_hero_title_1: "Seu negócio,",
   home_hero_title_2: "online de verdade.",
@@ -379,6 +380,41 @@ const THEMES = [
     escuro: false,
     swatch: ["#fff4ea", "#e07040", "#3d1f14"],
   },
+  {
+    id: "sangue",
+    nome: "Sangue",
+    descricao: "Vermelho escuro e carvão",
+    escuro: true,
+    swatch: ["#120608", "#b91c1c", "#fecaca"],
+  },
+  {
+    id: "violeta",
+    nome: "Violeta",
+    descricao: "Roxo neon em fundo quase preto",
+    escuro: true,
+    swatch: ["#0c0618", "#a855f7", "#f3e8ff"],
+  },
+  {
+    id: "neon-roxo",
+    nome: "Neon Roxo",
+    descricao: "Magenta elétrico e violeta",
+    escuro: true,
+    swatch: ["#0a0514", "#d946ef", "#fae8ff"],
+  },
+  {
+    id: "ameixa",
+    nome: "Ameixa",
+    descricao: "Plum profundo e rubi",
+    escuro: true,
+    swatch: ["#14081a", "#9f1239", "#fce7f3"],
+  },
+  {
+    id: "fuchsia-night",
+    nome: "Fuchsia Night",
+    descricao: "Fúcsia neon no escuro",
+    escuro: true,
+    swatch: ["#0d0612", "#e879f9", "#fdf4ff"],
+  },
 ];
 
 /** Pacotes de tipografia (data-font) */
@@ -426,14 +462,312 @@ const MEDIA_PRESETS = [
   { id: "gallery-dense", nome: "Galeria densa", descricao: "Mais colunas nos projetos" },
 ];
 
+/**
+ * Looks prontos — cada um muda o site por completo
+ * (cor + fonte + molde + posição de imagens + botões/figuras).
+ * Ordenados por paleta e, dentro dela, do mais escuro ao mais claro.
+ */
+const LOOK_PRESETS = [
+  /* Neutro */
+  {
+    id: "obsidian",
+    nome: "Obsidian",
+    descricao: "Preto profundo, painéis transparentes",
+    palette: "Neutro",
+    theme: "preto",
+    font: "display",
+    layout: "frame",
+    media: "copy-wide",
+    swatch: ["#0a0a0b", "#2a2a2e", "#f5f5f5"],
+  },
+  {
+    id: "tech-glass",
+    nome: "Tech Glass",
+    descricao: "SaaS premium — preto, glass e bento",
+    palette: "Neutro",
+    theme: "preto",
+    font: "tech",
+    layout: "soft",
+    media: "classic",
+    swatch: ["#000000", "#2a2a2a", "#ffffff"],
+  },
+  {
+    id: "ash-glass",
+    nome: "Ash Glass",
+    descricao: "Cinza escuro translúcido, layout compacto",
+    palette: "Neutro",
+    theme: "slate",
+    font: "saas",
+    layout: "compact",
+    media: "stack-media",
+    swatch: ["#1a1f26", "#9aa8b5", "#e8eef3"],
+  },
+  {
+    id: "sharp-saas",
+    nome: "Sharp SaaS",
+    descricao: "Bento assimétrico + overlay nos projetos",
+    palette: "Neutro",
+    theme: "graphite",
+    font: "saas",
+    layout: "sharp",
+    media: "media-wide",
+    swatch: ["#171a1f", "#7aa2c8", "#e8eef5"],
+  },
+  {
+    id: "ivory-soft",
+    nome: "Ivory Soft",
+    descricao: "Branco e cinza claro, muito ar",
+    palette: "Neutro",
+    theme: "cinza",
+    font: "soft",
+    layout: "pill",
+    media: "stack-copy",
+    swatch: ["#f3f4f6", "#9ca3af", "#111827"],
+  },
+  {
+    id: "editorial",
+    nome: "Editorial",
+    descricao: "Lista tipográfica numerada, sem cards",
+    palette: "Neutro",
+    theme: "branco",
+    font: "editorial",
+    layout: "editorial",
+    media: "flip",
+    swatch: ["#ffffff", "#1a1a1a", "#ececea"],
+  },
+
+  /* Azul */
+  {
+    id: "navy-depth",
+    nome: "Navy Depth",
+    descricao: "Azul-noite denso, colunas de revista",
+    palette: "Azul",
+    theme: "midnight",
+    font: "geometric",
+    layout: "magazine",
+    media: "about-flip",
+    swatch: ["#0b1020", "#6b8fd6", "#e6ecf8"],
+  },
+  {
+    id: "azure-blast",
+    nome: "Azure Blast",
+    descricao: "Azul elétrico forte, mídia larga",
+    palette: "Azul",
+    theme: "azul",
+    font: "geometric",
+    layout: "frame",
+    media: "media-wide",
+    swatch: ["#0a1628", "#2563eb", "#dbeafe"],
+  },
+  {
+    id: "indigo-flare",
+    nome: "Indigo Flare",
+    descricao: "Índigo profundo, revista densa",
+    palette: "Azul",
+    theme: "indigo",
+    font: "display",
+    layout: "magazine",
+    media: "about-flip",
+    swatch: ["#12122a", "#6366f1", "#e0e7ff"],
+  },
+  {
+    id: "ocean-vivid",
+    nome: "Ocean Vivid",
+    descricao: "Azul oceano vivo, tipografia limpa",
+    palette: "Azul",
+    theme: "oceano",
+    font: "soft",
+    layout: "editorial",
+    media: "flip",
+    swatch: ["#e0f2fe", "#0284c7", "#0c4a6e"],
+  },
+
+  /* Ciano / teal */
+  {
+    id: "neon-night",
+    nome: "Neon Night",
+    descricao: "Faixas horizontais + formulário no topo",
+    palette: "Ciano",
+    theme: "neon",
+    font: "mono",
+    layout: "strip",
+    media: "hero-flip",
+    swatch: ["#0b1218", "#2ee6d6", "#dffcf8"],
+  },
+  {
+    id: "teal-rush",
+    nome: "Teal Rush",
+    descricao: "Teal saturado, glass e texto largo",
+    palette: "Ciano",
+    theme: "teal",
+    font: "tech",
+    layout: "soft",
+    media: "copy-wide",
+    swatch: ["#042f2e", "#14b8a6", "#ccfbf1"],
+  },
+
+  /* Verde */
+  {
+    id: "volt-lime",
+    nome: "Volt Lime",
+    descricao: "Verde lima neon, faixas técnicas",
+    palette: "Verde",
+    theme: "lime",
+    font: "mono",
+    layout: "strip",
+    media: "hero-flip",
+    swatch: ["#0c1408", "#a3e635", "#f7fee7"],
+  },
+
+  /* Quente */
+  {
+    id: "amber-flare",
+    nome: "Amber Flare",
+    descricao: "Âmbar quente intenso, bento irregular",
+    palette: "Quente",
+    theme: "amber",
+    font: "saas",
+    layout: "bento",
+    media: "flip",
+    swatch: ["#1c1205", "#f59e0b", "#fff7ed"],
+  },
+  {
+    id: "copper-heat",
+    nome: "Copper Heat",
+    descricao: "Cobre metálico, molduras marcadas",
+    palette: "Quente",
+    theme: "cobre",
+    font: "classic",
+    layout: "frame",
+    media: "classic",
+    swatch: ["#1a1008", "#d97706", "#fef3c7"],
+  },
+  {
+    id: "fire-sunset",
+    nome: "Fire Sunset",
+    descricao: "Laranja-coral forte, empilhado",
+    palette: "Quente",
+    theme: "sunset",
+    font: "condensed",
+    layout: "loft",
+    media: "stack-media",
+    swatch: ["#2a1008", "#ea580c", "#ffedd5"],
+  },
+  {
+    id: "warm-studio",
+    nome: "Warm Studio",
+    descricao: "Tudo central, pílulas e 1 destaque grande",
+    palette: "Quente",
+    theme: "marrom-claro",
+    font: "classic",
+    layout: "loft",
+    media: "center",
+    swatch: ["#f5efe4", "#c49a6c", "#7a5a3c"],
+  },
+
+  /* Vermelho */
+  {
+    id: "blood-noir",
+    nome: "Blood Noir",
+    descricao: "Vermelho sangue no preto, blocos duros",
+    palette: "Vermelho",
+    theme: "sangue",
+    font: "display",
+    layout: "sharp",
+    media: "classic",
+    swatch: ["#120608", "#dc2626", "#fecaca"],
+  },
+  {
+    id: "crimson-volt",
+    nome: "Crimson Volt",
+    descricao: "Vermelho rubi intenso, cards em bloco",
+    palette: "Vermelho",
+    theme: "vinho",
+    font: "display",
+    layout: "sharp",
+    media: "classic",
+    swatch: ["#2a0a12", "#e11d48", "#ffe4e8"],
+  },
+  {
+    id: "plum-ember",
+    nome: "Plum Ember",
+    descricao: "Ameixa e rubi, molduras quentes",
+    palette: "Vermelho",
+    theme: "ameixa",
+    font: "classic",
+    layout: "frame",
+    media: "media-wide",
+    swatch: ["#14081a", "#9f1239", "#fce7f3"],
+  },
+
+  /* Roxo / magenta */
+  {
+    id: "neon-orchid",
+    nome: "Neon Orchid",
+    descricao: "Magenta elétrico, faixas neon",
+    palette: "Roxo",
+    theme: "neon-roxo",
+    font: "mono",
+    layout: "strip",
+    media: "hero-flip",
+    swatch: ["#0a0514", "#d946ef", "#fae8ff"],
+  },
+  {
+    id: "violet-pulse",
+    nome: "Violet Pulse",
+    descricao: "Roxo neon, colunas elétricas",
+    palette: "Roxo",
+    theme: "violeta",
+    font: "geometric",
+    layout: "magazine",
+    media: "about-flip",
+    swatch: ["#0c0618", "#a855f7", "#f3e8ff"],
+  },
+  {
+    id: "cyber-magenta",
+    nome: "Cyber Magenta",
+    descricao: "Fúcsia neon, glass cyber",
+    palette: "Roxo",
+    theme: "fuchsia-night",
+    font: "saas",
+    layout: "soft",
+    media: "copy-wide",
+    swatch: ["#0d0612", "#e879f9", "#fdf4ff"],
+  },
+  {
+    id: "berry-pop",
+    nome: "Berry Pop",
+    descricao: "Magenta vibrante, pílulas e centro",
+    palette: "Roxo",
+    theme: "berry",
+    font: "rounded",
+    layout: "pill",
+    media: "center",
+    swatch: ["#1f0a18", "#ec4899", "#fce7f3"],
+  },
+  {
+    id: "petal-sky",
+    nome: "Petal Sky",
+    descricao: "Rosa suave e azul claro, cards escalonados",
+    palette: "Roxo",
+    theme: "peonia",
+    font: "rounded",
+    layout: "bento",
+    media: "flip",
+    swatch: ["#fff1ee", "#7eb6d9", "#d46a6a"],
+  },
+];
+
 const DEFAULT_THEME = "preto";
 const DEFAULT_FONT = "tech";
 const DEFAULT_LAYOUT = "soft";
 const DEFAULT_MEDIA = "classic";
+const DEFAULT_LOOK = "tech-glass";
 const THEME_STORAGE_KEY = "xhybrid-theme";
 const FONT_STORAGE_KEY = "xhybrid-font";
 const LAYOUT_STORAGE_KEY = "xhybrid-layout";
 const MEDIA_STORAGE_KEY = "xhybrid-media";
+const LOOK_STORAGE_KEY = "xhybrid-look";
 
 /** Preenchido após carregar /api/images.php */
 let galleryPhotos = [];

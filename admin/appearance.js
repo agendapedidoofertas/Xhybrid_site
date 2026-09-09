@@ -1,21 +1,14 @@
 (function () {
   const root = document.getElementById("admin-appearance");
-  if (!root || typeof THEMES === "undefined") return;
+  if (!root || typeof LOOK_PRESETS === "undefined") return;
 
   const state = {
-    theme: root.dataset.theme || DEFAULT_THEME,
-    font: root.dataset.font || DEFAULT_FONT,
-    layout: root.dataset.layout || DEFAULT_LAYOUT,
-    media: root.dataset.media || DEFAULT_MEDIA,
+    look: root.dataset.selectedLook || DEFAULT_LOOK,
   };
 
-  const fieldTheme = document.getElementById("field-theme");
-  const fieldFont = document.getElementById("field-font");
-  const fieldLayout = document.getElementById("field-layout");
-  const fieldMedia = document.getElementById("field-media");
+  const fieldLook = document.getElementById("field-look");
   const demo = document.getElementById("appearance-demo");
   const demoToggle = document.getElementById("appearance-demo-toggle");
-  const remixBtn = document.getElementById("appearance-remix");
   const frame = document.getElementById("appearance-frame");
   const statusEl = document.getElementById("appearance-status");
 
@@ -27,23 +20,26 @@
       .replace(/"/g, "&quot;");
   }
 
+  function currentPreset() {
+    return LOOK_PRESETS.find((l) => l.id === state.look) || LOOK_PRESETS[0];
+  }
+
   function syncFields() {
-    if (fieldTheme) fieldTheme.value = state.theme;
-    if (fieldFont) fieldFont.value = state.font;
-    if (fieldLayout) fieldLayout.value = state.layout;
-    if (fieldMedia) fieldMedia.value = state.media;
+    if (fieldLook) fieldLook.value = state.look;
   }
 
   function pushPreview() {
     if (!frame || !frame.contentWindow) return;
+    const preset = currentPreset();
     try {
       frame.contentWindow.postMessage(
         {
           type: "xhybrid-appearance-preview",
-          theme: state.theme,
-          font: state.font,
-          layout: state.layout,
-          media: state.media,
+          look: preset.id,
+          theme: preset.theme,
+          font: preset.font,
+          layout: preset.layout,
+          media: preset.media,
         },
         window.location.origin
       );
@@ -53,104 +49,67 @@
   }
 
   function markDirty() {
+    const preset = currentPreset();
     if (statusEl) {
-      statusEl.textContent = "Pré-visualização atualizada — salve para publicar no site.";
+      statusEl.textContent = `Look “${preset.nome}” na demo — salve para publicar.`;
     }
   }
 
-  function renderThemes() {
-    const mount = document.getElementById("opt-themes");
+  function renderLooks() {
+    const mount = document.getElementById("opt-looks");
     if (!mount) return;
-    mount.innerHTML = THEMES.map((t) => {
-      const active = t.id === state.theme;
-      const swatches = t.swatch
-        .map((c) => `<span style="background:${c}"></span>`)
-        .join("");
-      return `
-        <button type="button" class="admin-appearance__swatch${active ? " is-active" : ""}" data-theme-id="${escapeHtml(t.id)}" aria-pressed="${active}" title="${escapeHtml(t.nome)}">
-          <span class="admin-appearance__swatch-colors">${swatches}</span>
-          <span class="admin-appearance__swatch-name">${escapeHtml(t.nome)}</span>
-        </button>`;
-    }).join("");
-  }
 
-  function renderList(mountId, items, currentId, dataAttr) {
-    const mount = document.getElementById(mountId);
-    if (!mount) return;
-    mount.innerHTML = items
-      .map((item) => {
-        const active = item.id === currentId;
+    const groups = [];
+    LOOK_PRESETS.forEach((look) => {
+      const name = look.palette || "Outros";
+      let group = groups.find((g) => g.name === name);
+      if (!group) {
+        group = { name, looks: [] };
+        groups.push(group);
+      }
+      group.looks.push(look);
+    });
+
+    mount.innerHTML = groups
+      .map((group) => {
+        const items = group.looks
+          .map((look) => {
+            const active = look.id === state.look;
+            const swatches = look.swatch
+              .map((c) => `<span style="background:${c}"></span>`)
+              .join("");
+            return `
+        <button type="button" class="admin-appearance__look${active ? " is-active" : ""}" data-look-id="${escapeHtml(look.id)}" aria-pressed="${active}">
+          <span class="admin-appearance__look-swatch">${swatches}</span>
+          <span class="admin-appearance__look-copy">
+            <span class="admin-appearance__look-name">${escapeHtml(look.nome)}</span>
+            <span class="admin-appearance__look-desc">${escapeHtml(look.descricao)}</span>
+          </span>
+        </button>`;
+          })
+          .join("");
         return `
-          <button type="button" class="admin-appearance__choice${active ? " is-active" : ""}" ${dataAttr}="${escapeHtml(item.id)}" aria-pressed="${active}">
-            <span class="admin-appearance__choice-name">${escapeHtml(item.nome)}</span>
-            <span class="admin-appearance__choice-desc">${escapeHtml(item.descricao)}</span>
-          </button>`;
+      <div class="admin-appearance__palette" role="group" aria-label="${escapeHtml(group.name)}">
+        <h3 class="admin-appearance__palette-title">${escapeHtml(group.name)}</h3>
+        <div class="admin-appearance__palette-list">${items}</div>
+      </div>`;
       })
       .join("");
   }
 
-  function renderAll() {
-    renderThemes();
-    renderList("opt-fonts", FONT_PACKS, state.font, "data-font-id");
-    renderList("opt-layouts", LAYOUT_PRESETS, state.layout, "data-layout-id");
-    renderList("opt-media", MEDIA_PRESETS, state.media, "data-media-id");
+  function selectLook(id) {
+    if (!LOOK_PRESETS.some((l) => l.id === id)) return;
+    state.look = id;
+    renderLooks();
     syncFields();
-  }
-
-  function pickRandom(list, avoidId) {
-    if (!list.length) return null;
-    if (list.length === 1) return list[0];
-    let pick = list[Math.floor(Math.random() * list.length)];
-    let guard = 0;
-    while (avoidId && pick.id === avoidId && guard < 8) {
-      pick = list[Math.floor(Math.random() * list.length)];
-      guard += 1;
-    }
-    return pick;
-  }
-
-  function remix() {
-    state.theme = (pickRandom(THEMES, state.theme) || THEMES[0]).id;
-    state.font = (pickRandom(FONT_PACKS, state.font) || FONT_PACKS[0]).id;
-    state.layout = (pickRandom(LAYOUT_PRESETS, state.layout) || LAYOUT_PRESETS[0]).id;
-    state.media = (pickRandom(MEDIA_PRESETS, state.media) || MEDIA_PRESETS[0]).id;
-    renderAll();
     pushPreview();
     markDirty();
   }
 
   root.addEventListener("click", (e) => {
-    const themeBtn = e.target.closest("[data-theme-id]");
-    if (themeBtn) {
-      state.theme = themeBtn.getAttribute("data-theme-id");
-      renderAll();
-      pushPreview();
-      markDirty();
-      return;
-    }
-    const fontBtn = e.target.closest("[data-font-id]");
-    if (fontBtn) {
-      state.font = fontBtn.getAttribute("data-font-id");
-      renderAll();
-      pushPreview();
-      markDirty();
-      return;
-    }
-    const layoutBtn = e.target.closest("[data-layout-id]");
-    if (layoutBtn) {
-      state.layout = layoutBtn.getAttribute("data-layout-id");
-      renderAll();
-      pushPreview();
-      markDirty();
-      return;
-    }
-    const mediaBtn = e.target.closest("[data-media-id]");
-    if (mediaBtn) {
-      state.media = mediaBtn.getAttribute("data-media-id");
-      renderAll();
-      pushPreview();
-      markDirty();
-    }
+    const lookBtn = e.target.closest("[data-look-id]");
+    if (!lookBtn) return;
+    selectLook(lookBtn.getAttribute("data-look-id"));
   });
 
   if (demoToggle && demo) {
@@ -170,8 +129,6 @@
       }
     });
   }
-
-  if (remixBtn) remixBtn.addEventListener("click", remix);
 
   document.querySelectorAll("[data-preview-page]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -196,5 +153,6 @@
     pushPreview();
   });
 
-  renderAll();
+  renderLooks();
+  syncFields();
 })();

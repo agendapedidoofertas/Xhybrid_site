@@ -11,7 +11,7 @@ function admin_header(string $title, ?array $user = null): void
 {
     ?>
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="preto" data-font="tech" data-layout="soft">
+<html lang="pt-BR" data-theme="preto" data-font="tech" data-layout="sharp">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

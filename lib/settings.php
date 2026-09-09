@@ -92,6 +92,19 @@ function settings_definitions(): array
         ],
 
         // Aparência do site (só admin)
+        'appearance_look' => [
+            'group' => 'appearance', 'label' => 'Look do site', 'max' => 32, 'type' => 'choice',
+            'choices' => [
+                'obsidian', 'tech-glass', 'ash-glass', 'sharp-saas', 'ivory-soft', 'editorial',
+                'navy-depth', 'azure-blast', 'indigo-flare', 'ocean-vivid',
+                'neon-night', 'teal-rush',
+                'volt-lime',
+                'amber-flare', 'copper-heat', 'fire-sunset', 'warm-studio',
+                'blood-noir', 'crimson-volt', 'plum-ember',
+                'neon-orchid', 'violet-pulse', 'cyber-magenta', 'berry-pop', 'petal-sky',
+            ],
+            'default' => 'tech-glass',
+        ],
         'appearance_theme' => [
             'group' => 'appearance', 'label' => 'Cor / tema', 'max' => 32, 'type' => 'choice',
             'choices' => [
@@ -99,6 +112,7 @@ function settings_definitions(): array
                 'verde', 'teal', 'amber', 'cinza', 'indigo', 'graphite', 'oceano', 'lime',
                 'vinho', 'cobre', 'slate', 'neon', 'berry', 'midnight',
                 'menta', 'peonia', 'lavanda', 'mostarda', 'gelo', 'sunset',
+                'sangue', 'violeta', 'neon-roxo', 'ameixa', 'fuchsia-night',
             ],
             'default' => 'preto',
         ],

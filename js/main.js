@@ -32,6 +32,14 @@ function isMediaId(v) {
   return typeof v === "string" && MEDIA_PRESETS.some((m) => m.id === v);
 }
 
+function isLookId(v) {
+  return typeof v === "string" && LOOK_PRESETS.some((l) => l.id === v);
+}
+
+function getLookPreset(lookId) {
+  return LOOK_PRESETS.find((l) => l.id === lookId) || LOOK_PRESETS[0];
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -87,73 +95,59 @@ function applyMedia(mediaId) {
   document.documentElement.setAttribute("data-media", mediaId);
 }
 
-function cacheAppearance(theme, font, layout, media) {
+function applyLook(lookId) {
+  document.documentElement.setAttribute("data-look", lookId);
+}
+
+function cacheAppearance(theme, font, layout, media, look) {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
     localStorage.setItem(FONT_STORAGE_KEY, font);
     localStorage.setItem(LAYOUT_STORAGE_KEY, layout);
     localStorage.setItem(MEDIA_STORAGE_KEY, media);
+    if (look) localStorage.setItem(LOOK_STORAGE_KEY, look);
   } catch (_) {
     /* ignore */
   }
 }
 
 function resolveAppearance() {
-  const fromSite = {
-    theme: site("appearance_theme"),
-    font: site("appearance_font"),
-    layout: site("appearance_layout"),
-    media: site("appearance_media"),
+  let look = site("appearance_look");
+  if (!isLookId(look)) {
+    try {
+      const savedLook = localStorage.getItem(LOOK_STORAGE_KEY);
+      if (isLookId(savedLook)) look = savedLook;
+    } catch (_) { /* ignore */ }
+  }
+  if (!isLookId(look)) look = DEFAULT_LOOK;
+
+  const preset = getLookPreset(look);
+  return {
+    look: preset.id,
+    theme: preset.theme,
+    font: preset.font,
+    layout: preset.layout,
+    media: preset.media,
   };
-
-  let theme = isThemeId(fromSite.theme) ? fromSite.theme : DEFAULT_THEME;
-  let font = isFontId(fromSite.font) ? fromSite.font : DEFAULT_FONT;
-  let layout = isLayoutId(fromSite.layout) ? fromSite.layout : DEFAULT_LAYOUT;
-  let media = isMediaId(fromSite.media) ? fromSite.media : DEFAULT_MEDIA;
-
-  // Cache local só ajuda o FOUC; API/admin mandam no site()
-  if (!isThemeId(fromSite.theme)) {
-    try {
-      const saved = localStorage.getItem(THEME_STORAGE_KEY);
-      if (isThemeId(saved)) theme = saved;
-    } catch (_) { /* ignore */ }
-  }
-  if (!isFontId(fromSite.font)) {
-    try {
-      const saved = localStorage.getItem(FONT_STORAGE_KEY);
-      if (isFontId(saved)) font = saved;
-    } catch (_) { /* ignore */ }
-  }
-  if (!isLayoutId(fromSite.layout)) {
-    try {
-      const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
-      if (isLayoutId(saved)) layout = saved;
-    } catch (_) { /* ignore */ }
-  }
-  if (!isMediaId(fromSite.media)) {
-    try {
-      const saved = localStorage.getItem(MEDIA_STORAGE_KEY);
-      if (isMediaId(saved)) media = saved;
-    } catch (_) { /* ignore */ }
-  }
-
-  return { theme, font, layout, media };
 }
 
 function applyAppearance(appearance, { persist = true } = {}) {
-  const theme = isThemeId(appearance.theme) ? appearance.theme : DEFAULT_THEME;
-  const font = isFontId(appearance.font) ? appearance.font : DEFAULT_FONT;
-  const layout = isLayoutId(appearance.layout) ? appearance.layout : DEFAULT_LAYOUT;
-  const media = isMediaId(appearance.media) ? appearance.media : DEFAULT_MEDIA;
+  const look = isLookId(appearance.look) ? appearance.look : DEFAULT_LOOK;
+  const preset = getLookPreset(look);
+  const theme = preset.theme;
+  const font = preset.font;
+  const layout = preset.layout;
+  const media = preset.media;
 
+  applyLook(look);
   applyTheme(theme);
   applyFont(font);
   applyLayout(layout);
   applyMedia(media);
 
-  if (persist) cacheAppearance(theme, font, layout, media);
+  if (persist) cacheAppearance(theme, font, layout, media, look);
 
-  return { theme, font, layout, media };
+  return { look, theme, font, layout, media };
 }
 
 function setupAppearancePreviewListener() {
@@ -163,6 +157,7 @@ function setupAppearancePreviewListener() {
     if (!data || data.type !== "xhybrid-appearance-preview") return;
     applyAppearance(
       {
+        look: data.look,
         theme: data.theme,
         font: data.font,
         layout: data.layout,
@@ -442,7 +437,10 @@ function initRevealAnimations() {
     { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
   );
 
-  reveals.forEach((el) => io.observe(el));
+  reveals.forEach((el, i) => {
+    el.style.setProperty("--reveal-delay", `${Math.min(i * 70, 420)}ms`);
+    io.observe(el);
+  });
 }
 
 /** Preenche textos e links com data-site / data-site-href */

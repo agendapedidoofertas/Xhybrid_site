@@ -1,7 +1,115 @@
-/* Admin — preto / tech / soft glass (fixixa; não segue remix do site) */
+/* Admin — molde fixo preto / cinza / branco (não segue looks do site) */
 
 body[data-page="admin"] {
   color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --card: #141414;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
+  --primary: #e8e8e8;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #e5e5e5;
+  --muted: #171717;
+  --muted-foreground: #a3a3a3;
+  --accent: #262626;
+  --accent-foreground: #f5f5f5;
+  --destructive: #ef4444;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #d4d4d4;
+  --surface-glow: rgba(255, 255, 255, 0.035);
+  --glass-bg: rgba(20, 20, 20, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+  --glass-blur: 10px;
+  --card-blur: 10px;
+  --header-radius: 0.45rem;
+  --radius: 0.45rem;
+  --radius-sm: 0.3rem;
+  --radius-lg: 0.65rem;
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #f5f5f5;
+}
+
+body[data-page="admin"]::before {
+  opacity: 0.4;
+  background:
+    radial-gradient(700px 420px at 10% -10%, rgba(255, 255, 255, 0.05), transparent 60%),
+    radial-gradient(600px 380px at 90% 0%, rgba(255, 255, 255, 0.03), transparent 55%),
+    #0a0a0a;
+}
+
+body[data-page="admin"]::after {
+  opacity: 0.1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-color: transparent;
+}
+
+body[data-page="admin"] .site-header {
+  background: rgba(10, 10, 10, 0.9);
+  border-bottom: 1px solid #2a2a2a;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body[data-page="admin"] .site-logo,
+body[data-page="admin"] .site-logo .text-primary {
+  color: #f5f5f5;
+}
+
+body[data-page="admin"] .site-nav a {
+  color: #a3a3a3;
+}
+
+body[data-page="admin"] .site-nav a:hover {
+  color: #f5f5f5;
+}
+
+body[data-page="admin"] .btn-primary {
+  background: #e8e8e8 !important;
+  color: #0a0a0a !important;
+  border-color: #e8e8e8 !important;
+  box-shadow: none !important;
+}
+
+body[data-page="admin"] .btn-primary:hover {
+  background: #ffffff !important;
+  color: #0a0a0a !important;
+}
+
+body[data-page="admin"] .btn-secondary,
+body[data-page="admin"] .btn-outline,
+body[data-page="admin"] .btn-ghost {
+  background: #1a1a1a;
+  color: #e5e5e5;
+  border-color: #2a2a2a;
+  box-shadow: none;
+}
+
+body[data-page="admin"] .form-input,
+body[data-page="admin"] select.form-input,
+body[data-page="admin"] textarea.form-input {
+  background: #111;
+  color: #f5f5f5;
+  border-color: #2a2a2a;
+}
+
+body[data-page="admin"] .form-input:focus,
+body[data-page="admin"] select.form-input:focus,
+body[data-page="admin"] textarea.form-input:focus {
+  border-color: #a3a3a3;
+  outline-color: #d4d4d4;
+  box-shadow: none;
 }
 
 body[data-page="admin"] .admin-main {
@@ -245,6 +353,86 @@ body[data-page="admin"] .admin-appearance__label {
   color: var(--muted-foreground);
 }
 
+body[data-page="admin"] .admin-appearance__looks {
+  display: grid;
+  gap: 1.35rem;
+}
+
+body[data-page="admin"] .admin-appearance__palette-title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a3a3a3;
+}
+
+body[data-page="admin"] .admin-appearance__palette-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+body[data-page="admin"] .admin-appearance__look {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 0.85rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: color-mix(in oklch, var(--card) 55%, transparent);
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--duration) var(--ease), background var(--duration) var(--ease), transform var(--duration) var(--ease);
+}
+
+body[data-page="admin"] .admin-appearance__look:hover {
+  border-color: #525252;
+  background: #1a1a1a;
+  transform: translateY(-1px);
+}
+
+body[data-page="admin"] .admin-appearance__look.is-active {
+  border-color: #e8e8e8;
+  background: #1f1f1f;
+  box-shadow: 0 0 0 1px #525252;
+}
+
+body[data-page="admin"] .admin-appearance__look-swatch {
+  display: flex;
+  height: 3.25rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+body[data-page="admin"] .admin-appearance__look-swatch span {
+  flex: 1;
+}
+
+body[data-page="admin"] .admin-appearance__look-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+body[data-page="admin"] .admin-appearance__look-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+body[data-page="admin"] .admin-appearance__look-desc {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  line-height: 1.35;
+}
+
 body[data-page="admin"] .admin-appearance__swatches {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
@@ -270,8 +458,8 @@ body[data-page="admin"] .admin-appearance__swatch:hover {
 }
 
 body[data-page="admin"] .admin-appearance__swatch.is-active {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 50%, transparent);
+  border-color: #e8e8e8;
+  box-shadow: 0 0 0 1px #525252;
 }
 
 body[data-page="admin"] .admin-appearance__swatch-colors {
@@ -317,8 +505,8 @@ body[data-page="admin"] .admin-appearance__choice:hover {
 }
 
 body[data-page="admin"] .admin-appearance__choice.is-active {
-  border-color: var(--primary);
-  background: color-mix(in oklch, var(--primary) 12%, var(--card));
+  border-color: #e8e8e8;
+  background: #1f1f1f;
 }
 
 body[data-page="admin"] .admin-appearance__choice-name {
@@ -382,9 +570,9 @@ body[data-page="admin"] .admin-appearance__page-btn {
 }
 
 body[data-page="admin"] .admin-appearance__page-btn.is-active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-foreground);
+  background: #e8e8e8;
+  border-color: #e8e8e8;
+  color: #0a0a0a;
 }
 
 body[data-page="admin"] .admin-appearance__frame {
