@@ -1,0 +1,500 @@
+/**
+ * Configuração central da Xhybrid.
+ * Valores padrão — sobrescritos por /api/settings.php quando disponível.
+ */
+const SITE_DEFAULTS = {
+  whatsapp_number: "5511999999999",
+  whatsapp_message:
+    "Olá! Vim pelo site da Xhybrid e quero um orçamento de site.",
+  email: "contato@xhybrid.com.br",
+  instagram_url: "https://instagram.com/xhybrid",
+  instagram_label: "@xhybrid — projetos e bastidores",
+  contact_whatsapp_desc: "O jeito mais rápido de pedir um orçamento",
+  contact_response_title: "Tempo de resposta",
+  contact_response_text: "Respondemos em até 1 dia útil",
+  nav_index: "Início",
+  nav_sobre: "Sobre",
+  nav_galeria: "Projetos",
+  nav_contato: "Contato",
+  footer_tagline:
+    "Agência de criação de sites, manutenção e tecnologia — presença digital profissional para o seu negócio.",
+  footer_link_sobre: "Sobre nós",
+  fab_label: "Fale conosco",
+  footer_hours_title: "Horário de funcionamento",
+  footer_hours_line1: "Segunda a sexta: 9h – 18h",
+  footer_hours_line2: "Sábado: 9h – 13h",
+  footer_hours_line3: "Domingo: fechado",
+  appearance_theme: "preto",
+  appearance_font: "tech",
+  appearance_layout: "soft",
+  appearance_media: "classic",
+  home_badge: "Sites & tecnologia",
+  home_hero_title_1: "Seu negócio,",
+  home_hero_title_2: "online de verdade.",
+  home_hero_text:
+    "Somos a Xhybrid — criação de sites, manutenção e tecnologia para empresas que querem presença digital profissional.",
+  home_btn_gallery: "Ver projetos",
+  home_btn_quote: "Pedir orçamento",
+  home_weave_title: "O que fazemos",
+  home_weave_subtitle:
+    "Do site institucional à manutenção contínua — tecnologia sob medida para o seu negócio.",
+  home_feat_1_title: "Criação de sites",
+  home_feat_1_text:
+    "Landing pages e sites corporativos modernos, rápidos e alinhados à sua marca.",
+  home_feat_2_title: "Manutenção",
+  home_feat_2_text:
+    "Atualizações, backups, performance e correções para o site ficar sempre no ar.",
+  home_feat_3_title: "Tecnologia",
+  home_feat_3_text:
+    "Integrações, automações e melhorias digitais para otimizar o dia a dia.",
+  home_destaques_title: "Projetos em destaque",
+  home_destaques_subtitle: "Alguns trabalhos de criação e desenvolvimento.",
+  home_destaques_link: "Ver portfólio completo",
+  home_cta_title_1: "Tem um projeto?",
+  home_cta_title_2: "A gente desenvolve.",
+  home_cta_text:
+    "Conte o que precisa — site novo, manutenção ou melhoria tecnológica — e montamos a melhor proposta.",
+  home_cta_btn: "Chamar no WhatsApp",
+  about_eyebrow: "About us",
+  about_title_1: "Tecnologia,",
+  about_title_2: "com clareza.",
+  about_p1:
+    "A Xhybrid nasceu para ajudar empresas a terem presença digital profissional: sites bem feitos, manutenção confiável e tecnologia aplicada ao negócio.",
+  about_p2:
+    "Cuidamos do visual, da performance e da operação — do primeiro briefing à publicação, com comunicação direta e prazos claros.",
+  about_p3:
+    "Mais do que páginas no ar, entregamos uma base digital sólida para você atender clientes, divulgar serviços e crescer online.",
+  about_btn: "Ver projetos",
+  about_stat_1_value: "100%",
+  about_stat_1_text: "Foco em entrega e resultado",
+  about_stat_2_value: "Ágil",
+  about_stat_2_text: "Processo claro do briefing à publicação",
+  about_stat_3_value: "Sob medida",
+  about_stat_3_text: "Soluções alinhadas ao seu negócio",
+  gallery_eyebrow: "Portfolio",
+  gallery_title: "Projetos",
+  gallery_subtitle:
+    "Sites e soluções que já entregamos. Toque em uma foto para ampliar.",
+  contact_eyebrow: "Get in touch",
+  contact_title: "Contato",
+  contact_subtitle:
+    "Orçamentos e dúvidas — escolha o canal que preferir.",
+  contact_form_title: "Escreva para nós",
+  contact_form_intro: "Preencha abaixo e sua mensagem abre direto no seu e-mail.",
+  contact_form_btn: "Enviar mensagem",
+};
+
+/** Estado vivo do site (defaults + API) */
+const SITE = { ...SITE_DEFAULTS };
+
+function site(key) {
+  const v = SITE[key];
+  return v == null || v === "" ? SITE_DEFAULTS[key] || "" : v;
+}
+
+function applySiteSettings(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data) || data.error) {
+    return false;
+  }
+  let applied = 0;
+  Object.keys(SITE_DEFAULTS).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(data, key) && typeof data[key] === "string") {
+      SITE[key] = data[key];
+      applied += 1;
+    }
+  });
+  return applied > 0;
+}
+
+function whatsappLink(message) {
+  const msg = message == null ? site("whatsapp_message") : message;
+  return `https://wa.me/${site("whatsapp_number")}?text=${encodeURIComponent(msg)}`;
+}
+
+function whatsappUrl() {
+  return whatsappLink();
+}
+
+function whatsappProduto(nome) {
+  return whatsappLink(
+    `Olá! Me interessei pelo projeto "${nome}" da Xhybrid. Pode me passar mais detalhes?`,
+  );
+}
+
+/** Compat: código antigo */
+let WHATSAPP_NUMBER = SITE.whatsapp_number;
+let WHATSAPP_DEFAULT_MESSAGE = SITE.whatsapp_message;
+let INSTAGRAM_URL = SITE.instagram_url;
+let EMAIL = SITE.email;
+let WHATSAPP_URL = whatsappUrl();
+
+function syncContactGlobals() {
+  WHATSAPP_NUMBER = site("whatsapp_number");
+  WHATSAPP_DEFAULT_MESSAGE = site("whatsapp_message");
+  INSTAGRAM_URL = site("instagram_url");
+  EMAIL = site("email");
+  WHATSAPP_URL = whatsappUrl();
+}
+
+function getNavLinks() {
+  return [
+    { href: "index.html", label: site("nav_index"), page: "index" },
+    { href: "sobre.html", label: site("nav_sobre"), page: "sobre" },
+    { href: "galeria.html", label: site("nav_galeria"), page: "galeria" },
+    { href: "contato.html", label: site("nav_contato"), page: "contato" },
+  ];
+}
+
+const products = [
+  {
+    id: "landing-page",
+    nome: "Landing Page",
+    descricao:
+      "Página de captura rápida, objetiva e otimizada para conversão de leads.",
+    imageKey: "amigurumi",
+    categoria: "Criação",
+  },
+  {
+    id: "site-corporativo",
+    nome: "Site Corporativo",
+    descricao:
+      "Site institucional moderno para apresentar a empresa, serviços e contato.",
+    imageKey: "manta",
+    categoria: "Criação",
+  },
+  {
+    id: "loja-online",
+    nome: "Loja Online",
+    descricao:
+      "Estrutura digital para catálogo, pedidos e presença comercial na web.",
+    imageKey: "sousplat",
+    categoria: "E-commerce",
+  },
+  {
+    id: "manutencao",
+    nome: "Manutenção Contínua",
+    descricao:
+      "Atualizações, backups, correções e monitoramento para o site permanecer estável.",
+    imageKey: "top",
+    categoria: "Manutenção",
+  },
+  {
+    id: "integracoes",
+    nome: "Integrações",
+    descricao:
+      "WhatsApp, formulários, CRM e automações conectadas ao fluxo do negócio.",
+    imageKey: "bolsa",
+    categoria: "Tecnologia",
+  },
+  {
+    id: "identidade-web",
+    nome: "Identidade Web",
+    descricao:
+      "Visual, tipografia e layout alinhados à marca para uma presença profissional.",
+    imageKey: "bebe",
+    categoria: "Design",
+  },
+];
+
+const THEMES = [
+  {
+    id: "marrom-claro",
+    nome: "Marrom Claro",
+    descricao: "Creme, bege e caramelo",
+    escuro: false,
+    swatch: ["#f5efe4", "#c49a6c", "#7a5a3c"],
+  },
+  {
+    id: "marrom-escuro",
+    nome: "Marrom Escuro",
+    descricao: "Chocolate, café e creme",
+    escuro: true,
+    swatch: ["#2a1d15", "#c89a67", "#efe3d1"],
+  },
+  {
+    id: "branco",
+    nome: "Branco Minimalista",
+    descricao: "Branco, off-white e grafite",
+    escuro: false,
+    swatch: ["#ffffff", "#ececea", "#1a1a1a"],
+  },
+  {
+    id: "preto",
+    nome: "Preto Elegante",
+    descricao: "Preto, grafite e branco",
+    escuro: true,
+    swatch: ["#0f0f10", "#3a3a3d", "#f2f2f2"],
+  },
+  {
+    id: "azul",
+    nome: "Azul",
+    descricao: "Marinho, azul médio e claro",
+    escuro: true,
+    swatch: ["#0f1d33", "#3f6fb3", "#dbe7f7"],
+  },
+  {
+    id: "rosa",
+    nome: "Rosa",
+    descricao: "Rosa queimado, claro e vinho",
+    escuro: false,
+    swatch: ["#fbf1f2", "#c47a86", "#7a2e40"],
+  },
+  {
+    id: "verde",
+    nome: "Verde Floresta",
+    descricao: "Verde profundo e menta",
+    escuro: true,
+    swatch: ["#0f1f18", "#3dba8a", "#d8f3e7"],
+  },
+  {
+    id: "teal",
+    nome: "Teal",
+    descricao: "Petróleo e ciano",
+    escuro: true,
+    swatch: ["#0b1c1f", "#2ec4b6", "#d7f5f2"],
+  },
+  {
+    id: "amber",
+    nome: "Amber",
+    descricao: "Areia e âmbar",
+    escuro: false,
+    swatch: ["#f7f1e6", "#d4a11a", "#3a2a12"],
+  },
+  {
+    id: "cinza",
+    nome: "Cinza Claro",
+    descricao: "Cinza frio e grafite",
+    escuro: false,
+    swatch: ["#f3f4f6", "#6b7280", "#111827"],
+  },
+  {
+    id: "indigo",
+    nome: "Indigo",
+    descricao: "Azul-índigo noturno",
+    escuro: true,
+    swatch: ["#12122a", "#818cf8", "#e0e7ff"],
+  },
+  {
+    id: "graphite",
+    nome: "Graphite",
+    descricao: "Chumbo e azul aço",
+    escuro: true,
+    swatch: ["#171a1f", "#7aa2c8", "#e8eef5"],
+  },
+  {
+    id: "oceano",
+    nome: "Oceano",
+    descricao: "Azul claro e espuma",
+    escuro: false,
+    swatch: ["#eef6fb", "#2f7fb5", "#0b2a3d"],
+  },
+  {
+    id: "lime",
+    nome: "Lime Dark",
+    descricao: "Preto com lima",
+    escuro: true,
+    swatch: ["#10140f", "#a3e635", "#f7fee7"],
+  },
+  {
+    id: "vinho",
+    nome: "Vinho",
+    descricao: "Bordeaux e blush",
+    escuro: true,
+    swatch: ["#2a1218", "#d4787a", "#f7e8ea"],
+  },
+  {
+    id: "cobre",
+    nome: "Cobre",
+    descricao: "Bronze e cobre quente",
+    escuro: true,
+    swatch: ["#24180f", "#d0894a", "#f5e6d6"],
+  },
+  {
+    id: "slate",
+    nome: "Slate",
+    descricao: "Ardósia e prata",
+    escuro: true,
+    swatch: ["#1a1f26", "#9aa8b5", "#e8eef3"],
+  },
+  {
+    id: "neon",
+    nome: "Neon",
+    descricao: "Escuro com ciano elétrico",
+    escuro: true,
+    swatch: ["#0b1218", "#2ee6d6", "#dffcf8"],
+  },
+  {
+    id: "berry",
+    nome: "Berry",
+    descricao: "Magenta e vinho",
+    escuro: true,
+    swatch: ["#24101c", "#e06aaa", "#fce8f2"],
+  },
+  {
+    id: "midnight",
+    nome: "Midnight",
+    descricao: "Azul-noite profundo",
+    escuro: true,
+    swatch: ["#0b1020", "#6b8fd6", "#e6ecf8"],
+  },
+  {
+    id: "menta",
+    nome: "Menta",
+    descricao: "Verde fresco claro",
+    escuro: false,
+    swatch: ["#effaf5", "#2f9e7a", "#14352b"],
+  },
+  {
+    id: "peonia",
+    nome: "Peônia",
+    descricao: "Pêssego e rosa suave",
+    escuro: false,
+    swatch: ["#fff1ee", "#d46a6a", "#4a1f22"],
+  },
+  {
+    id: "lavanda",
+    nome: "Lavanda",
+    descricao: "Lilás suave e violeta",
+    escuro: false,
+    swatch: ["#f4f0fb", "#7a63b8", "#2a2140"],
+  },
+  {
+    id: "mostarda",
+    nome: "Mostarda",
+    descricao: "Dourado e mostarda",
+    escuro: false,
+    swatch: ["#f7f1df", "#c49a1a", "#3a2e10"],
+  },
+  {
+    id: "gelo",
+    nome: "Gelo",
+    descricao: "Branco gelo e azul frio",
+    escuro: false,
+    swatch: ["#f5fafc", "#3d7ea6", "#142432"],
+  },
+  {
+    id: "sunset",
+    nome: "Sunset",
+    descricao: "Coral e pôr do sol",
+    escuro: false,
+    swatch: ["#fff4ea", "#e07040", "#3d1f14"],
+  },
+];
+
+/** Pacotes de tipografia (data-font) */
+const FONT_PACKS = [
+  { id: "tech", nome: "Tech", descricao: "Space Grotesk + IBM Plex" },
+  { id: "soft", nome: "Soft", descricao: "Outfit + Sora" },
+  { id: "editorial", nome: "Editorial", descricao: "Fraunces + Source Sans" },
+  { id: "saas", nome: "SaaS", descricao: "Plus Jakarta + Manrope" },
+  { id: "mono", nome: "Mono", descricao: "Space Grotesk + JetBrains" },
+  { id: "display", nome: "Display", descricao: "Syne + DM Sans" },
+  { id: "geometric", nome: "Geometric", descricao: "Archivo + Public Sans" },
+  { id: "classic", nome: "Classic", descricao: "Playfair + Lato" },
+  { id: "rounded", nome: "Rounded", descricao: "Nunito + Nunito Sans" },
+  { id: "condensed", nome: "Condensed", descricao: "Barlow Condensed + Barlow" },
+];
+
+/** Moldes de layout (data-layout) — visual: raios, glass, densidade */
+const LAYOUT_PRESETS = [
+  { id: "soft", nome: "Soft Glass", descricao: "Arredondado e glass" },
+  { id: "sharp", nome: "Sharp Tech", descricao: "Reto e técnico" },
+  { id: "bento", nome: "Bento", descricao: "Cards assimétricos" },
+  { id: "editorial", nome: "Editorial", descricao: "Limpo e central" },
+  { id: "pill", nome: "Pill SaaS", descricao: "Máximo arredondado" },
+  { id: "compact", nome: "Compact", descricao: "Denso e objetivo" },
+  { id: "frame", nome: "Frame", descricao: "Bordas marcadas" },
+  { id: "magazine", nome: "Magazine", descricao: "Editorial denso" },
+  { id: "loft", nome: "Loft", descricao: "Amplo sem glass" },
+  { id: "strip", nome: "Strip", descricao: "Faixas horizontais" },
+];
+
+/**
+ * Posição das imagens / composição (data-media).
+ * Independente do molde — no mobile sempre empilha.
+ */
+const MEDIA_PRESETS = [
+  { id: "classic", nome: "Clássico", descricao: "Texto esq · imagem dir" },
+  { id: "flip", nome: "Invertido", descricao: "Imagem esq · texto dir" },
+  { id: "hero-flip", nome: "Hero invertido", descricao: "Só o hero troca de lado" },
+  { id: "about-flip", nome: "Sobre invertido", descricao: "Só o sobre troca de lado" },
+  { id: "stack-media", nome: "Imagem no topo", descricao: "Mídia acima do texto" },
+  { id: "stack-copy", nome: "Texto no topo", descricao: "Texto acima da mídia" },
+  { id: "center", nome: "Central", descricao: "Hero centralizado" },
+  { id: "media-wide", nome: "Mídia larga", descricao: "Imagem domina o hero" },
+  { id: "copy-wide", nome: "Texto largo", descricao: "Texto domina o hero" },
+  { id: "gallery-dense", nome: "Galeria densa", descricao: "Mais colunas nos projetos" },
+];
+
+const DEFAULT_THEME = "preto";
+const DEFAULT_FONT = "tech";
+const DEFAULT_LAYOUT = "soft";
+const DEFAULT_MEDIA = "classic";
+const THEME_STORAGE_KEY = "xhybrid-theme";
+const FONT_STORAGE_KEY = "xhybrid-font";
+const LAYOUT_STORAGE_KEY = "xhybrid-layout";
+const MEDIA_STORAGE_KEY = "xhybrid-media";
+
+/** Preenchido após carregar /api/images.php */
+let galleryPhotos = [];
+
+function bindProductImages() {
+  products.forEach((p) => {
+    // Sem fallback: se o slug não veio da API, a imagem está inativa.
+    p.imagem = IMAGES[p.imageKey] || "";
+  });
+}
+
+/**
+ * @param {Array} apiRows
+ * @param {boolean} apiOk - true se /api/images.php respondeu com sucesso
+ */
+function rebuildGalleryPhotos(apiRows, apiOk) {
+  if (apiOk) {
+    galleryPhotos = (apiRows || [])
+      .filter((row) => row.slug && row.slug !== "favicon")
+      .map((row) => ({
+        src: driveToSrc(row.url) || row.url,
+        alt: row.title || row.slug,
+        legenda: row.title || row.slug,
+        descricao: (row.description || "").trim(),
+        preco: (row.price || "").trim(),
+        precoPromo: (row.promo_price || "").trim(),
+      }))
+      .filter((foto) => Boolean(foto.src));
+    return;
+  }
+
+  galleryPhotos = [
+    ...products
+      .filter((p) => p.imagem)
+      .map((p) => ({
+        src: p.imagem,
+        alt: p.nome,
+        legenda: p.categoria,
+        descricao: "",
+        preco: "",
+        precoPromo: "",
+      })),
+    ...(IMAGES.hero
+      ? [{
+          src: IMAGES.hero,
+          alt: "Ambiente de desenvolvimento com notebook e código",
+          legenda: "Nosso trabalho",
+          descricao: "",
+          preco: "",
+          precoPromo: "",
+        }]
+      : []),
+    ...(IMAGES.casal
+      ? [{
+          src: IMAGES.casal,
+          alt: "Equipe colaborando em projeto digital",
+          legenda: "Xhybrid em ação",
+          descricao: "",
+          preco: "",
+          precoPromo: "",
+        }]
+      : []),
+  ];
+}

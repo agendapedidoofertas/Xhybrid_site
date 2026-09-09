@@ -1,0 +1,447 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Definições dos textos/canais editáveis do site.
+ * max = limite de caracteres (responsividade + segurança).
+ */
+function settings_definitions(): array
+{
+    return [
+        // Contato / canais
+        'whatsapp_number' => [
+            'group' => 'contact', 'label' => 'WhatsApp (DDI+DDD+número, só dígitos)', 'max' => 15, 'type' => 'whatsapp',
+            'default' => '5511999999999',
+        ],
+        'whatsapp_message' => [
+            'group' => 'contact', 'label' => 'Mensagem padrão do WhatsApp', 'max' => 160, 'type' => 'text',
+            'default' => 'Olá! Vim pelo site da Xhybrid e quero um orçamento de site.',
+        ],
+        'email' => [
+            'group' => 'contact', 'label' => 'E-mail', 'max' => 80, 'type' => 'email',
+            'default' => 'contato@xhybrid.com.br',
+        ],
+        'instagram_url' => [
+            'group' => 'contact', 'label' => 'URL do Instagram', 'max' => 120, 'type' => 'url',
+            'default' => 'https://instagram.com/xhybrid',
+        ],
+        'instagram_label' => [
+            'group' => 'contact', 'label' => 'Texto do card Instagram', 'max' => 80, 'type' => 'text',
+            'default' => '@xhybrid — projetos e bastidores',
+        ],
+        'contact_whatsapp_desc' => [
+            'group' => 'contact', 'label' => 'Texto do card WhatsApp', 'max' => 80, 'type' => 'text',
+            'default' => 'O jeito mais rápido de pedir um orçamento',
+        ],
+        'contact_response_title' => [
+            'group' => 'contact', 'label' => 'Título tempo de resposta', 'max' => 40, 'type' => 'text',
+            'default' => 'Tempo de resposta',
+        ],
+        'contact_response_text' => [
+            'group' => 'contact', 'label' => 'Texto tempo de resposta', 'max' => 80, 'type' => 'text',
+            'default' => 'Respondemos em até 1 dia útil',
+        ],
+
+        // Menu (4 itens fixos — só rótulos)
+        'nav_index' => [
+            'group' => 'menu', 'label' => 'Menu 1 — Início', 'max' => 16, 'type' => 'short',
+            'default' => 'Início',
+        ],
+        'nav_sobre' => [
+            'group' => 'menu', 'label' => 'Menu 2 — Sobre', 'max' => 16, 'type' => 'short',
+            'default' => 'Sobre',
+        ],
+        'nav_galeria' => [
+            'group' => 'menu', 'label' => 'Menu 3 — Galeria', 'max' => 16, 'type' => 'short',
+            'default' => 'Projetos',
+        ],
+        'nav_contato' => [
+            'group' => 'menu', 'label' => 'Menu 4 — Contato', 'max' => 16, 'type' => 'short',
+            'default' => 'Contato',
+        ],
+
+        // Rodapé
+        'footer_tagline' => [
+            'group' => 'footer', 'label' => 'Frase do rodapé', 'max' => 180, 'type' => 'text',
+            'default' => 'Agência de criação de sites, manutenção e tecnologia — presença digital profissional para o seu negócio.',
+        ],
+        'footer_link_sobre' => [
+            'group' => 'footer', 'label' => 'Link rodapé — Sobre', 'max' => 24, 'type' => 'short',
+            'default' => 'Sobre nós',
+        ],
+        'fab_label' => [
+            'group' => 'footer', 'label' => 'Texto do botão flutuante WhatsApp', 'max' => 24, 'type' => 'short',
+            'default' => 'Fale conosco',
+        ],
+        'footer_hours_title' => [
+            'group' => 'footer', 'label' => 'Horário — título', 'max' => 40, 'type' => 'short',
+            'default' => 'Horário de funcionamento',
+        ],
+        'footer_hours_line1' => [
+            'group' => 'footer', 'label' => 'Horário — linha 1', 'max' => 80, 'type' => 'text',
+            'default' => 'Segunda a sexta: 9h – 18h',
+        ],
+        'footer_hours_line2' => [
+            'group' => 'footer', 'label' => 'Horário — linha 2', 'max' => 80, 'type' => 'text',
+            'default' => 'Sábado: 9h – 13h',
+        ],
+        'footer_hours_line3' => [
+            'group' => 'footer', 'label' => 'Horário — linha 3', 'max' => 80, 'type' => 'text',
+            'default' => 'Domingo: fechado',
+        ],
+
+        // Aparência do site (só admin)
+        'appearance_theme' => [
+            'group' => 'appearance', 'label' => 'Cor / tema', 'max' => 32, 'type' => 'choice',
+            'choices' => [
+                'marrom-claro', 'marrom-escuro', 'branco', 'preto', 'azul', 'rosa',
+                'verde', 'teal', 'amber', 'cinza', 'indigo', 'graphite', 'oceano', 'lime',
+                'vinho', 'cobre', 'slate', 'neon', 'berry', 'midnight',
+                'menta', 'peonia', 'lavanda', 'mostarda', 'gelo', 'sunset',
+            ],
+            'default' => 'preto',
+        ],
+        'appearance_font' => [
+            'group' => 'appearance', 'label' => 'Fonte', 'max' => 32, 'type' => 'choice',
+            'choices' => [
+                'tech', 'soft', 'editorial', 'saas', 'mono', 'display',
+                'geometric', 'classic', 'rounded', 'condensed',
+            ],
+            'default' => 'tech',
+        ],
+        'appearance_layout' => [
+            'group' => 'appearance', 'label' => 'Molde', 'max' => 32, 'type' => 'choice',
+            'choices' => [
+                'soft', 'sharp', 'bento', 'editorial', 'pill', 'compact',
+                'frame', 'magazine', 'loft', 'strip',
+            ],
+            'default' => 'soft',
+        ],
+        'appearance_media' => [
+            'group' => 'appearance', 'label' => 'Imagens / layout', 'max' => 32, 'type' => 'choice',
+            'choices' => [
+                'classic', 'flip', 'hero-flip', 'about-flip', 'stack-media', 'stack-copy',
+                'center', 'media-wide', 'copy-wide', 'gallery-dense',
+            ],
+            'default' => 'classic',
+        ],
+
+        // Home
+        'home_badge' => [
+            'group' => 'home', 'label' => 'Badge do hero', 'max' => 40, 'type' => 'short',
+            'default' => 'Sites & tecnologia',
+        ],
+        'home_hero_title_1' => [
+            'group' => 'home', 'label' => 'Título hero (linha 1)', 'max' => 40, 'type' => 'short',
+            'default' => 'Seu negócio,',
+        ],
+        'home_hero_title_2' => [
+            'group' => 'home', 'label' => 'Título hero (linha 2, itálico)', 'max' => 40, 'type' => 'short',
+            'default' => 'online de verdade.',
+        ],
+        'home_hero_text' => [
+            'group' => 'home', 'label' => 'Texto do hero', 'max' => 220, 'type' => 'text',
+            'default' => 'Somos a Xhybrid — criação de sites, manutenção e tecnologia para empresas que querem presença digital profissional.',
+        ],
+        'home_btn_gallery' => [
+            'group' => 'home', 'label' => 'Botão galeria', 'max' => 28, 'type' => 'short',
+            'default' => 'Ver projetos',
+        ],
+        'home_btn_quote' => [
+            'group' => 'home', 'label' => 'Botão orçamento', 'max' => 28, 'type' => 'short',
+            'default' => 'Pedir orçamento',
+        ],
+        'home_weave_title' => [
+            'group' => 'home', 'label' => 'Título “O que fazemos”', 'max' => 40, 'type' => 'short',
+            'default' => 'O que fazemos',
+        ],
+        'home_weave_subtitle' => [
+            'group' => 'home', 'label' => 'Subtítulo “O que fazemos”', 'max' => 160, 'type' => 'text',
+            'default' => 'Do site institucional à manutenção contínua — tecnologia sob medida para o seu negócio.',
+        ],
+        'home_feat_1_title' => [
+            'group' => 'home', 'label' => 'Card 1 — título', 'max' => 30, 'type' => 'short',
+            'default' => 'Criação de sites',
+        ],
+        'home_feat_1_text' => [
+            'group' => 'home', 'label' => 'Card 1 — texto', 'max' => 120, 'type' => 'text',
+            'default' => 'Landing pages e sites corporativos modernos, rápidos e alinhados à sua marca.',
+        ],
+        'home_feat_2_title' => [
+            'group' => 'home', 'label' => 'Card 2 — título', 'max' => 30, 'type' => 'short',
+            'default' => 'Manutenção',
+        ],
+        'home_feat_2_text' => [
+            'group' => 'home', 'label' => 'Card 2 — texto', 'max' => 120, 'type' => 'text',
+            'default' => 'Atualizações, backups, performance e correções para o site ficar sempre no ar.',
+        ],
+        'home_feat_3_title' => [
+            'group' => 'home', 'label' => 'Card 3 — título', 'max' => 30, 'type' => 'short',
+            'default' => 'Tecnologia',
+        ],
+        'home_feat_3_text' => [
+            'group' => 'home', 'label' => 'Card 3 — texto', 'max' => 120, 'type' => 'text',
+            'default' => 'Integrações, automações e melhorias digitais para otimizar o dia a dia.',
+        ],
+        'home_destaques_title' => [
+            'group' => 'home', 'label' => 'Título destaques', 'max' => 40, 'type' => 'short',
+            'default' => 'Projetos em destaque',
+        ],
+        'home_destaques_subtitle' => [
+            'group' => 'home', 'label' => 'Subtítulo destaques', 'max' => 120, 'type' => 'text',
+            'default' => 'Alguns trabalhos de criação e desenvolvimento.',
+        ],
+        'home_destaques_link' => [
+            'group' => 'home', 'label' => 'Link “ver galeria completa”', 'max' => 40, 'type' => 'short',
+            'default' => 'Ver portfólio completo',
+        ],
+        'home_cta_title_1' => [
+            'group' => 'home', 'label' => 'CTA título (parte 1)', 'max' => 40, 'type' => 'short',
+            'default' => 'Tem um projeto?',
+        ],
+        'home_cta_title_2' => [
+            'group' => 'home', 'label' => 'CTA título (parte 2, itálico)', 'max' => 40, 'type' => 'short',
+            'default' => 'A gente desenvolve.',
+        ],
+        'home_cta_text' => [
+            'group' => 'home', 'label' => 'Texto do CTA', 'max' => 240, 'type' => 'text',
+            'default' => 'Conte o que precisa — site novo, manutenção ou melhoria tecnológica — e montamos a melhor proposta.',
+        ],
+        'home_cta_btn' => [
+            'group' => 'home', 'label' => 'Botão do CTA', 'max' => 30, 'type' => 'short',
+            'default' => 'Chamar no WhatsApp',
+        ],
+
+        // Sobre
+        'about_eyebrow' => [
+            'group' => 'sobre', 'label' => 'Eyebrow', 'max' => 30, 'type' => 'short',
+            'default' => 'About us',
+        ],
+        'about_title_1' => [
+            'group' => 'sobre', 'label' => 'Título (parte 1)', 'max' => 40, 'type' => 'short',
+            'default' => 'Tecnologia,',
+        ],
+        'about_title_2' => [
+            'group' => 'sobre', 'label' => 'Título (parte 2, itálico)', 'max' => 40, 'type' => 'short',
+            'default' => 'com clareza.',
+        ],
+        'about_p1' => [
+            'group' => 'sobre', 'label' => 'Parágrafo 1', 'max' => 350, 'type' => 'text',
+            'default' => 'A Xhybrid nasceu para ajudar empresas a terem presença digital profissional: sites bem feitos, manutenção confiável e tecnologia aplicada ao negócio.',
+        ],
+        'about_p2' => [
+            'group' => 'sobre', 'label' => 'Parágrafo 2', 'max' => 350, 'type' => 'text',
+            'default' => 'Cuidamos do visual, da performance e da operação — do primeiro briefing à publicação, com comunicação direta e prazos claros.',
+        ],
+        'about_p3' => [
+            'group' => 'sobre', 'label' => 'Parágrafo 3', 'max' => 350, 'type' => 'text',
+            'default' => 'Mais do que páginas no ar, entregamos uma base digital sólida para você atender clientes, divulgar serviços e crescer online.',
+        ],
+        'about_btn' => [
+            'group' => 'sobre', 'label' => 'Botão', 'max' => 30, 'type' => 'short',
+            'default' => 'Ver projetos',
+        ],
+        'about_stat_1_value' => [
+            'group' => 'sobre', 'label' => 'Destaque 1 — valor', 'max' => 20, 'type' => 'short',
+            'default' => '100%',
+        ],
+        'about_stat_1_text' => [
+            'group' => 'sobre', 'label' => 'Destaque 1 — texto', 'max' => 80, 'type' => 'text',
+            'default' => 'Foco em entrega e resultado',
+        ],
+        'about_stat_2_value' => [
+            'group' => 'sobre', 'label' => 'Destaque 2 — valor', 'max' => 20, 'type' => 'short',
+            'default' => 'Ágil',
+        ],
+        'about_stat_2_text' => [
+            'group' => 'sobre', 'label' => 'Destaque 2 — texto', 'max' => 80, 'type' => 'text',
+            'default' => 'Processo claro do briefing à publicação',
+        ],
+        'about_stat_3_value' => [
+            'group' => 'sobre', 'label' => 'Destaque 3 — valor', 'max' => 20, 'type' => 'short',
+            'default' => 'Sob medida',
+        ],
+        'about_stat_3_text' => [
+            'group' => 'sobre', 'label' => 'Destaque 3 — texto', 'max' => 80, 'type' => 'text',
+            'default' => 'Soluções alinhadas ao seu negócio',
+        ],
+
+        // Galeria página
+        'gallery_eyebrow' => [
+            'group' => 'galeria', 'label' => 'Eyebrow', 'max' => 30, 'type' => 'short',
+            'default' => 'Portfolio',
+        ],
+        'gallery_title' => [
+            'group' => 'galeria', 'label' => 'Título', 'max' => 30, 'type' => 'short',
+            'default' => 'Projetos',
+        ],
+        'gallery_subtitle' => [
+            'group' => 'galeria', 'label' => 'Subtítulo', 'max' => 160, 'type' => 'text',
+            'default' => 'Sites e soluções que já entregamos. Toque em uma foto para ampliar.',
+        ],
+
+        // Contato página (cabeçalho / formulário)
+        'contact_eyebrow' => [
+            'group' => 'contato_page', 'label' => 'Eyebrow', 'max' => 30, 'type' => 'short',
+            'default' => 'Get in touch',
+        ],
+        'contact_title' => [
+            'group' => 'contato_page', 'label' => 'Título', 'max' => 24, 'type' => 'short',
+            'default' => 'Contato',
+        ],
+        'contact_subtitle' => [
+            'group' => 'contato_page', 'label' => 'Subtítulo', 'max' => 140, 'type' => 'text',
+            'default' => 'Orçamentos e dúvidas — escolha o canal que preferir.',
+        ],
+        'contact_form_title' => [
+            'group' => 'contato_page', 'label' => 'Título do formulário', 'max' => 40, 'type' => 'short',
+            'default' => 'Escreva para nós',
+        ],
+        'contact_form_intro' => [
+            'group' => 'contato_page', 'label' => 'Intro do formulário', 'max' => 140, 'type' => 'text',
+            'default' => 'Preencha abaixo e sua mensagem abre direto no seu e-mail.',
+        ],
+        'contact_form_btn' => [
+            'group' => 'contato_page', 'label' => 'Botão enviar', 'max' => 28, 'type' => 'short',
+            'default' => 'Enviar mensagem',
+        ],
+    ];
+}
+
+function settings_groups(): array
+{
+    return [
+        'contact' => 'Canais de contato',
+        'menu' => 'Menu (4 itens)',
+        'footer' => 'Rodapé',
+        'appearance' => 'Aparência',
+        'home' => 'Home',
+        'sobre' => 'Sobre',
+        'galeria' => 'Galeria',
+        'contato_page' => 'Página Contato',
+    ];
+}
+
+function settings_strip_controls(string $value): string
+{
+    $clean = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value);
+    return is_string($clean) ? $clean : '';
+}
+
+function settings_sanitize(string $key, string $value): string
+{
+    $defs = settings_definitions();
+    if (!isset($defs[$key])) {
+        return '';
+    }
+    $def = $defs[$key];
+    $value = settings_strip_controls($value);
+    $value = trim(str_replace("\r\n", "\n", $value));
+    $type = $def['type'] ?? 'text';
+    $max = (int) $def['max'];
+
+    if ($type === 'whatsapp') {
+        $value = preg_replace('/\D+/', '', $value) ?? '';
+    } elseif ($type === 'email') {
+        $value = filter_var($value, FILTER_SANITIZE_EMAIL) ?: '';
+        $value = str_replace(['<', '>'], '', $value);
+        if ($value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            $value = (string) $def['default'];
+        }
+    } elseif ($type === 'url') {
+        $value = str_replace(['<', '>', '"', "'"], '', $value);
+        if ($value !== '' && !preg_match('#^https?://#i', $value)) {
+            $value = 'https://' . ltrim($value, '/');
+        }
+        if ($value !== '' && !filter_var($value, FILTER_VALIDATE_URL)) {
+            $value = (string) $def['default'];
+        }
+    } elseif ($type === 'choice') {
+        $choices = $def['choices'] ?? [];
+        if (!is_array($choices) || !in_array($value, $choices, true)) {
+            $value = (string) $def['default'];
+        }
+    } else {
+        // Textos: sem HTML
+        $value = str_replace(['<', '>'], '', $value);
+    }
+
+    if (function_exists('mb_substr')) {
+        $value = mb_substr($value, 0, $max, 'UTF-8');
+    } else {
+        $value = substr($value, 0, $max);
+    }
+
+    return $value;
+}
+
+function settings_all(PDO $pdo): array
+{
+    $defs = settings_definitions();
+    $out = [];
+    foreach ($defs as $key => $def) {
+        $out[$key] = (string) $def['default'];
+    }
+
+    $stmt = $pdo->query('SELECT setting_key, value FROM settings');
+    foreach ($stmt->fetchAll() as $row) {
+        $key = (string) ($row['setting_key'] ?? '');
+        if ($key !== '' && array_key_exists($key, $out)) {
+            $out[$key] = (string) ($row['value'] ?? '');
+        }
+    }
+
+    return $out;
+}
+
+function settings_get(PDO $pdo, string $key): string
+{
+    $all = settings_all($pdo);
+    return $all[$key] ?? '';
+}
+
+function settings_save_many(PDO $pdo, array $input): void
+{
+    $defs = settings_definitions();
+    $now = gmdate('c');
+    $stmt = $pdo->prepare(
+        'INSERT INTO settings (setting_key, value, updated_at) VALUES (:setting_key, :value, :updated_at)
+         ON CONFLICT(setting_key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at'
+    );
+
+    foreach ($defs as $key => $def) {
+        if (!array_key_exists($key, $input)) {
+            continue;
+        }
+        $value = settings_sanitize($key, (string) $input[$key]);
+        if ($value === '' && in_array($def['type'] ?? '', ['whatsapp', 'email', 'url', 'short'], true)) {
+            $value = (string) $def['default'];
+        }
+        $stmt->execute([
+            ':setting_key' => $key,
+            ':value' => $value,
+            ':updated_at' => $now,
+        ]);
+    }
+}
+
+function settings_seed(PDO $pdo): void
+{
+    $count = (int) $pdo->query('SELECT COUNT(*) FROM settings')->fetchColumn();
+    if ($count > 0) {
+        return;
+    }
+
+    $now = gmdate('c');
+    $stmt = $pdo->prepare(
+        'INSERT INTO settings (setting_key, value, updated_at) VALUES (:setting_key, :value, :updated_at)'
+    );
+    foreach (settings_definitions() as $key => $def) {
+        $stmt->execute([
+            ':setting_key' => $key,
+            ':value' => (string) $def['default'],
+            ':updated_at' => $now,
+        ]);
+    }
+}

@@ -1,0 +1,145 @@
+<?php
+
+declare(strict_types=1);
+
+require_once dirname(__DIR__) . '/lib/auth.php';
+require_once dirname(__DIR__) . '/lib/csrf.php';
+require_once dirname(__DIR__) . '/lib/admin_layout.php';
+
+auth_boot_session();
+$user = require_role_admin();
+
+$error = '';
+$ok = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
+    $action = (string) ($_POST['action'] ?? '');
+
+    if ($action === 'create') {
+        $username = trim((string) ($_POST['username'] ?? ''));
+        $password = (string) ($_POST['password'] ?? '');
+        $confirm = (string) ($_POST['confirm'] ?? '');
+        $role = (string) ($_POST['role'] ?? 'editor');
+
+        if ($username === '' || strlen($username) < 3) {
+            $error = 'Usuário com pelo menos 3 caracteres.';
+        } elseif (strlen($password) < 8) {
+            $error = 'A senha precisa ter pelo menos 8 caracteres.';
+        } elseif ($password !== $confirm) {
+            $error = 'A confirmação de senha não confere.';
+        } else {
+            try {
+                create_user($username, $password, $role);
+                $ok = 'Usuário criado. A senha não fica visível depois — apenas hash no servidor.';
+            } catch (PDOException $e) {
+                $error = str_contains($e->getMessage(), 'UNIQUE')
+                    ? 'Este nome de usuário já existe.'
+                    : 'Erro ao criar usuário.';
+            }
+        }
+    } elseif ($action === 'reset') {
+        $targetId = (int) ($_POST['id'] ?? 0);
+        $password = (string) ($_POST['password'] ?? '');
+        $confirm = (string) ($_POST['confirm'] ?? '');
+        if ($password !== $confirm) {
+            $error = 'A confirmação de senha não confere.';
+        } else {
+            $error = admin_reset_password($targetId, $password);
+            if ($error === '') {
+                $ok = 'Senha redefinida (não é possível ver a senha antiga).';
+            }
+        }
+    } elseif ($action === 'delete') {
+        $targetId = (int) ($_POST['id'] ?? 0);
+        $error = delete_user_by_id($targetId, (int) $user['id']);
+        if ($error === '') {
+            $ok = 'Usuário excluído.';
+        }
+    }
+}
+
+$users = list_users();
+
+admin_header('Usuários', $user);
+?>
+      <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
+        <p class="eyebrow">Acesso</p>
+        <h1 class="font-display">Usuários</h1>
+        <p>Só administradores gerenciam contas. Senhas nunca são exibidas — só criar ou redefinir.</p>
+      </header>
+
+      <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
+      <?php if ($ok): ?><p class="admin-flash"><?= h($ok) ?></p><?php endif; ?>
+
+      <section class="contact-form admin-form" style="margin-top:1.5rem;">
+        <h2 class="font-display" style="font-size:1.5rem;">Novo usuário</h2>
+        <form method="post" style="margin-top:1rem;">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="create">
+          <div class="form-group">
+            <label for="username">Usuário</label>
+            <input id="username" name="username" class="form-input" required minlength="3" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="password">Senha inicial</label>
+            <input id="password" name="password" type="password" class="form-input" required minlength="8" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="confirm">Confirmar senha</label>
+            <input id="confirm" name="confirm" type="password" class="form-input" required minlength="8" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="role">Tipo</label>
+            <select id="role" name="role" class="form-input">
+              <option value="editor">Editor (imagens)</option>
+              <option value="admin">Admin (imagens + usuários)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Criar usuário</button>
+        </form>
+      </section>
+
+      <div class="admin-table-wrap" style="margin-top:2.5rem;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Tipo</th>
+              <th>Criado</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php foreach ($users as $u): ?>
+            <tr>
+              <td><strong><?= h($u['username']) ?></strong><?= (int) $u['id'] === (int) $user['id'] ? ' <span class="text-muted">(você)</span>' : '' ?></td>
+              <td><?= h($u['role'] ?? 'admin') ?></td>
+              <td class="text-muted"><?= h((string) ($u['created_at'] ?? '')) ?></td>
+              <td>
+                <div class="admin-row-actions" style="flex-direction:column;align-items:flex-start;gap:0.75rem;">
+                  <form method="post" style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:flex-end;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="reset">
+                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                    <input type="password" name="password" class="form-input" placeholder="Nova senha" required minlength="8" style="width:9rem;margin:0;" autocomplete="new-password">
+                    <input type="password" name="confirm" class="form-input" placeholder="Confirmar" required minlength="8" style="width:9rem;margin:0;" autocomplete="new-password">
+                    <button type="submit" class="btn btn-outline btn-sm">Redefinir senha</button>
+                  </form>
+                  <?php if ((int) $u['id'] !== (int) $user['id']): ?>
+                  <form method="post" onsubmit="return confirm('Excluir este usuário?');">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                    <button type="submit" class="btn btn-outline btn-sm">Excluir</button>
+                  </form>
+                  <?php endif; ?>
+                </div>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+<?php
+admin_footer();
