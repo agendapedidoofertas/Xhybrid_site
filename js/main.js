@@ -8,6 +8,9 @@ const ICONS = {
   palette: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
   check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
   instagram: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>',
+  facebook: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>',
+  tiktok: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>',
+  mapPin: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>',
   mail: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
   clock: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
   send: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>',
@@ -191,7 +194,7 @@ function renderHeader(currentPage) {
   const brand = site("brand_name") || "Xhybrid";
   let logoInner;
   if (IMAGES.logo) {
-    logoInner = `<img class="site-logo__img" src="${escapeHtml(IMAGES.logo)}" alt="${escapeHtml(brand)}" width="140" height="40">`;
+    logoInner = `<img class="site-logo__img" src="${escapeHtml(IMAGES.logo)}" alt="${escapeHtml(brand)}" width="140" height="40" referrerpolicy="no-referrer">`;
   } else if (brand.toLowerCase() === "xhybrid") {
     logoInner = `X<span class="text-primary italic">hybrid</span>`;
   } else {
@@ -219,9 +222,14 @@ function renderHeader(currentPage) {
 
 function renderFooter() {
   const year = new Date().getFullYear();
-  const wa = whatsappUrl();
-  const ig = site("instagram_url");
-  const mail = site("email");
+  const waNum = site("whatsapp_number").trim();
+  const wa = waNum ? whatsappUrl() : "";
+  const ig = site("instagram_url").trim();
+  const fb = site("facebook_url").trim();
+  const tt = site("tiktok_url").trim();
+  const mail = site("email").trim();
+  const address = site("address").trim();
+  const maps = site("maps_url").trim();
   const brand = site("brand_name") || "Xhybrid";
   const hoursTitle = site("footer_hours_title");
   const hoursLines = ["footer_hours_line1", "footer_hours_line2", "footer_hours_line3"]
@@ -243,6 +251,15 @@ function renderFooter() {
       ? `X<span class="text-primary italic">hybrid</span>`
       : escapeHtml(brand);
 
+  const socialBits = [
+    wa ? `<a href="${escapeHtml(wa)}" target="_blank" rel="noreferrer" aria-label="WhatsApp">${ICONS.messageCircle}</a>` : "",
+    ig ? `<a href="${escapeHtml(ig)}" target="_blank" rel="noreferrer" aria-label="Instagram">${ICONS.instagram}</a>` : "",
+    fb ? `<a href="${escapeHtml(fb)}" target="_blank" rel="noreferrer" aria-label="Facebook">${ICONS.facebook}</a>` : "",
+    tt ? `<a href="${escapeHtml(tt)}" target="_blank" rel="noreferrer" aria-label="TikTok">${ICONS.tiktok}</a>` : "",
+    mail ? `<a href="mailto:${escapeHtml(mail)}" aria-label="E-mail">${ICONS.mail}</a>` : "",
+    maps ? `<a href="${escapeHtml(maps)}" target="_blank" rel="noreferrer" aria-label="Google Maps">${ICONS.mapPin}</a>` : "",
+  ].filter(Boolean).join("");
+
   return `
     <footer class="site-footer">
       <div class="container site-footer__grid">
@@ -253,19 +270,16 @@ function renderFooter() {
         <nav aria-label="Links do rodapé">
           <p class="site-footer__heading">Navegue</p>
           <ul class="site-footer__links">
-            ${site("feature_page_sobre") !== "0" ? `<li><a href="sobre.html">${escapeHtml(site("footer_link_sobre"))}</a></li>` : ""}
-            ${site("feature_page_galeria") !== "0" ? `<li><a href="galeria.html">${escapeHtml(site("nav_galeria"))}</a></li>` : ""}
-            ${site("feature_page_contato") !== "0" ? `<li><a href="contato.html">${escapeHtml(site("nav_contato"))}</a></li>` : ""}
+            ${pageIsEnabled("sobre") ? `<li><a href="sobre.html">${escapeHtml(site("footer_link_sobre"))}</a></li>` : ""}
+            ${pageIsEnabled("galeria") ? `<li><a href="galeria.html">${escapeHtml(site("nav_galeria"))}</a></li>` : ""}
+            ${pageIsEnabled("contato") ? `<li><a href="contato.html">${escapeHtml(site("nav_contato"))}</a></li>` : ""}
           </ul>
         </nav>
         <div>
           <p class="site-footer__heading">Fale com a gente</p>
-          <div class="social-links">
-            <a href="${escapeHtml(wa)}" target="_blank" rel="noreferrer" aria-label="WhatsApp">${ICONS.messageCircle}</a>
-            <a href="${escapeHtml(ig)}" target="_blank" rel="noreferrer" aria-label="Instagram">${ICONS.instagram}</a>
-            <a href="mailto:${escapeHtml(mail)}" aria-label="E-mail">${ICONS.mail}</a>
-          </div>
-          <p class="site-footer__tagline" style="margin-top:0.75rem">${escapeHtml(mail)}</p>
+          ${socialBits ? `<div class="social-links">${socialBits}</div>` : ""}
+          ${mail ? `<p class="site-footer__tagline" style="margin-top:0.75rem">${escapeHtml(mail)}</p>` : ""}
+          ${address ? `<p class="site-footer__tagline" style="margin-top:0.5rem">${escapeHtml(address)}</p>` : ""}
         </div>
         ${hoursBlock}
       </div>
@@ -276,6 +290,9 @@ function renderFooter() {
 }
 
 function renderFabWhatsApp() {
+  if (!site("whatsapp_number").trim()) {
+    return "";
+  }
   return `
     <a href="${escapeHtml(whatsappUrl())}" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp" class="fab-whatsapp">
       <span class="fab-whatsapp__label">${escapeHtml(site("fab_label"))}</span>
@@ -428,6 +445,10 @@ function applyBrandMeta() {
   const author = document.querySelector('meta[name="author"]');
   if (author && brand) author.setAttribute("content", brand);
 
+  document.querySelectorAll("[data-error-home]").forEach((el) => {
+    el.textContent = brand ? `Voltar a ${brand}` : "Voltar ao início";
+  });
+
   const ensureMeta = (attr, key, value) => {
     if (!value) return;
     let el = document.querySelector(`meta[${attr}="${key}"]`);
@@ -493,16 +514,10 @@ function applySections() {
     el.hidden = flag === "0";
   });
 
-  const pageFlags = {
-    sobre: "feature_page_sobre",
-    galeria: "feature_page_galeria",
-    contato: "feature_page_contato",
-  };
   document.querySelectorAll("[data-requires-page]").forEach((el) => {
     const page = el.getAttribute("data-requires-page");
-    const flag = pageFlags[page];
-    if (!flag) return;
-    el.hidden = site(flag) === "0";
+    if (!page) return;
+    el.hidden = !pageIsEnabled(page);
   });
 
   document.querySelectorAll(".hero__actions").forEach((actions) => {
@@ -526,14 +541,10 @@ function applySections() {
 
 function enforcePlanPages() {
   const page = document.body.dataset.page || "index";
-  const map = {
-    sobre: "feature_page_sobre",
-    galeria: "feature_page_galeria",
-    contato: "feature_page_contato",
-  };
-  const flag = map[page];
-  if (flag && site(flag) === "0") {
-    window.location.replace("index.html");
+  if (page === "sobre" || page === "galeria" || page === "contato") {
+    if (!pageIsEnabled(page)) {
+      window.location.replace("index.html");
+    }
   }
 }
 
@@ -701,15 +712,78 @@ function applySiteTexts() {
     const key = el.getAttribute("data-site-href");
     if (!key) return;
     if (key === "whatsapp") {
-      el.setAttribute("href", whatsappUrl());
+      el.setAttribute("href", site("whatsapp_number").trim() ? whatsappUrl() : "#");
     } else if (key === "email") {
-      el.setAttribute("href", `mailto:${site("email")}`);
+      const mail = site("email").trim();
+      el.setAttribute("href", mail ? `mailto:${mail}` : "#");
     } else if (key === "instagram") {
-      el.setAttribute("href", site("instagram_url"));
+      el.setAttribute("href", site("instagram_url").trim() || "#");
+    } else if (key === "facebook") {
+      el.setAttribute("href", site("facebook_url").trim() || "#");
+    } else if (key === "tiktok") {
+      el.setAttribute("href", site("tiktok_url").trim() || "#");
+    } else if (key === "maps") {
+      el.setAttribute("href", site("maps_url").trim() || "#");
     } else {
-      el.setAttribute("href", site(key));
+      el.setAttribute("href", site(key) || "#");
     }
   });
+
+  const hideChannel = (id, visible) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const wrap = el.closest("li") || el;
+    wrap.hidden = !visible;
+  };
+
+  hideChannel("contact-whatsapp", Boolean(site("whatsapp_number").trim()));
+  hideChannel("contact-email", Boolean(site("email").trim()));
+  hideChannel("contact-instagram", Boolean(site("instagram_url").trim()));
+  hideChannel("contact-facebook", Boolean(site("facebook_url").trim()));
+  hideChannel("contact-tiktok", Boolean(site("tiktok_url").trim()));
+
+  const address = site("address").trim();
+  const maps = site("maps_url").trim();
+  hideChannel("contact-address", Boolean(address || maps));
+
+  const addrEl = document.getElementById("contact-address");
+  if (addrEl) {
+    if (maps) {
+      addrEl.setAttribute("href", maps);
+      addrEl.setAttribute("target", "_blank");
+      addrEl.setAttribute("rel", "noreferrer");
+      addrEl.classList.remove("channel-card--static");
+    } else {
+      addrEl.setAttribute("href", "#");
+      addrEl.removeAttribute("target");
+      addrEl.removeAttribute("rel");
+      addrEl.classList.add("channel-card--static");
+      addrEl.onclick = (e) => e.preventDefault();
+    }
+  }
+
+  const responseCard = document.getElementById("contact-response");
+  if (responseCard) {
+    const wrap = responseCard.closest("li") || responseCard;
+    const title = site("contact_response_title").trim();
+    const text = site("contact_response_text").trim();
+    wrap.hidden = !(title || text);
+  }
+
+  // Labels de rede: se vazios, usa nome da plataforma
+  const fillSocialLabel = (dataKey, fallback) => {
+    document.querySelectorAll(`[data-site="${dataKey}"]`).forEach((el) => {
+      if (!site(dataKey).trim()) el.textContent = fallback;
+    });
+  };
+  fillSocialLabel("instagram_label", "Instagram");
+  fillSocialLabel("facebook_label", "Facebook");
+  fillSocialLabel("tiktok_label", "TikTok");
+  if (!address && maps) {
+    document.querySelectorAll('[data-site="address"]').forEach((el) => {
+      el.textContent = "Ver no Google Maps";
+    });
+  }
 }
 
 function applyImages() {
@@ -729,16 +803,33 @@ function applyImages() {
 
   document.querySelectorAll("[data-img]").forEach((el) => {
     const key = el.getAttribute("data-img");
-    const src = IMAGES[key];
+    // Só URLs da API — ausente → robô (depois do fetch, nunca no HTML inicial)
+    const src = (key && IMAGES[key]) || IMAGE_PLACEHOLDER;
     el.setAttribute("referrerpolicy", "no-referrer");
-    if (src) {
-      el.hidden = false;
-      el.setAttribute("src", src);
-      attachDriveFallback(el);
+    el.hidden = false;
+    el.setAttribute("src", src);
+    if (isPlaceholderSrc(src)) {
+      el.classList.add("is-placeholder");
     } else {
-      el.removeAttribute("src");
-      el.hidden = true;
+      el.classList.remove("is-placeholder");
     }
+    el.classList.add("is-media-ready");
+    attachImageFallback(el);
+  });
+
+  // Posters de vídeo acompanham o mesmo catálogo (não ficam com JPG antigo do HTML)
+  document.querySelectorAll("[data-video]").forEach((video) => {
+    const slug = video.getAttribute("data-video") || "";
+    const posterMap = {
+      "video-home": "hero",
+      "video-sobre": "about",
+      "video-galeria": "hero",
+      "video-contato": "hero",
+    };
+    const imgKey = posterMap[slug] || "hero";
+    const poster = IMAGES[imgKey] || IMAGE_PLACEHOLDER;
+    video.setAttribute("poster", poster);
+    video.classList.add("is-media-ready");
   });
 }
 
@@ -788,12 +879,12 @@ function applyVideos() {
     const fallback = media ? media.querySelector("img") : null;
 
     if (fallback && slug === "video-galeria") {
-      const poster = firstGallerySrc();
-      if (poster) {
-        fallback.hidden = false;
-        fallback.setAttribute("src", poster);
-        video.setAttribute("poster", poster);
-      }
+      const poster = firstGallerySrc() || IMAGE_PLACEHOLDER;
+      fallback.hidden = false;
+      fallback.setAttribute("src", poster);
+      video.setAttribute("poster", poster);
+      if (isPlaceholderSrc(poster)) fallback.classList.add("is-placeholder");
+      else fallback.classList.remove("is-placeholder");
     }
 
     const showFallback = () => {
@@ -804,7 +895,10 @@ function applyVideos() {
         /* ignore */
       }
       video.hidden = true;
-      if (fallback) fallback.hidden = false;
+      if (fallback) {
+        // Mantém o src já definido por applyImages (ativo ou robô)
+        fallback.hidden = false;
+      }
     };
 
     if (!canPlay || !isVideoUrl(src)) {
@@ -952,7 +1046,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const page = document.body.dataset.page || "index";
   setupLayout(page);
+  document.querySelectorAll(".site-logo__img, .product-card img, .gallery__item img").forEach((img) => {
+    attachImageFallback(img);
+  });
   applyVideos();
+  // Reaplica imagens depois dos vídeos para não “ressuscitar” src/poster de desativadas
+  applyImages();
   applySiteTexts();
   if (typeof applyFeatureIcons === "function") {
     applyFeatureIcons();

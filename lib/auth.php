@@ -13,7 +13,7 @@ function auth_boot_session(): void
     $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443);
 
-    session_name('ae_atelier_admin');
+    session_name('xhybrid_admin');
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',

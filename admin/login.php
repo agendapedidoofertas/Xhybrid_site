@@ -18,16 +18,62 @@ if (current_user()) {
     exit;
 }
 
+function login_rate_limited(string $ip): bool
+{
+    $rateDir = dirname(__DIR__) . '/data/rate';
+    if (!is_dir($rateDir)) {
+        @mkdir($rateDir, 0755, true);
+    }
+    $rateFile = $rateDir . '/login-' . hash('sha256', $ip) . '.json';
+    $now = time();
+    $hits = [];
+    if (is_file($rateFile)) {
+        $prev = json_decode((string) file_get_contents($rateFile), true);
+        if (is_array($prev)) {
+            $hits = array_values(array_filter($prev, static fn ($t) => is_int($t) && ($now - $t) < 900));
+        }
+    }
+    if (count($hits) >= 12) {
+        return true;
+    }
+    return false;
+}
+
+function login_rate_hit(string $ip): void
+{
+    $rateDir = dirname(__DIR__) . '/data/rate';
+    if (!is_dir($rateDir)) {
+        @mkdir($rateDir, 0755, true);
+    }
+    $rateFile = $rateDir . '/login-' . hash('sha256', $ip) . '.json';
+    $now = time();
+    $hits = [];
+    if (is_file($rateFile)) {
+        $prev = json_decode((string) file_get_contents($rateFile), true);
+        if (is_array($prev)) {
+            $hits = array_values(array_filter($prev, static fn ($t) => is_int($t) && ($now - $t) < 900));
+        }
+    }
+    $hits[] = $now;
+    @file_put_contents($rateFile, json_encode($hits));
+}
+
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
-    $username = trim((string) ($_POST['username'] ?? ''));
-    $password = (string) ($_POST['password'] ?? '');
-    if (!login_user($username, $password)) {
-        $error = 'Usuário ou senha inválidos.';
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    if (login_rate_limited($ip)) {
+        $error = 'Muitas tentativas. Aguarde alguns minutos.';
     } else {
-        header('Location: index.php');
-        exit;
+        $username = trim((string) ($_POST['username'] ?? ''));
+        $password = (string) ($_POST['password'] ?? '');
+        if (!login_user($username, $password)) {
+            login_rate_hit($ip);
+            $error = 'Usuário ou senha inválidos.';
+        } else {
+            header('Location: index.php');
+            exit;
+        }
     }
 }
 

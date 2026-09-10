@@ -7,7 +7,7 @@ require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 
 auth_boot_session();
-$user = require_role_admin();
+$user = require_admin();
 
 $error = '';
 $ok = '';

@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/lib/auth.php';
 require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/images.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
 require_once dirname(__DIR__) . '/lib/uploads.php';
@@ -80,12 +81,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             : 'Preencha título, slug e o link do Google Drive (ou URL da imagem).';
     }
 
+    if ($error === '' && $active === 1 && !images_url_available($url)) {
+        $error = 'Não é possível ativar: URL vazia ou arquivo local não encontrado. Corrija a mídia ou deixe desativada.';
+    }
+
     if ($error === '') {
-        $reserved = ['favicon', 'logo', 'hero', 'casal'];
+        $reserved = ['favicon', 'logo', 'hero', 'about'];
         $isReserved = in_array($slug, $reserved, true) || str_starts_with($slug, 'video-');
         if ($active === 1 && !$isReserved) {
             $countStmt = $pdo->query(
-                "SELECT COUNT(*) FROM images WHERE active = 1 AND slug NOT IN ('favicon','logo','hero','casal') AND slug NOT LIKE 'video-%'"
+                "SELECT COUNT(*) FROM images WHERE active = 1 AND slug NOT IN ('favicon','logo','hero','about') AND slug NOT LIKE 'video-%'"
             );
             $galleryCount = (int) $countStmt->fetchColumn();
             $wasCounted = false;
@@ -97,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $would = $wasCounted ? $galleryCount : $galleryCount + 1;
             if ($would > $limitGallery) {
-                $error = "Plano permite no máximo {$limitGallery} imagens na galeria (além de logo/favicon/hero/casal/vídeos).";
+                $error = "Plano permite no máximo {$limitGallery} imagens na galeria (além de logo/favicon/hero/about/vídeos).";
             }
         }
     }
@@ -186,9 +191,9 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
         <p class="eyebrow">Imagens</p>
         <h1 class="font-display"><?= $isEdit ? 'Editar imagem' : 'Nova imagem' ?></h1>
         <?php if ($canUpload): ?>
-          <p>Admin: pode enviar arquivo para <code>assets/uploads/</code> ou colar URL. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code>, vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>.</p>
+          <p>Admin: pode enviar arquivo para <code>assets/uploads/</code> ou colar URL. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>about</code>, vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>.</p>
         <?php else: ?>
-          <p>Cole o link de compartilhamento do <strong>Google Drive</strong> (qualquer um com o link). Assim a imagem não ocupa espaço no servidor. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code> e vídeos Signature.</p>
+          <p>Cole o link de compartilhamento do <strong>Google Drive</strong> (qualquer um com o link). Assim a imagem não ocupa espaço no servidor. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>about</code> e vídeos Signature.</p>
         <?php endif; ?>
       </header>
 
@@ -245,17 +250,30 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
           <input type="checkbox" name="active" value="1" <?= ((int) ($image['active'] ?? 1) === 1) ? 'checked' : '' ?>>
           Ativa no site
         </label>
-        <?php if (!empty($image['url'])): ?>
-          <?php
-            $preview = (string) $image['url'];
-            $isVideo = (bool) preg_match('/\.(mp4|webm)(\?|$)/i', $preview);
-          ?>
+        <?php
+          $preview = trim((string) ($image['url'] ?? ''));
+          $available = images_url_available($preview);
+          $ph = admin_placeholder_src();
+          $previewSrc = $available ? admin_media_url($preview) : $ph;
+          $isVideo = $available && (bool) preg_match('/\.(mp4|webm)(\?|$)/i', $preview);
+        ?>
+        <div class="form-group">
+          <label>Preview</label>
           <?php if ($isVideo): ?>
-            <video class="admin-preview" src="<?= h($preview) ?>" controls muted playsinline style="max-width:100%;max-height:220px;"></video>
+            <video class="admin-preview" src="<?= h($previewSrc) ?>" controls muted playsinline style="max-width:100%;max-height:220px;"></video>
+          <?php elseif ($available): ?>
+            <img
+              class="admin-preview"
+              src="<?= h($previewSrc) ?>"
+              alt=""
+              referrerpolicy="no-referrer"
+              data-placeholder="<?= h($ph) ?>"
+              onerror="if(!this.dataset.ph){this.dataset.ph='1';this.src=this.dataset.placeholder;this.classList.add('is-placeholder');}"
+            >
           <?php else: ?>
-            <img class="admin-preview" src="<?= h($preview) ?>" alt="" referrerpolicy="no-referrer">
+            <span class="admin-preview admin-preview--robot" aria-hidden="true"><?= admin_robot_svg() ?></span>
           <?php endif; ?>
-        <?php endif; ?>
+        </div>
         <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
           <button type="submit" class="btn btn-primary">Salvar</button>
           <a href="index.php" class="btn btn-outline">Cancelar</a>

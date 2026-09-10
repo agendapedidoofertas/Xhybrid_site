@@ -41,7 +41,7 @@ Para `cliente.seudominio.com.br` **não** compartilhe o mesmo SQLite com vários
 **Modelo recomendado:**
 
 1. Uma cópia (ou deploy) do projeto por cliente **ou** código compartilhado + pastas privadas.
-2. Cada instância tem o próprio `data/atelier.sqlite` (só textos, flags, paths).
+2. Cada instância tem o próprio `data/site.sqlite` (só textos, flags, paths).
 3. Cada instância tem o próprio `assets/uploads/` (fotos/vídeos no disco).
 4. Apague a pasta do cliente para remover tudo — sem “peso” no banco da vitrine.
 

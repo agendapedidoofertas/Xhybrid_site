@@ -15,7 +15,7 @@ if (!is_dir($dir)) {
     mkdir($dir, 0755, true);
 }
 
-$dest = $dir . DIRECTORY_SEPARATOR . 'atelier-' . gmdate('Ymd-His') . '.sqlite';
+$dest = $dir . DIRECTORY_SEPARATOR . 'site-' . gmdate('Ymd-His') . '.sqlite';
 if (!copy($src, $dest)) {
     fwrite(STDERR, "Falha ao copiar backup.\n");
     exit(1);

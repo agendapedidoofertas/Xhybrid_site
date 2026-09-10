@@ -66,7 +66,7 @@ admin_header('Usuários', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Acesso</p>
         <h1 class="font-display">Usuários</h1>
-        <p>Só administradores gerenciam contas, senhas, marca, preset e aparência. Editores (donos do site) cuidam de textos, imagens, contato e serviços.</p>
+        <p>Só administradores gerenciam contas, marca, preset, aparência, plano e SMTP. Editores cuidam de textos, imagens (URL/Drive), canais de contato e serviços — e podem alterar a própria senha.</p>
       </header>
 
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>

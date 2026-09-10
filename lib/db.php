@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 function db_path(): string
 {
-    return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'atelier.sqlite';
+    $dir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR;
+    $path = $dir . 'site.sqlite';
+    $legacy = $dir . 'atelier.sqlite';
+    if (!is_file($path) && is_file($legacy)) {
+        @rename($legacy, $path);
+    }
+    return $path;
 }
 
 function sqlite_driver_loaded(): bool
@@ -190,6 +196,56 @@ function db_migrate(PDO $pdo): void
             updated_at TEXT NOT NULL
         )'
     );
+
+    db_migrate_image_slugs($pdo);
+}
+
+/** Renomeia slugs legados → nomes Xhybrid em bancos já existentes */
+function db_migrate_image_slugs(PDO $pdo): void
+{
+    $map = [
+        'casal' => 'about',
+        'amigurumi' => 'landing',
+        'manta' => 'corporate',
+        'sousplat' => 'shop',
+        'top' => 'maintenance',
+        'bolsa' => 'integrations',
+        'bebe' => 'branding',
+    ];
+
+    $select = $pdo->prepare('SELECT id, url, slug FROM images WHERE slug = :slug LIMIT 1');
+    $exists = $pdo->prepare('SELECT id FROM images WHERE slug = :slug LIMIT 1');
+    $update = $pdo->prepare(
+        'UPDATE images SET slug = :new_slug, url = :url, updated_at = :updated_at WHERE id = :id'
+    );
+    $updateSvc = $pdo->prepare(
+        'UPDATE services SET image_slug = :new_slug WHERE image_slug = :old_slug'
+    );
+    $now = gmdate('c');
+
+    foreach ($map as $old => $new) {
+        $select->execute([':slug' => $old]);
+        $row = $select->fetch();
+        if ($row) {
+            $exists->execute([':slug' => $new]);
+            if (!$exists->fetch()) {
+                $url = (string) ($row['url'] ?? '');
+                $url = str_replace(
+                    ['/' . $old . '.jpg', '\\' . $old . '.jpg', $old . '.jpg'],
+                    ['/' . $new . '.jpg', '\\' . $new . '.jpg', $new . '.jpg'],
+                    $url
+                );
+                $update->execute([
+                    ':new_slug' => $new,
+                    ':url' => $url,
+                    ':updated_at' => $now,
+                    ':id' => (int) $row['id'],
+                ]);
+            }
+        }
+
+        $updateSvc->execute([':new_slug' => $new, ':old_slug' => $old]);
+    }
 }
 
 function db_seed_images(PDO $pdo): void
@@ -204,13 +260,13 @@ function db_seed_images(PDO $pdo): void
         ['favicon.svg', 'Favicon Xhybrid', 'favicon', 0],
         ['assets/logo-xhybrid.svg', 'Logo Xhybrid', 'logo', 1],
         ['assets/hero.jpg', 'Hero — desenvolvimento', 'hero', 2],
-        ['assets/casal.jpg', 'Equipe Xhybrid', 'casal', 3],
-        ['assets/amigurumi.jpg', 'Landing Page', 'amigurumi', 4],
-        ['assets/manta.jpg', 'Site Corporativo', 'manta', 5],
-        ['assets/sousplat.jpg', 'Loja Online', 'sousplat', 6],
-        ['assets/top.jpg', 'Manutenção Contínua', 'top', 7],
-        ['assets/bolsa.jpg', 'Integrações', 'bolsa', 8],
-        ['assets/bebe.jpg', 'Identidade Web', 'bebe', 9],
+        ['assets/about.jpg', 'Equipe Xhybrid', 'about', 3],
+        ['assets/landing.jpg', 'Landing Page', 'landing', 4],
+        ['assets/corporate.jpg', 'Site Corporativo', 'corporate', 5],
+        ['assets/shop.jpg', 'Loja Online', 'shop', 6],
+        ['assets/maintenance.jpg', 'Manutenção Contínua', 'maintenance', 7],
+        ['assets/integrations.jpg', 'Integrações', 'integrations', 8],
+        ['assets/branding.jpg', 'Identidade Web', 'branding', 9],
     ];
 
     $stmt = $pdo->prepare(

@@ -32,6 +32,30 @@ function settings_definitions(): array
             'group' => 'contact', 'label' => 'Texto do card Instagram', 'max' => 80, 'type' => 'text',
             'default' => '@xhybrid — projetos e bastidores',
         ],
+        'facebook_url' => [
+            'group' => 'contact', 'label' => 'URL do Facebook', 'max' => 120, 'type' => 'url',
+            'default' => '',
+        ],
+        'facebook_label' => [
+            'group' => 'contact', 'label' => 'Texto do card Facebook', 'max' => 80, 'type' => 'text',
+            'default' => '',
+        ],
+        'tiktok_url' => [
+            'group' => 'contact', 'label' => 'URL do TikTok', 'max' => 120, 'type' => 'url',
+            'default' => '',
+        ],
+        'tiktok_label' => [
+            'group' => 'contact', 'label' => 'Texto do card TikTok', 'max' => 80, 'type' => 'text',
+            'default' => '',
+        ],
+        'address' => [
+            'group' => 'contact', 'label' => 'Endereço', 'max' => 160, 'type' => 'text',
+            'default' => '',
+        ],
+        'maps_url' => [
+            'group' => 'contact', 'label' => 'URL do Google Maps', 'max' => 220, 'type' => 'url',
+            'default' => '',
+        ],
         'contact_whatsapp_desc' => [
             'group' => 'contact', 'label' => 'Texto do card WhatsApp', 'max' => 80, 'type' => 'text',
             'default' => 'O jeito mais rápido de pedir um orçamento',
@@ -627,7 +651,7 @@ function settings_sanitize(string $key, string $value): string
         $value = filter_var($value, FILTER_SANITIZE_EMAIL) ?: '';
         $value = str_replace(['<', '>'], '', $value);
         if ($value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $value = (string) $def['default'];
+            $value = '';
         }
     } elseif ($type === 'url') {
         $value = str_replace(['<', '>', '"', "'"], '', $value);
@@ -635,7 +659,8 @@ function settings_sanitize(string $key, string $value): string
             $value = 'https://' . ltrim($value, '/');
         }
         if ($value !== '' && !filter_var($value, FILTER_VALIDATE_URL)) {
-            $value = (string) $def['default'];
+            // URL inválida: limpa em vez de forçar default (permite apagar Instagram/Facebook/etc.)
+            $value = '';
         }
     } elseif ($type === 'choice' || $type === 'icon') {
         $choices = $def['choices'] ?? [];
@@ -680,10 +705,78 @@ function settings_all(PDO $pdo): array
     return $out;
 }
 
+/**
+ * Settings seguros para a API pública (sem SMTP / segredos).
+ *
+ * @return array<string, string>
+ */
+function settings_public(PDO $pdo): array
+{
+    $all = settings_all($pdo);
+    foreach (array_keys($all) as $key) {
+        if (str_starts_with($key, 'smtp_')) {
+            unset($all[$key]);
+        }
+    }
+    return $all;
+}
+
 function settings_get(PDO $pdo, string $key): string
 {
     $all = settings_all($pdo);
     return $all[$key] ?? '';
+}
+
+/**
+ * Se a aba de textos da página ficou toda vazia, desliga a página no menu
+ * (feature_page_*). Se voltou a ter texto, religa (quando o plano permitir).
+ */
+function settings_sync_page_from_text_tab(PDO $pdo, string $tab): void
+{
+    $map = [
+        'galeria' => [
+            'feature' => 'feature_page_galeria',
+            'keys' => ['gallery_eyebrow', 'gallery_title', 'gallery_subtitle'],
+        ],
+        'sobre' => [
+            'feature' => 'feature_page_sobre',
+            'keys' => [
+                'about_eyebrow', 'about_title_1', 'about_title_2',
+                'about_p1', 'about_p2', 'about_p3',
+            ],
+        ],
+        'contato_page' => [
+            'feature' => 'feature_page_contato',
+            'keys' => ['contact_eyebrow', 'contact_title', 'contact_subtitle'],
+        ],
+    ];
+    if (!isset($map[$tab])) {
+        return;
+    }
+
+    $all = settings_all($pdo);
+    $any = false;
+    foreach ($map[$tab]['keys'] as $key) {
+        if (trim((string) ($all[$key] ?? '')) !== '') {
+            $any = true;
+            break;
+        }
+    }
+
+    $feature = $map[$tab]['feature'];
+    if (!$any) {
+        settings_save_many($pdo, [$feature => '0']);
+        return;
+    }
+
+    // Não religar se o plano Essencial (ou flag) proíbe a página
+    require_once __DIR__ . '/plans.php';
+    $plan = (string) ($all['site_plan'] ?? 'profissional');
+    $bundle = plan_bundle($plan);
+    if (isset($bundle[$feature]) && (string) $bundle[$feature] === '0' && $plan === 'essencial') {
+        return;
+    }
+    settings_save_many($pdo, [$feature => '1']);
 }
 
 function settings_save_many(PDO $pdo, array $input): void
@@ -699,10 +792,12 @@ function settings_save_many(PDO $pdo, array $input): void
         if (!array_key_exists($key, $input)) {
             continue;
         }
-        $value = settings_sanitize($key, (string) $input[$key]);
-        if ($value === '' && in_array($def['type'] ?? '', ['whatsapp', 'email', 'url', 'short'], true)) {
-            $value = (string) $def['default'];
+        // Não apagar senha SMTP ao salvar formulário com campo vazio
+        if ($key === 'smtp_pass' && trim((string) $input[$key]) === '') {
+            continue;
         }
+        $value = settings_sanitize($key, (string) $input[$key]);
+        // Campos opcionais (WhatsApp, e-mail, redes) podem ficar em branco — o front esconde o bloco
         $stmt->execute([
             ':setting_key' => $key,
             ':value' => $value,

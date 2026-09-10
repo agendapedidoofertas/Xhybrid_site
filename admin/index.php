@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/lib/auth.php';
 require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/images.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/services.php';
 
@@ -17,6 +18,7 @@ if (user_count() === 0) {
 }
 
 $user = require_admin();
+$isAdmin = user_is_admin($user);
 $flash = '';
 
 function next_position(PDO $pdo): int
@@ -62,16 +64,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int) ($_POST['id'] ?? 0);
     $pdo = db();
 
-    if ($action === 'delete' && $id > 0) {
+    if (($action === 'delete' || $action === 'toggle') && !$isAdmin) {
+        $flash = 'Apenas o administrador pode ativar ou excluir imagens.';
+    } elseif ($action === 'delete' && $id > 0) {
         $stmt = $pdo->prepare('DELETE FROM images WHERE id = :id');
         $stmt->execute([':id' => $id]);
         $flash = 'Imagem excluída.';
     } elseif ($action === 'toggle' && $id > 0) {
-        $stmt = $pdo->prepare(
-            'UPDATE images SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END, updated_at = :updated_at WHERE id = :id'
-        );
-        $stmt->execute([':updated_at' => gmdate('c'), ':id' => $id]);
-        $flash = 'Status atualizado.';
+        $cur = $pdo->prepare('SELECT id, url, active FROM images WHERE id = :id');
+        $cur->execute([':id' => $id]);
+        $row = $cur->fetch();
+        if ($row && (int) ($row['active'] ?? 0) === 0 && !images_url_available((string) ($row['url'] ?? ''))) {
+            $flash = 'Não dá para ativar: URL vazia ou arquivo local ausente. Envie/cole uma mídia válida.';
+        } else {
+            $stmt = $pdo->prepare(
+                'UPDATE images SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END, updated_at = :updated_at WHERE id = :id'
+            );
+            $stmt->execute([':updated_at' => gmdate('c'), ':id' => $id]);
+            $flash = 'Status atualizado.';
+        }
     } elseif (($action === 'up' || $action === 'down') && $id > 0) {
         swap_position($pdo, $id, $action);
         $flash = 'Ordem atualizada.';
@@ -83,6 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $ok = isset($_GET['ok']) ? (string) $_GET['ok'] : '';
 $pdo = db();
+$autoOff = images_deactivate_unavailable($pdo);
+if ($autoOff > 0 && $ok === '') {
+    $ok = $autoOff === 1
+        ? '1 imagem sem arquivo/URL foi desativada automaticamente.'
+        : "{$autoOff} imagens sem arquivo/URL foram desativadas automaticamente.";
+}
 $images = $pdo->query('SELECT * FROM images ORDER BY position ASC, id ASC')->fetchAll();
 $settings = settings_all($pdo);
 $servicesCount = (int) $pdo->query('SELECT COUNT(*) FROM services WHERE active = 1')->fetchColumn();
@@ -129,7 +146,7 @@ admin_header('Painel', $user);
         <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
           <p class="eyebrow">Catálogo</p>
           <h1 class="font-display">Imagens</h1>
-          <p>Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code> + vídeos Signature. Editores usam link do Google Drive; upload de arquivo só para admin.</p>
+          <p>Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>about</code> + vídeos Signature. Editores usam link do Google Drive; upload de arquivo só para admin.</p>
         </header>
         <a href="image_edit.php" class="btn btn-primary">Adicionar imagem</a>
       </div>
@@ -154,25 +171,36 @@ admin_header('Painel', $user);
           <?php foreach ($images as $img): ?>
             <tr>
               <td>
-                <?php if ($img['url'] !== ''): ?>
-                  <img src="<?= h($img['url']) ?>" alt="" referrerpolicy="no-referrer" onerror="this.style.opacity=0.3">
-                <?php endif; ?>
+                <?php
+                  $thumb = trim((string) ($img['url'] ?? ''));
+                  $available = images_url_available($thumb);
+                  $isActive = (int) ($img['active'] ?? 0) === 1;
+                  // Com URL/arquivo válido, preview real mesmo se "Não" (inativa)
+                  echo admin_thumb_html($thumb, $available);
+                ?>
               </td>
               <td>
                 <strong><?= h($img['title']) ?></strong><br>
                 <span class="text-muted"><?= h($img['slug']) ?></span>
+                <?php if (!$available): ?>
+                  <br><span class="text-muted" style="color:var(--destructive, #f87171);font-size:0.8rem;">Sem arquivo/URL — robô no site</span>
+                <?php elseif (!$isActive): ?>
+                  <br><span class="text-muted" style="font-size:0.8rem;">Inativa no painel — URL válida ainda aparece no site</span>
+                <?php endif; ?>
               </td>
               <td><?= (int) $img['position'] ?></td>
               <td><?= ((int) $img['active'] === 1) ? 'Sim' : 'Não' ?></td>
               <td>
                 <div class="admin-row-actions">
                   <a class="btn btn-outline btn-sm" href="image_edit.php?id=<?= (int) $img['id'] ?>">Editar</a>
+                  <?php if ($isAdmin): ?>
                   <form method="post">
                     <?= csrf_field() ?>
                     <input type="hidden" name="id" value="<?= (int) $img['id'] ?>">
                     <input type="hidden" name="action" value="toggle">
                     <button type="submit" class="btn btn-outline btn-sm"><?= ((int) $img['active'] === 1) ? 'Desativar' : 'Ativar' ?></button>
                   </form>
+                  <?php endif; ?>
                   <form method="post">
                     <?= csrf_field() ?>
                     <input type="hidden" name="id" value="<?= (int) $img['id'] ?>">
@@ -185,12 +213,14 @@ admin_header('Painel', $user);
                     <input type="hidden" name="action" value="down">
                     <button type="submit" class="btn btn-outline btn-sm" title="Descer">↓</button>
                   </form>
+                  <?php if ($isAdmin): ?>
                   <form method="post" onsubmit="return confirm('Excluir esta imagem?');">
                     <?= csrf_field() ?>
                     <input type="hidden" name="id" value="<?= (int) $img['id'] ?>">
                     <input type="hidden" name="action" value="delete">
                     <button type="submit" class="btn btn-outline btn-sm">Excluir</button>
                   </form>
+                  <?php endif; ?>
                 </div>
               </td>
             </tr>

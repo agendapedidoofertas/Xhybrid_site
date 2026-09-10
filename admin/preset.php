@@ -77,7 +77,7 @@ admin_header('Preset', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Admin</p>
         <h1 class="font-display">Presets</h1>
-        <p>Aplica look, textos, seções, serviços e imagens do ramo. Xhybrid é a vitrine; os demais aceleram sites de cliente.</p>
+        <p>Aplica look, textos, seções, serviços e imagens do ramo. Instagram de agência é limpo nos nichos — ajuste WhatsApp, e-mail e Instagram depois. Xhybrid é a vitrine; os demais aceleram sites de cliente.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>

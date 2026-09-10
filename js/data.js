@@ -9,6 +9,12 @@ const SITE_DEFAULTS = {
   email: "contato@xhybrid.com.br",
   instagram_url: "https://instagram.com/xhybrid",
   instagram_label: "@xhybrid — projetos e bastidores",
+  facebook_url: "",
+  facebook_label: "",
+  tiktok_url: "",
+  tiktok_label: "",
+  address: "",
+  maps_url: "",
   contact_whatsapp_desc: "O jeito mais rápido de pedir um orçamento",
   contact_response_title: "Tempo de resposta",
   contact_response_text: "Respondemos em até 1 dia útil",
@@ -103,12 +109,6 @@ const SITE_DEFAULTS = {
   seo_contato_description: "",
   analytics_ga4_id: "",
   analytics_meta_pixel_id: "",
-  smtp_host: "",
-  smtp_port: "587",
-  smtp_user: "",
-  smtp_pass: "",
-  smtp_from: "",
-  smtp_to: "",
   section_hero: "1",
   section_features: "1",
   section_works: "1",
@@ -150,8 +150,12 @@ const SITE_DEFAULTS = {
 const SITE = { ...SITE_DEFAULTS };
 
 function site(key) {
-  const v = SITE[key];
-  return v == null || v === "" ? SITE_DEFAULTS[key] || "" : v;
+  // Respeita string vazia salva no admin (não repor default — ex.: Instagram apagado)
+  if (Object.prototype.hasOwnProperty.call(SITE, key)) {
+    const v = SITE[key];
+    return v == null ? "" : String(v);
+  }
+  return SITE_DEFAULTS[key] || "";
 }
 
 function applySiteSettings(data) {
@@ -198,17 +202,47 @@ function syncContactGlobals() {
   WHATSAPP_URL = whatsappUrl();
 }
 
+function pageCopyIsEmpty(page) {
+  const keys = {
+    sobre: [
+      "about_eyebrow",
+      "about_title_1",
+      "about_title_2",
+      "about_p1",
+      "about_p2",
+      "about_p3",
+    ],
+    galeria: ["gallery_eyebrow", "gallery_title", "gallery_subtitle"],
+    contato: ["contact_eyebrow", "contact_title", "contact_subtitle"],
+  }[page];
+  if (!keys) return false;
+  return keys.every((k) => !site(k).trim());
+}
+
+function pageIsEnabled(page) {
+  const flag = {
+    sobre: "feature_page_sobre",
+    galeria: "feature_page_galeria",
+    contato: "feature_page_contato",
+  }[page];
+  if (!flag) return true;
+  if (site(flag) === "0") return false;
+  // Textos todos vazios → esconde aba mesmo se a flag ainda estiver ligada
+  if (pageCopyIsEmpty(page)) return false;
+  return true;
+}
+
 function getNavLinks() {
   const links = [
     { href: "index.html", label: site("nav_index"), page: "index" },
   ];
-  if (site("feature_page_sobre") !== "0") {
+  if (pageIsEnabled("sobre")) {
     links.push({ href: "sobre.html", label: site("nav_sobre"), page: "sobre" });
   }
-  if (site("feature_page_galeria") !== "0") {
+  if (pageIsEnabled("galeria")) {
     links.push({ href: "galeria.html", label: site("nav_galeria"), page: "galeria" });
   }
-  if (site("feature_page_contato") !== "0") {
+  if (pageIsEnabled("contato")) {
     links.push({ href: "contato.html", label: site("nav_contato"), page: "contato" });
   }
   return links;
@@ -240,7 +274,7 @@ const products = [
     nome: "Landing Page",
     descricao:
       "Página de captura rápida, objetiva e otimizada para conversão de leads.",
-    imageKey: "amigurumi",
+    imageKey: "landing",
     categoria: "Criação",
   },
   {
@@ -248,7 +282,7 @@ const products = [
     nome: "Site Corporativo",
     descricao:
       "Site institucional moderno para apresentar a empresa, serviços e contato.",
-    imageKey: "manta",
+    imageKey: "corporate",
     categoria: "Criação",
   },
   {
@@ -256,7 +290,7 @@ const products = [
     nome: "Loja Online",
     descricao:
       "Estrutura digital para catálogo, pedidos e presença comercial na web.",
-    imageKey: "sousplat",
+    imageKey: "shop",
     categoria: "E-commerce",
   },
   {
@@ -264,7 +298,7 @@ const products = [
     nome: "Manutenção Contínua",
     descricao:
       "Atualizações, backups, correções e monitoramento para o site permanecer estável.",
-    imageKey: "top",
+    imageKey: "maintenance",
     categoria: "Manutenção",
   },
   {
@@ -272,7 +306,7 @@ const products = [
     nome: "Integrações",
     descricao:
       "WhatsApp, formulários, CRM e automações conectadas ao fluxo do negócio.",
-    imageKey: "bolsa",
+    imageKey: "integrations",
     categoria: "Tecnologia",
   },
   {
@@ -280,7 +314,7 @@ const products = [
     nome: "Identidade Web",
     descricao:
       "Visual, tipografia e layout alinhados à marca para uma presença profissional.",
-    imageKey: "bebe",
+    imageKey: "branding",
     categoria: "Design",
   },
 ];
@@ -874,8 +908,8 @@ let galleryPhotos = [];
 
 function bindProductImages() {
   products.forEach((p) => {
-    // Sem fallback: se o slug não veio da API, a imagem está inativa.
-    p.imagem = IMAGES[p.imageKey] || "";
+    // Sem slug na API: usa robô placeholder em vez de card sem imagem
+    p.imagem = IMAGES[p.imageKey] || IMAGE_PLACEHOLDER;
   });
 }
 
@@ -921,8 +955,8 @@ function rebuildGalleryPhotos(apiRows, apiOk) {
       .filter((foto) => Boolean(foto.src));
 
     const maxExtra = Math.max(0, parseInt(site("limit_gallery") || "12", 10) || 12);
-    const core = galleryPhotos.filter((f) => f._slug === "hero" || f._slug === "casal");
-    const extras = galleryPhotos.filter((f) => f._slug !== "hero" && f._slug !== "casal").slice(0, maxExtra);
+    const core = galleryPhotos.filter((f) => f._slug === "hero" || f._slug === "about");
+    const extras = galleryPhotos.filter((f) => f._slug !== "hero" && f._slug !== "about").slice(0, maxExtra);
     galleryPhotos = [...core, ...extras].map(({ _slug, ...rest }) => rest);
     return;
   }
@@ -948,9 +982,9 @@ function rebuildGalleryPhotos(apiRows, apiOk) {
           precoPromo: "",
         }]
       : []),
-    ...(IMAGES.casal
+    ...(IMAGES.about
       ? [{
-          src: IMAGES.casal,
+          src: IMAGES.about,
           alt: "Equipe colaborando em projeto digital",
           legenda: "Xhybrid em ação",
           descricao: "",

@@ -11,12 +11,12 @@ function services_seed(PDO $pdo): void
 
     $now = gmdate('c');
     $rows = [
-        ['Landing Page', 'Página focada em conversão para campanhas e lançamentos.', 'amigurumi', 'Sites', 0],
-        ['Site Corporativo', 'Presença institucional clara, rápida e profissional.', 'manta', 'Sites', 1],
-        ['Loja Online', 'Vitrine digital com catálogo e fluxo de contato.', 'sousplat', 'E-commerce', 2],
-        ['Manutenção', 'Atualizações, backups e performance contínua.', 'top', 'Suporte', 3],
-        ['Integrações', 'WhatsApp, formulários e automações no dia a dia.', 'bolsa', 'Tecnologia', 4],
-        ['Identidade Web', 'Visual alinhado à marca em todas as páginas.', 'bebe', 'Design', 5],
+        ['Landing Page', 'Página focada em conversão para campanhas e lançamentos.', 'landing', 'Sites', 0],
+        ['Site Corporativo', 'Presença institucional clara, rápida e profissional.', 'corporate', 'Sites', 1],
+        ['Loja Online', 'Vitrine digital com catálogo e fluxo de contato.', 'shop', 'E-commerce', 2],
+        ['Manutenção', 'Atualizações, backups e performance contínua.', 'maintenance', 'Suporte', 3],
+        ['Integrações', 'WhatsApp, formulários e automações no dia a dia.', 'integrations', 'Tecnologia', 4],
+        ['Identidade Web', 'Visual alinhado à marca em todas as páginas.', 'branding', 'Design', 5],
     ];
 
     $stmt = $pdo->prepare(

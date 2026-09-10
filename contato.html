@@ -25,8 +25,8 @@
     <main>
       <section class="page-cover">
         <div class="page-cover__media" aria-hidden="true">
-          <video data-video="video-contato" muted loop playsinline preload="metadata" poster="assets/hero.jpg"></video>
-          <img data-img="hero" src="assets/hero.jpg" alt="" width="1408" height="1024" referrerpolicy="no-referrer">
+          <video data-video="video-contato" muted loop playsinline preload="metadata"></video>
+          <img data-img="hero" alt="" width="1408" height="1024" referrerpolicy="no-referrer">
         </div>
         <div class="container page-cover__content">
           <header class="page-header" style="margin:0;text-align:left;max-width:none;">
@@ -69,17 +69,50 @@
                 </span>
                 <span>
                   <span class="channel-card__title">Instagram</span>
-                  <span class="channel-card__desc" data-site="instagram_label">@ae.atelier — bastidores e novidades</span>
+                  <span class="channel-card__desc" data-site="instagram_label">@xhybrid — projetos e bastidores</span>
                 </span>
               </a>
             </li>
-            <li class="channel-card channel-card--static">
+            <li>
+              <a href="#" class="channel-card" id="contact-facebook" data-site-href="facebook" target="_blank" rel="noreferrer">
+                <span class="channel-card__icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </span>
+                <span>
+                  <span class="channel-card__title">Facebook</span>
+                  <span class="channel-card__desc" data-site="facebook_label">Facebook</span>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="channel-card" id="contact-tiktok" data-site-href="tiktok" target="_blank" rel="noreferrer">
+                <span class="channel-card__icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                </span>
+                <span>
+                  <span class="channel-card__title">TikTok</span>
+                  <span class="channel-card__desc" data-site="tiktok_label">TikTok</span>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="channel-card" id="contact-address" data-site-href="maps" target="_blank" rel="noreferrer">
+                <span class="channel-card__icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <span>
+                  <span class="channel-card__title">Endereço</span>
+                  <span class="channel-card__desc" data-site="address">Endereço do negócio</span>
+                </span>
+              </a>
+            </li>
+            <li id="contact-response" class="channel-card channel-card--static">
               <span class="channel-card__icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </span>
               <span>
                 <span class="channel-card__title" data-site="contact_response_title">Tempo de resposta</span>
-                <span class="channel-card__desc" data-site="contact_response_text">Respondemos em até 1 dia útil 💛</span>
+                <span class="channel-card__desc" data-site="contact_response_text">Respondemos em até 1 dia útil</span>
               </span>
             </li>
           </ul>
@@ -95,7 +128,7 @@
 
             <div class="form-group">
               <label for="mensagem">Mensagem</label>
-              <textarea id="mensagem" name="mensagem" required rows="5" class="form-input" placeholder="Conte o que você precisa: site novo, manutenção, integração..."></textarea>
+              <textarea id="mensagem" name="mensagem" required rows="5" class="form-input" placeholder="Conte o que você precisa…"></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">

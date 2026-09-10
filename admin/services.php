@@ -104,7 +104,7 @@ admin_header('Serviços', $user);
           </div>
           <div class="form-group">
             <label for="image_slug">Slug da imagem</label>
-            <input id="image_slug" name="image_slug" class="form-input" maxlength="40" placeholder="amigurumi" value="<?= h((string) ($edit['image_slug'] ?? '')) ?>">
+            <input id="image_slug" name="image_slug" class="form-input" maxlength="40" placeholder="landing" value="<?= h((string) ($edit['image_slug'] ?? '')) ?>">
           </div>
           <div class="form-group">
             <label for="position">Ordem</label>

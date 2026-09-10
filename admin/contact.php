@@ -10,12 +10,13 @@ require_once dirname(__DIR__) . '/lib/settings.php';
 
 auth_boot_session();
 $user = require_admin();
+$isAdmin = user_is_admin($user);
 
 $flash = '';
 $error = '';
 $defs = settings_definitions();
 $values = settings_all(db());
-$groups = ['contact', 'smtp'];
+$groups = $isAdmin ? ['contact', 'smtp'] : ['contact'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (isset($_GET['ok'])) {
-    $flash = 'Contato e SMTP salvos.';
+    $flash = $isAdmin ? 'Contato e SMTP salvos.' : 'Contato salvo.';
     $values = settings_all(db());
 }
 
@@ -48,7 +49,9 @@ admin_header('Contato', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Site</p>
         <h1 class="font-display">Contato</h1>
-        <p>Canais do site e SMTP para o formulário enviar e-mail de verdade (sem gravar mensagens no SQLite).</p>
+        <p><?= $isAdmin
+            ? 'Canais do site (WhatsApp, e-mail, redes, endereço) e SMTP. Campo vazio esconde o bloco no site.'
+            : 'Canais do site. Campo vazio (ex.: Instagram sem URL) esconde o bloco no site. SMTP só o administrador configura.' ?></p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -64,13 +67,14 @@ admin_header('Contato', $user);
             <?php if (($def['type'] ?? '') === 'text' && (int) $def['max'] > 80): ?>
               <textarea id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" rows="2" maxlength="<?= (int) $def['max'] ?>"><?= h($values[$key] ?? '') ?></textarea>
             <?php else: ?>
-              <input id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" maxlength="<?= (int) $def['max'] ?>" value="<?= h($values[$key] ?? '') ?>"<?= $key === 'smtp_pass' || str_contains($key, 'pass') ? '' : '' ?>>
+              <input id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" maxlength="<?= (int) $def['max'] ?>" value="<?= h($values[$key] ?? '') ?>">
             <?php endif; ?>
           </div>
         <?php endforeach; ?>
 
+        <?php if ($isAdmin): ?>
         <h2 class="admin-appearance__label" style="margin-top:1.5rem;">SMTP (formulário)</h2>
-        <p class="text-muted" style="margin:0 0 0.75rem;font-size:0.875rem;">Preencha host, usuário e senha. Destino vazio usa o e-mail do site. A senha fica no SQLite — use conta SMTP dedicada.</p>
+        <p class="text-muted" style="margin:0 0 0.75rem;font-size:0.875rem;">Preencha host, usuário e senha. Destino vazio usa o e-mail do site. Deixe a senha em branco para manter a atual. A senha fica no SQLite — use conta SMTP dedicada.</p>
         <?php foreach ($defs as $key => $def): ?>
           <?php if (($def['group'] ?? '') !== 'smtp') continue; ?>
           <div class="form-group">
@@ -80,11 +84,12 @@ admin_header('Contato', $user);
               name="<?= h($key) ?>"
               class="form-input"
               maxlength="<?= (int) $def['max'] ?>"
-              value="<?= h($values[$key] ?? '') ?>"
-              <?= $key === 'smtp_pass' ? 'type="password" autocomplete="new-password"' : 'type="text"' ?>
+              value="<?= $key === 'smtp_pass' ? '' : h($values[$key] ?? '') ?>"
+              <?= $key === 'smtp_pass' ? 'type="password" autocomplete="new-password" placeholder="•••••••• (deixe vazio para não alterar)"' : 'type="text"' ?>
             >
           </div>
         <?php endforeach; ?>
+        <?php endif; ?>
 
         <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Salvar contato</button>
       </form>

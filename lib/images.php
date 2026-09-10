@@ -74,6 +74,44 @@ function images_upsert_by_slug(PDO $pdo, array $rows): void
 }
 
 /**
+ * Desativa imagens de galeria que não estão no pacote do preset
+ * (mantém logo, favicon e vídeos).
+ *
+ * @param list<string> $keepSlugs
+ */
+function images_deactivate_unlisted(PDO $pdo, array $keepSlugs): void
+{
+    $keep = [];
+    foreach ($keepSlugs as $slug) {
+        $slug = trim((string) $slug);
+        if ($slug !== '') {
+            $keep[$slug] = true;
+        }
+    }
+    $keep['favicon'] = true;
+    $keep['logo'] = true;
+
+    $now = gmdate('c');
+    $rows = $pdo->query('SELECT id, slug, active FROM images')->fetchAll();
+    $upd = $pdo->prepare(
+        'UPDATE images SET active = 0, updated_at = :updated_at WHERE id = :id'
+    );
+    foreach ($rows as $row) {
+        $slug = (string) ($row['slug'] ?? '');
+        if ($slug === '' || isset($keep[$slug]) || str_starts_with($slug, 'video-')) {
+            continue;
+        }
+        if ((int) ($row['active'] ?? 0) !== 1) {
+            continue;
+        }
+        $upd->execute([
+            ':updated_at' => $now,
+            ':id' => (int) $row['id'],
+        ]);
+    }
+}
+
+/**
  * Monta lista de imagens de um pacote de preset em assets/presets/{id}/.
  *
  * @param array<string, array{title?: string, description?: string, position?: int, file?: string}> $map slug => meta
@@ -97,4 +135,95 @@ function preset_image_rows(string $presetId, array $map): array
         $i++;
     }
     return $out;
+}
+
+/** Raiz do projeto (pasta com assets/, data/, etc.). */
+function images_project_root(): string
+{
+    return dirname(__DIR__);
+}
+
+/**
+ * Resolve path local de uma URL relativa do site (sem path traversal).
+ * Retorna null se for URL remota/data ou vazia.
+ */
+function images_local_fs_path(string $url): ?string
+{
+    $url = trim(str_replace('\\', '/', $url));
+    if ($url === '' || preg_match('#^(https?:)?//#i', $url) || str_starts_with($url, 'data:')) {
+        return null;
+    }
+
+    $parts = [];
+    foreach (explode('/', ltrim($url, '/')) as $part) {
+        if ($part === '' || $part === '.') {
+            continue;
+        }
+        if ($part === '..') {
+            array_pop($parts);
+            continue;
+        }
+        $parts[] = $part;
+    }
+    if ($parts === []) {
+        return null;
+    }
+
+    return images_project_root() . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts);
+}
+
+/**
+ * True se a mídia pode aparecer no site:
+ * - URL http(s)/data (Drive etc.)
+ * - path local com arquivo existente no disco
+ */
+function images_url_available(string $url): bool
+{
+    $url = trim($url);
+    if ($url === '') {
+        return false;
+    }
+    if (preg_match('#^(https?:)?//#i', $url) || str_starts_with($url, 'data:')) {
+        return true;
+    }
+    $path = images_local_fs_path($url);
+    return $path !== null && is_file($path);
+}
+
+/**
+ * Desativa automaticamente imagens ativas sem URL ou sem arquivo local.
+ * URLs remotas (Drive) permanecem ativas.
+ *
+ * @return int quantidade desativada nesta chamada
+ */
+function images_deactivate_unavailable(PDO $pdo): int
+{
+    static $ran = false;
+    if ($ran) {
+        return 0;
+    }
+    $ran = true;
+
+    $rows = $pdo->query('SELECT id, url, active FROM images WHERE active = 1')->fetchAll();
+    if ($rows === []) {
+        return 0;
+    }
+
+    $upd = $pdo->prepare(
+        'UPDATE images SET active = 0, updated_at = :updated_at WHERE id = :id'
+    );
+    $now = gmdate('c');
+    $count = 0;
+    foreach ($rows as $row) {
+        if (images_url_available((string) ($row['url'] ?? ''))) {
+            continue;
+        }
+        $upd->execute([
+            ':updated_at' => $now,
+            ':id' => (int) $row['id'],
+        ]);
+        $count++;
+    }
+
+    return $count;
 }

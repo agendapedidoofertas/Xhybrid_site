@@ -16,13 +16,13 @@ function preset_media_pack(string $id, array $titles): array
 {
     $order = [
         'hero' => 2,
-        'casal' => 3,
-        'amigurumi' => 4,
-        'manta' => 5,
-        'sousplat' => 6,
-        'top' => 7,
-        'bolsa' => 8,
-        'bebe' => 9,
+        'about' => 3,
+        'landing' => 4,
+        'corporate' => 5,
+        'shop' => 6,
+        'maintenance' => 7,
+        'integrations' => 8,
+        'branding' => 9,
     ];
     $map = [];
     foreach ($titles as $slug => $title) {
@@ -66,6 +66,12 @@ function preset_xhybrid(): array
             'email' => 'contato@xhybrid.com.br',
             'instagram_url' => 'https://instagram.com/xhybrid',
             'instagram_label' => '@xhybrid — projetos e bastidores',
+            'facebook_url' => '',
+            'facebook_label' => '',
+            'tiktok_url' => '',
+            'tiktok_label' => '',
+            'address' => '',
+            'maps_url' => '',
             'nav_index' => 'Início',
             'nav_sobre' => 'Sobre',
             'nav_galeria' => 'Projetos',
@@ -150,39 +156,39 @@ function preset_xhybrid(): array
             [
                 'title' => 'Landing Page',
                 'description' => 'Página de captura rápida, objetiva e otimizada para conversão.',
-                'image_slug' => 'amigurumi',
+                'image_slug' => 'landing',
                 'category' => 'Criação',
                 'active' => 1,
             ],
             [
                 'title' => 'Site Corporativo',
                 'description' => 'Site institucional moderno para apresentar empresa, serviços e contato.',
-                'image_slug' => 'manta',
+                'image_slug' => 'corporate',
                 'category' => 'Criação',
                 'active' => 1,
             ],
             [
                 'title' => 'Manutenção contínua',
                 'description' => 'Atualizações, backups, performance e suporte para o site ficar no ar.',
-                'image_slug' => 'sousplat',
+                'image_slug' => 'shop',
                 'category' => 'Manutenção',
                 'active' => 1,
             ],
             [
                 'title' => 'Integrações',
                 'description' => 'WhatsApp, formulários, CRM e automações alinhadas ao seu fluxo.',
-                'image_slug' => 'top',
+                'image_slug' => 'maintenance',
                 'category' => 'Tecnologia',
                 'active' => 1,
             ],
         ],
         'images' => preset_media_pack('xhybrid', [
             'hero' => 'Hero — desenvolvimento',
-            'casal' => 'Equipe Xhybrid',
-            'amigurumi' => 'Landing Page',
-            'manta' => 'Site Corporativo',
-            'sousplat' => 'Manutenção Contínua',
-            'top' => 'Integrações',
+            'about' => 'Equipe Xhybrid',
+            'landing' => 'Landing Page',
+            'corporate' => 'Site Corporativo',
+            'shop' => 'Manutenção Contínua',
+            'maintenance' => 'Integrações',
         ]),
     ];
 }
@@ -296,55 +302,55 @@ function preset_eletricista(): array
             [
                 'title' => 'Instalação residencial',
                 'description' => 'Tomadas, iluminação, chuveiro e padrões com segurança.',
-                'image_slug' => 'amigurumi',
+                'image_slug' => 'landing',
                 'category' => 'Residencial',
                 'active' => 1,
             ],
             [
                 'title' => 'Quadro elétrico',
                 'description' => 'Montagem, troca de disjuntores e organização do quadro.',
-                'image_slug' => 'manta',
+                'image_slug' => 'corporate',
                 'category' => 'Segurança',
                 'active' => 1,
             ],
             [
                 'title' => 'Manutenção predial',
                 'description' => 'Revisão e correções para condomínios e comércios.',
-                'image_slug' => 'sousplat',
+                'image_slug' => 'shop',
                 'category' => 'Predial',
                 'active' => 1,
             ],
             [
                 'title' => 'Emergência',
                 'description' => 'Falta de energia, curto-circuito e riscos elétricos.',
-                'image_slug' => 'top',
+                'image_slug' => 'maintenance',
                 'category' => 'Urgência',
                 'active' => 1,
             ],
             [
                 'title' => 'Iluminação LED',
                 'description' => 'Projetos e troca para economia e melhor luz.',
-                'image_slug' => 'bolsa',
+                'image_slug' => 'integrations',
                 'category' => 'Iluminação',
                 'active' => 1,
             ],
             [
                 'title' => 'Padrão / entrada',
                 'description' => 'Adequação de padrão e entrada de energia.',
-                'image_slug' => 'bebe',
+                'image_slug' => 'branding',
                 'category' => 'Residencial',
                 'active' => 1,
             ],
         ],
         'images' => preset_media_pack('eletricista', [
             'hero' => 'Hero — serviços elétricos',
-            'casal' => 'Instalação profissional',
-            'amigurumi' => 'Quadro e medições',
-            'manta' => 'Tomadas e pontos',
-            'sousplat' => 'Iluminação LED',
-            'top' => 'Padrão e entrada',
-            'bolsa' => 'Emergência',
-            'bebe' => 'Adequação de padrão',
+            'about' => 'Instalação profissional',
+            'landing' => 'Quadro e medições',
+            'corporate' => 'Tomadas e pontos',
+            'shop' => 'Iluminação LED',
+            'maintenance' => 'Padrão e entrada',
+            'integrations' => 'Emergência',
+            'branding' => 'Adequação de padrão',
         ]),
     ];
 }
@@ -369,6 +375,14 @@ function preset_niche_base(array $over): array
         'nav_contato' => 'Contato',
         'footer_link_sobre' => 'Quem somos',
         'fab_label' => 'Fale conosco',
+        'instagram_url' => '',
+        'instagram_label' => '',
+        'facebook_url' => '',
+        'facebook_label' => '',
+        'tiktok_url' => '',
+        'tiktok_label' => '',
+        'address' => '',
+        'maps_url' => '',
         'home_btn_gallery' => 'Ver serviços',
         'home_btn_quote' => 'WhatsApp',
         'home_destaques_link' => 'Ver mais',
@@ -461,19 +475,19 @@ function preset_clinica(): array
         'faq_4_q' => 'Posso remarcar?',
         'faq_4_a' => 'Sim — avise com antecedência pelo mesmo canal.',
         '_services' => [
-            ['title' => 'Consulta clínica', 'description' => 'Avaliação e orientação personalizada.', 'image_slug' => 'amigurumi', 'category' => 'Consultas', 'active' => 1],
-            ['title' => 'Retorno', 'description' => 'Acompanhamento de exames e evolução.', 'image_slug' => 'manta', 'category' => 'Consultas', 'active' => 1],
-            ['title' => 'Check-up', 'description' => 'Rotina preventiva com plano de cuidados.', 'image_slug' => 'sousplat', 'category' => 'Prevenção', 'active' => 1],
-            ['title' => 'Teleorientação', 'description' => 'Dúvidas rápidas quando disponível.', 'image_slug' => 'top', 'category' => 'Online', 'active' => 1],
+            ['title' => 'Consulta clínica', 'description' => 'Avaliação e orientação personalizada.', 'image_slug' => 'landing', 'category' => 'Consultas', 'active' => 1],
+            ['title' => 'Retorno', 'description' => 'Acompanhamento de exames e evolução.', 'image_slug' => 'corporate', 'category' => 'Consultas', 'active' => 1],
+            ['title' => 'Check-up', 'description' => 'Rotina preventiva com plano de cuidados.', 'image_slug' => 'shop', 'category' => 'Prevenção', 'active' => 1],
+            ['title' => 'Teleorientação', 'description' => 'Dúvidas rápidas quando disponível.', 'image_slug' => 'maintenance', 'category' => 'Online', 'active' => 1],
         ],
     ]);
     $pack['images'] = preset_media_pack('clinica', [
         'hero' => 'Recepção da clínica',
-        'casal' => 'Equipe de cuidado',
-        'amigurumi' => 'Consultório',
-        'manta' => 'Avaliação clínica',
-        'sousplat' => 'Check-up',
-        'top' => 'Teleorientação',
+        'about' => 'Equipe de cuidado',
+        'landing' => 'Consultório',
+        'corporate' => 'Avaliação clínica',
+        'shop' => 'Check-up',
+        'maintenance' => 'Teleorientação',
     ]);
     return $pack;
 }
@@ -561,19 +575,19 @@ function preset_restaurante(): array
         'faq_4_q' => 'Fazem delivery?',
         'faq_4_a' => 'Sim em bairros próximos; confirme no WhatsApp.',
         '_services' => [
-            ['title' => 'Almoço', 'description' => 'Pratos do dia e clássicos da casa.', 'image_slug' => 'amigurumi', 'category' => 'Salão', 'active' => 1],
-            ['title' => 'Jantar', 'description' => 'Menu completo com entradas e sobremesas.', 'image_slug' => 'manta', 'category' => 'Salão', 'active' => 1],
-            ['title' => 'Eventos', 'description' => 'Mesas longas e menus sob consulta.', 'image_slug' => 'sousplat', 'category' => 'Eventos', 'active' => 1],
-            ['title' => 'Delivery', 'description' => 'Seleção para entrega na região.', 'image_slug' => 'top', 'category' => 'Delivery', 'active' => 1],
+            ['title' => 'Almoço', 'description' => 'Pratos do dia e clássicos da casa.', 'image_slug' => 'landing', 'category' => 'Salão', 'active' => 1],
+            ['title' => 'Jantar', 'description' => 'Menu completo com entradas e sobremesas.', 'image_slug' => 'corporate', 'category' => 'Salão', 'active' => 1],
+            ['title' => 'Eventos', 'description' => 'Mesas longas e menus sob consulta.', 'image_slug' => 'shop', 'category' => 'Eventos', 'active' => 1],
+            ['title' => 'Delivery', 'description' => 'Seleção para entrega na região.', 'image_slug' => 'maintenance', 'category' => 'Delivery', 'active' => 1],
         ],
     ]);
     $pack['images'] = preset_media_pack('restaurante', [
         'hero' => 'Salão à noite',
-        'casal' => 'Mesa posta',
-        'amigurumi' => 'Prato da casa',
-        'manta' => 'Jantar',
-        'sousplat' => 'Sobremesas',
-        'top' => 'Delivery',
+        'about' => 'Mesa posta',
+        'landing' => 'Prato da casa',
+        'corporate' => 'Jantar',
+        'shop' => 'Sobremesas',
+        'maintenance' => 'Delivery',
     ]);
     return $pack;
 }
@@ -659,19 +673,19 @@ function preset_advocacia(): array
         'faq_4_q' => 'Quais áreas cobrem?',
         'faq_4_a' => 'Veja a página de áreas ou pergunte no WhatsApp.',
         '_services' => [
-            ['title' => 'Cível', 'description' => 'Contratos, responsabilidade e disputas.', 'image_slug' => 'amigurumi', 'category' => 'Áreas', 'active' => 1],
-            ['title' => 'Empresarial', 'description' => 'Societário, compliance e negociações.', 'image_slug' => 'manta', 'category' => 'Áreas', 'active' => 1],
-            ['title' => 'Trabalhista', 'description' => 'Consultivo e contencioso trabalhista.', 'image_slug' => 'sousplat', 'category' => 'Áreas', 'active' => 1],
-            ['title' => 'Família', 'description' => 'Acordos e processos com mediação.', 'image_slug' => 'top', 'category' => 'Áreas', 'active' => 1],
+            ['title' => 'Cível', 'description' => 'Contratos, responsabilidade e disputas.', 'image_slug' => 'landing', 'category' => 'Áreas', 'active' => 1],
+            ['title' => 'Empresarial', 'description' => 'Societário, compliance e negociações.', 'image_slug' => 'corporate', 'category' => 'Áreas', 'active' => 1],
+            ['title' => 'Trabalhista', 'description' => 'Consultivo e contencioso trabalhista.', 'image_slug' => 'shop', 'category' => 'Áreas', 'active' => 1],
+            ['title' => 'Família', 'description' => 'Acordos e processos com mediação.', 'image_slug' => 'maintenance', 'category' => 'Áreas', 'active' => 1],
         ],
     ]);
     $pack['images'] = preset_media_pack('advocacia', [
         'hero' => 'Escritório',
-        'casal' => 'Advogado',
-        'amigurumi' => 'Consultoria',
-        'manta' => 'Contratos',
-        'sousplat' => 'Reuniões',
-        'top' => 'Acordos',
+        'about' => 'Advogado',
+        'landing' => 'Consultoria',
+        'corporate' => 'Contratos',
+        'shop' => 'Reuniões',
+        'maintenance' => 'Acordos',
     ]);
     return $pack;
 }
@@ -757,19 +771,19 @@ function preset_limpeza(): array
         'faq_4_q' => 'Como precificar?',
         'faq_4_a' => 'Por metragem, tipo de limpeza e frequência. Orçamento no WhatsApp.',
         '_services' => [
-            ['title' => 'Limpeza residencial', 'description' => 'Casa ou apartamento com checklist completo.', 'image_slug' => 'amigurumi', 'category' => 'Residencial', 'active' => 1],
-            ['title' => 'Banheiros e áreas molhadas', 'description' => 'Higienização profunda de boxes, pisos e louças.', 'image_slug' => 'manta', 'category' => 'Residencial', 'active' => 1],
-            ['title' => 'Limpeza comercial', 'description' => 'Escritórios e lojas com rotina discreta.', 'image_slug' => 'sousplat', 'category' => 'Comercial', 'active' => 1],
-            ['title' => 'Kit e materiais', 'description' => 'Equipamentos e produtos para um acabamento profissional.', 'image_slug' => 'top', 'category' => 'Padrão', 'active' => 1],
+            ['title' => 'Limpeza residencial', 'description' => 'Casa ou apartamento com checklist completo.', 'image_slug' => 'landing', 'category' => 'Residencial', 'active' => 1],
+            ['title' => 'Banheiros e áreas molhadas', 'description' => 'Higienização profunda de boxes, pisos e louças.', 'image_slug' => 'corporate', 'category' => 'Residencial', 'active' => 1],
+            ['title' => 'Limpeza comercial', 'description' => 'Escritórios e lojas com rotina discreta.', 'image_slug' => 'shop', 'category' => 'Comercial', 'active' => 1],
+            ['title' => 'Kit e materiais', 'description' => 'Equipamentos e produtos para um acabamento profissional.', 'image_slug' => 'maintenance', 'category' => 'Padrão', 'active' => 1],
         ],
     ]);
     $pack['images'] = preset_media_pack('limpeza', [
         'hero' => 'Limpeza residencial',
-        'casal' => 'Equipe de limpeza',
-        'amigurumi' => 'Cozinha impecável',
-        'manta' => 'Banheiro higienizado',
-        'sousplat' => 'Escritório limpo',
-        'top' => 'Kit profissional',
+        'about' => 'Equipe de limpeza',
+        'landing' => 'Cozinha impecável',
+        'corporate' => 'Banheiro higienizado',
+        'shop' => 'Escritório limpo',
+        'maintenance' => 'Kit profissional',
     ]);
     return $pack;
 }
@@ -857,19 +871,19 @@ function preset_locacao(): array
         'faq_4_q' => 'Inclui seguro?',
         'faq_4_a' => 'Coberturas e franquias são apresentadas antes da confirmação.',
         '_services' => [
-            ['title' => 'Compacto', 'description' => 'Ideal para cidade e economia de combustível.', 'image_slug' => 'amigurumi', 'category' => 'Frota', 'active' => 1],
-            ['title' => 'SUV', 'description' => 'Conforto para família e viagens.', 'image_slug' => 'manta', 'category' => 'Frota', 'active' => 1],
-            ['title' => 'Sedan', 'description' => 'Espaço e conforto para o dia a dia executivo.', 'image_slug' => 'sousplat', 'category' => 'Frota', 'active' => 1],
-            ['title' => 'Utilitário', 'description' => 'Pickup para carga e trabalho.', 'image_slug' => 'top', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'Compacto', 'description' => 'Ideal para cidade e economia de combustível.', 'image_slug' => 'landing', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'SUV', 'description' => 'Conforto para família e viagens.', 'image_slug' => 'corporate', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'Sedan', 'description' => 'Espaço e conforto para o dia a dia executivo.', 'image_slug' => 'shop', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'Utilitário', 'description' => 'Pickup para carga e trabalho.', 'image_slug' => 'maintenance', 'category' => 'Frota', 'active' => 1],
         ],
     ]);
     $pack['images'] = preset_media_pack('locacao', [
         'hero' => 'Frota pronta',
-        'casal' => 'Atendimento na retirada',
-        'amigurumi' => 'Compacto',
-        'manta' => 'SUV',
-        'sousplat' => 'Sedan',
-        'top' => 'Utilitário',
+        'about' => 'Atendimento na retirada',
+        'landing' => 'Compacto',
+        'corporate' => 'SUV',
+        'shop' => 'Sedan',
+        'maintenance' => 'Utilitário',
     ]);
     return $pack;
 }
@@ -899,6 +913,13 @@ function preset_apply(PDO $pdo, string $id): string
     services_replace_all($pdo, $preset['services']);
     if (!empty($preset['images']) && is_array($preset['images'])) {
         images_upsert_by_slug($pdo, $preset['images']);
+        $keep = [];
+        foreach ($preset['images'] as $row) {
+            if (!empty($row['slug'])) {
+                $keep[] = (string) $row['slug'];
+            }
+        }
+        images_deactivate_unlisted($pdo, $keep);
     }
     return $id;
 }

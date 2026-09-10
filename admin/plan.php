@@ -169,7 +169,7 @@ admin_header('Plano', $user);
           <input id="limit_services" name="limit_services" class="form-input" maxlength="3" value="<?= h($values['limit_services'] ?? '6') ?>">
         </div>
         <div class="form-group">
-          <label for="limit_gallery">Máx. imagens na galeria (além de logo/favicon/hero/casal)</label>
+          <label for="limit_gallery">Máx. imagens na galeria (além de logo/favicon/hero/about)</label>
           <input id="limit_gallery" name="limit_gallery" class="form-input" maxlength="3" value="<?= h($values['limit_gallery'] ?? '12') ?>">
         </div>
 

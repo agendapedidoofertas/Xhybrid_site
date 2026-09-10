@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     try {
         settings_save_many(db(), $input);
+        settings_sync_page_from_text_tab(db(), $tab);
         header('Location: texts.php?tab=' . urlencode($tab) . '&ok=1');
         exit;
     } catch (Throwable $e) {
@@ -71,7 +72,7 @@ admin_header('Textos do site', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Site</p>
         <h1 class="font-display">Textos</h1>
-        <p>Edite os textos das páginas. Cada campo tem limite de caracteres para não quebrar o layout no celular.</p>
+        <p>Edite os textos das páginas. Se apagar tudo de Galeria, Sobre ou Contato e salvar, a aba some do menu do site.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
