@@ -2,9 +2,39 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/images.php';
+
 /**
- * Presets de nicho — aplicam textos, seções, look e serviços de uma vez.
+ * Presets de nicho — aplicam textos, seções, look, serviços e imagens.
  */
+
+/**
+ * @param array<string, string> $titles slug => título na galeria
+ * @return list<array{slug: string, url: string, title: string, description: string, position: int}>
+ */
+function preset_media_pack(string $id, array $titles): array
+{
+    $order = [
+        'hero' => 2,
+        'casal' => 3,
+        'amigurumi' => 4,
+        'manta' => 5,
+        'sousplat' => 6,
+        'top' => 7,
+        'bolsa' => 8,
+        'bebe' => 9,
+    ];
+    $map = [];
+    foreach ($titles as $slug => $title) {
+        $map[$slug] = [
+            'title' => $title,
+            'position' => $order[$slug] ?? 50,
+            'file' => $slug . '.jpg',
+        ];
+    }
+    return preset_image_rows($id, $map);
+}
+
 /**
  * Vitrine da agência Xhybrid (Signature + textos tech).
  */
@@ -56,10 +86,13 @@ function preset_xhybrid(): array
             'home_weave_title' => 'O que fazemos',
             'home_weave_subtitle' => 'Do site institucional à manutenção contínua — tecnologia sob medida para o seu negócio.',
             'home_feat_1_title' => 'Criação de sites',
+            'home_feat_1_icon' => 'layout',
             'home_feat_1_text' => 'Landing pages e sites corporativos modernos, rápidos e alinhados à sua marca.',
             'home_feat_2_title' => 'Manutenção',
+            'home_feat_2_icon' => 'wrench',
             'home_feat_2_text' => 'Atualizações, backups, performance e correções para o site ficar sempre no ar.',
             'home_feat_3_title' => 'Tecnologia',
+            'home_feat_3_icon' => 'cpu',
             'home_feat_3_text' => 'Integrações, automações e melhorias digitais para otimizar o dia a dia.',
             'home_destaques_title' => 'Projetos em destaque',
             'home_destaques_subtitle' => 'Alguns trabalhos de criação e desenvolvimento.',
@@ -143,6 +176,14 @@ function preset_xhybrid(): array
                 'active' => 1,
             ],
         ],
+        'images' => preset_media_pack('xhybrid', [
+            'hero' => 'Hero — desenvolvimento',
+            'casal' => 'Equipe Xhybrid',
+            'amigurumi' => 'Landing Page',
+            'manta' => 'Site Corporativo',
+            'sousplat' => 'Manutenção Contínua',
+            'top' => 'Integrações',
+        ]),
     ];
 }
 
@@ -191,10 +232,13 @@ function preset_eletricista(): array
             'home_weave_title' => 'O que faço',
             'home_weave_subtitle' => 'Soluções elétricas para casa, comércio e condomínio — com padrão de segurança.',
             'home_feat_1_title' => 'Instalações',
+            'home_feat_1_icon' => 'bolt',
             'home_feat_1_text' => 'Quadros, tomadas, iluminação e projetos elétricos residenciais e prediais.',
             'home_feat_2_title' => 'Manutenção',
+            'home_feat_2_icon' => 'wrench',
             'home_feat_2_text' => 'Revisão, troca de disjuntores, curto-circuito e melhorias de segurança.',
             'home_feat_3_title' => 'Emergência',
+            'home_feat_3_icon' => 'plug',
             'home_feat_3_text' => 'Atendimento urgente para falta de energia, cheiro de queimado e riscos.',
             'home_destaques_title' => 'Trabalhos recentes',
             'home_destaques_subtitle' => 'Alguns serviços realizados em campo.',
@@ -292,6 +336,16 @@ function preset_eletricista(): array
                 'active' => 1,
             ],
         ],
+        'images' => preset_media_pack('eletricista', [
+            'hero' => 'Hero — serviços elétricos',
+            'casal' => 'Instalação profissional',
+            'amigurumi' => 'Quadro e medições',
+            'manta' => 'Tomadas e pontos',
+            'sousplat' => 'Iluminação LED',
+            'top' => 'Padrão e entrada',
+            'bolsa' => 'Emergência',
+            'bebe' => 'Adequação de padrão',
+        ]),
     ];
 }
 
@@ -357,10 +411,13 @@ function preset_clinica(): array
         'home_weave_title' => 'Como cuidamos',
         'home_weave_subtitle' => 'Atendimento organizado do acolhimento ao retorno.',
         'home_feat_1_title' => 'Consultas',
+        'home_feat_1_icon' => 'stethoscope',
         'home_feat_1_text' => 'Avaliação clínica com tempo para ouvir e orientar.',
         'home_feat_2_title' => 'Exames',
+        'home_feat_2_icon' => 'cross',
         'home_feat_2_text' => 'Encaminhamento e parceiros para exames com agilidade.',
         'home_feat_3_title' => 'Acompanhamento',
+        'home_feat_3_icon' => 'phone',
         'home_feat_3_text' => 'Retornos e planos de cuidado contínuo.',
         'home_destaques_title' => 'Espaço e equipe',
         'home_destaques_subtitle' => 'Ambiente preparado para receber você com conforto.',
@@ -410,6 +467,14 @@ function preset_clinica(): array
             ['title' => 'Teleorientação', 'description' => 'Dúvidas rápidas quando disponível.', 'image_slug' => 'top', 'category' => 'Online', 'active' => 1],
         ],
     ]);
+    $pack['images'] = preset_media_pack('clinica', [
+        'hero' => 'Recepção da clínica',
+        'casal' => 'Equipe de cuidado',
+        'amigurumi' => 'Consultório',
+        'manta' => 'Avaliação clínica',
+        'sousplat' => 'Check-up',
+        'top' => 'Teleorientação',
+    ]);
     return $pack;
 }
 
@@ -444,10 +509,13 @@ function preset_restaurante(): array
         'home_weave_title' => 'A experiência',
         'home_weave_subtitle' => 'Do aperitivo à sobremesa — com ritmo e carinho.',
         'home_feat_1_title' => 'Salão',
+        'home_feat_1_icon' => 'utensils',
         'home_feat_1_text' => 'Ambiente para almoço, jantar e ocasiões especiais.',
         'home_feat_2_title' => 'Cardápio',
+        'home_feat_2_icon' => 'coffee',
         'home_feat_2_text' => 'Pratos autorais com ingredientes da estação.',
         'home_feat_3_title' => 'Reservas',
+        'home_feat_3_icon' => 'phone',
         'home_feat_3_text' => 'Garanta sua mesa pelo WhatsApp em poucos minutos.',
         'home_destaques_title' => 'Pratos em destaque',
         'home_destaques_subtitle' => 'Alguns favoritos da casa.',
@@ -499,6 +567,14 @@ function preset_restaurante(): array
             ['title' => 'Delivery', 'description' => 'Seleção para entrega na região.', 'image_slug' => 'top', 'category' => 'Delivery', 'active' => 1],
         ],
     ]);
+    $pack['images'] = preset_media_pack('restaurante', [
+        'hero' => 'Salão à noite',
+        'casal' => 'Mesa posta',
+        'amigurumi' => 'Prato da casa',
+        'manta' => 'Jantar',
+        'sousplat' => 'Sobremesas',
+        'top' => 'Delivery',
+    ]);
     return $pack;
 }
 
@@ -531,10 +607,13 @@ function preset_advocacia(): array
         'home_weave_title' => 'Como atuamos',
         'home_weave_subtitle' => 'Diagnóstico, estratégia e execução com comunicação direta.',
         'home_feat_1_title' => 'Consultoria',
+        'home_feat_1_icon' => 'scale',
         'home_feat_1_text' => 'Análise preventiva de contratos e riscos.',
         'home_feat_2_title' => 'Contencioso',
+        'home_feat_2_icon' => 'gavel',
         'home_feat_2_text' => 'Defesa e acompanhamento processual.',
         'home_feat_3_title' => 'Acordos',
+        'home_feat_3_icon' => 'briefcase',
         'home_feat_3_text' => 'Negociação com foco em resultado e prazo.',
         'home_destaques_title' => 'Áreas de atuação',
         'home_destaques_subtitle' => 'Especialidades disponíveis no escritório.',
@@ -586,6 +665,212 @@ function preset_advocacia(): array
             ['title' => 'Família', 'description' => 'Acordos e processos com mediação.', 'image_slug' => 'top', 'category' => 'Áreas', 'active' => 1],
         ],
     ]);
+    $pack['images'] = preset_media_pack('advocacia', [
+        'hero' => 'Escritório',
+        'casal' => 'Advogado',
+        'amigurumi' => 'Consultoria',
+        'manta' => 'Contratos',
+        'sousplat' => 'Reuniões',
+        'top' => 'Acordos',
+    ]);
+    return $pack;
+}
+
+function preset_limpeza(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Limpeza Clara',
+        'brand_tagline' => 'Residencial e comercial com padrão alto',
+        'brand_city' => 'Sua cidade',
+        'brand_seo_title' => 'Limpeza Clara — limpeza residencial e comercial',
+        'brand_seo_description' => 'Limpeza profissional para casas e empresas. Orçamento rápido pelo WhatsApp.',
+        'area_text' => 'Atendemos casas, apartamentos e escritórios na região — confirme no WhatsApp.',
+        'urgency_enabled' => '1',
+        'urgency_label' => 'Agenda',
+        'appearance_look' => 'teal-rush',
+        'appearance_theme' => 'teal',
+        'appearance_font' => 'soft',
+        'appearance_layout' => 'soft',
+        'appearance_media' => 'classic',
+        'whatsapp_message' => 'Olá! Quero orçamento de limpeza. Vim pelo site.',
+        'nav_galeria' => 'Serviços',
+        'footer_tagline' => 'Ambientes limpos, seguros e bem cuidados — com equipe treinada e produtos adequados.',
+        'footer_hours_title' => 'Horário',
+        'footer_hours_line1' => 'Segunda a sábado: 7h – 18h',
+        'footer_hours_line2' => 'Domingo: sob consulta',
+        'footer_hours_line3' => 'Plantões para empresas: combine no WhatsApp',
+        'home_badge' => 'Limpeza profissional',
+        'home_hero_title_1' => 'Ambiente limpo,',
+        'home_hero_title_2' => 'sem preocupação.',
+        'home_hero_text' => 'Limpeza residencial e comercial com padrões claros, pontualidade e acabamento caprichado.',
+        'home_btn_gallery' => 'Ver serviços',
+        'home_weave_title' => 'O que limpamos',
+        'home_weave_subtitle' => 'Do dia a dia à limpeza pesada — com checklist e qualidade.',
+        'home_feat_1_title' => 'Residencial',
+        'home_feat_1_icon' => 'sparkles',
+        'home_feat_1_text' => 'Casas e apartamentos com foco em detalhes e organização.',
+        'home_feat_2_title' => 'Comercial',
+        'home_feat_2_icon' => 'building',
+        'home_feat_2_text' => 'Escritórios e lojas com rotina que não atrapalha o expediente.',
+        'home_feat_3_title' => 'Produtos',
+        'home_feat_3_icon' => 'droplets',
+        'home_feat_3_text' => 'Materiais adequados para cada superfície e higiene segura.',
+        'home_destaques_title' => 'Antes e depois do cuidado',
+        'home_destaques_subtitle' => 'Alguns ambientes que deixamos impecáveis.',
+        'home_cta_title_1' => 'Quer orçamento?',
+        'home_cta_title_2' => 'Chame no WhatsApp.',
+        'home_cta_text' => 'Informe metragem, tipo de imóvel e frequência desejada.',
+        'home_cta_btn' => 'Pedir orçamento',
+        'about_eyebrow' => 'Quem somos',
+        'about_title_1' => 'Limpeza com',
+        'about_title_2' => 'padrão e confiança.',
+        'about_p1' => 'A Limpeza Clara nasceu para entregar ambientes higienizados sem você precisar acompanhar cada passo.',
+        'about_p2' => 'Trabalhamos com checklist, horários combinados e comunicação direta pelo WhatsApp.',
+        'about_p3' => 'Seja residência ou empresa, montamos a rotina que cabe na sua rotina.',
+        'about_stat_1_value' => 'Checklist',
+        'about_stat_1_text' => 'Padrão claro em cada visita',
+        'about_stat_2_value' => 'Pontual',
+        'about_stat_2_text' => 'Horários combinados e cumpridos',
+        'about_stat_3_value' => 'Sob medida',
+        'about_stat_3_text' => 'Frequência semanal, quinzenal ou avulsa',
+        'gallery_subtitle' => 'Ambientes e serviços. Toque para ampliar.',
+        'contact_eyebrow' => 'Orçamento',
+        'contact_title' => 'Contato',
+        'contact_subtitle' => 'Peça orçamento com metragem e tipo de limpeza.',
+        'contact_whatsapp_desc' => 'Resposta rápida para agendar sua limpeza',
+        'contact_response_text' => 'Retornamos no mesmo dia útil',
+        'testimonial_1_name' => 'Camila',
+        'testimonial_1_city' => 'Centro',
+        'testimonial_1_text' => 'Apartamento impecável e equipe educada. Virei cliente fixa.',
+        'testimonial_2_name' => 'Escritório Norte',
+        'testimonial_2_city' => 'Empresarial',
+        'testimonial_2_text' => 'Limpeza comercial sem atrapalhar o expediente.',
+        'testimonial_3_name' => 'Paulo',
+        'testimonial_3_city' => 'Jardins',
+        'testimonial_3_text' => 'Pós-obra ficou perfeito. Recomendo.',
+        'faq_1_q' => 'Vocês levam produtos?',
+        'faq_1_a' => 'Sim — ou usamos os seus, se preferir. Combinamos no orçamento.',
+        'faq_2_q' => 'Fazem limpeza pós-obra?',
+        'faq_2_a' => 'Sim. Informe o estágio da obra para dimensionarmos a equipe.',
+        'faq_3_q' => 'Atendem empresas?',
+        'faq_3_a' => 'Sim, com rotina diária, semanal ou sob demanda.',
+        'faq_4_q' => 'Como precificar?',
+        'faq_4_a' => 'Por metragem, tipo de limpeza e frequência. Orçamento no WhatsApp.',
+        '_services' => [
+            ['title' => 'Limpeza residencial', 'description' => 'Casa ou apartamento com checklist completo.', 'image_slug' => 'amigurumi', 'category' => 'Residencial', 'active' => 1],
+            ['title' => 'Banheiros e áreas molhadas', 'description' => 'Higienização profunda de boxes, pisos e louças.', 'image_slug' => 'manta', 'category' => 'Residencial', 'active' => 1],
+            ['title' => 'Limpeza comercial', 'description' => 'Escritórios e lojas com rotina discreta.', 'image_slug' => 'sousplat', 'category' => 'Comercial', 'active' => 1],
+            ['title' => 'Kit e materiais', 'description' => 'Equipamentos e produtos para um acabamento profissional.', 'image_slug' => 'top', 'category' => 'Padrão', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('limpeza', [
+        'hero' => 'Limpeza residencial',
+        'casal' => 'Equipe de limpeza',
+        'amigurumi' => 'Cozinha impecável',
+        'manta' => 'Banheiro higienizado',
+        'sousplat' => 'Escritório limpo',
+        'top' => 'Kit profissional',
+    ]);
+    return $pack;
+}
+
+function preset_locacao(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Rota Fácil',
+        'brand_tagline' => 'Locação de veículos para o seu dia a dia',
+        'brand_city' => 'Sua cidade',
+        'brand_seo_title' => 'Rota Fácil — locação de carros e utilitários',
+        'brand_seo_description' => 'Aluguel de veículos com frota revisada. Reserve pelo WhatsApp.',
+        'area_text' => 'Retirada na loja e entrega sob consulta na região.',
+        'urgency_enabled' => '1',
+        'urgency_label' => 'Reservas',
+        'appearance_look' => 'azure-blast',
+        'appearance_theme' => 'azul',
+        'appearance_font' => 'saas',
+        'appearance_layout' => 'frame',
+        'appearance_media' => 'media-wide',
+        'whatsapp_message' => 'Olá! Quero cotar a locação de um veículo. Vim pelo site.',
+        'nav_galeria' => 'Frota',
+        'footer_tagline' => 'Frota revisada, atendimento claro e reserva rápida pelo WhatsApp.',
+        'footer_hours_title' => 'Horário da loja',
+        'footer_hours_line1' => 'Segunda a sexta: 8h – 18h',
+        'footer_hours_line2' => 'Sábado: 8h – 13h',
+        'footer_hours_line3' => 'Domingo: fechado',
+        'home_badge' => 'Locação de veículos',
+        'home_hero_title_1' => 'Seu carro pronto,',
+        'home_hero_title_2' => 'quando você precisa.',
+        'home_hero_text' => 'Compactos, SUVs e utilitários revisados — reserve pelo WhatsApp com agilidade.',
+        'home_btn_gallery' => 'Ver frota',
+        'home_weave_title' => 'Como funciona',
+        'home_weave_subtitle' => 'Escolha o modelo, combine datas e retire com documentação simples.',
+        'home_feat_1_title' => 'Frota revisada',
+        'home_feat_1_icon' => 'car',
+        'home_feat_1_text' => 'Veículos higienizados e com manutenção em dia.',
+        'home_feat_2_title' => 'Categorias',
+        'home_feat_2_icon' => 'truck',
+        'home_feat_2_text' => 'Do compacto ao utilitário — sobe a categoria conforme a viagem.',
+        'home_feat_3_title' => 'Reserva fácil',
+        'home_feat_3_icon' => 'phone',
+        'home_feat_3_text' => 'Cotação e confirmação rápidas pelo WhatsApp.',
+        'home_destaques_title' => 'Frota em destaque',
+        'home_destaques_subtitle' => 'Modelos disponíveis para locação.',
+        'home_cta_title_1' => 'Quer reservar?',
+        'home_cta_title_2' => 'Fale conosco.',
+        'home_cta_text' => 'Informe datas, categoria e se precisa de motorista ou entrega.',
+        'home_cta_btn' => 'Reservar no WhatsApp',
+        'about_eyebrow' => 'A locadora',
+        'about_title_1' => 'Mobilidade com',
+        'about_title_2' => 'transparência.',
+        'about_p1' => 'A Rota Fácil oferece locação de veículos com atendimento direto e frota cuidada.',
+        'about_p2' => 'Explicamos diárias, caução e cobertura sem letras miúdas escondidas.',
+        'about_p3' => 'Ideal para viagem, trabalho ou substituição do carro particular.',
+        'about_stat_1_value' => 'Frota',
+        'about_stat_1_text' => 'Modelos para cidade e estrada',
+        'about_stat_2_value' => 'Revisão',
+        'about_stat_2_text' => 'Manutenção e higienização constantes',
+        'about_stat_3_value' => 'Ágil',
+        'about_stat_3_text' => 'Reserva pelo WhatsApp',
+        'gallery_eyebrow' => 'Frota',
+        'gallery_title' => 'Veículos',
+        'gallery_subtitle' => 'Categorias disponíveis. Toque para ampliar.',
+        'contact_eyebrow' => 'Reservas',
+        'contact_title' => 'Contato',
+        'contact_subtitle' => 'Peça cotação com datas e categoria desejada.',
+        'contact_whatsapp_desc' => 'Reserve ou tire dúvidas sobre a frota',
+        'contact_response_text' => 'Retorno rápido em horário comercial',
+        'testimonial_1_name' => 'André',
+        'testimonial_1_city' => 'Centro',
+        'testimonial_1_text' => 'Carro limpo, entrega no horário e preço justo.',
+        'testimonial_2_name' => 'Empresa Delta',
+        'testimonial_2_city' => 'Industrial',
+        'testimonial_2_text' => 'Locamos utilitário para obra — processo simples.',
+        'testimonial_3_name' => 'Fernanda',
+        'testimonial_3_city' => 'Praia',
+        'testimonial_3_text' => 'SUV impecável para o fim de semana.',
+        'faq_1_q' => 'Quais documentos preciso?',
+        'faq_1_a' => 'CNH válida e documento com foto. Detalhamos no WhatsApp.',
+        'faq_2_q' => 'Tem caução?',
+        'faq_2_a' => 'Sim, conforme categoria — valores transparentes na cotação.',
+        'faq_3_q' => 'Posso devolver em outra cidade?',
+        'faq_3_a' => 'Sob consulta. Informe origem e destino na reserva.',
+        'faq_4_q' => 'Inclui seguro?',
+        'faq_4_a' => 'Coberturas e franquias são apresentadas antes da confirmação.',
+        '_services' => [
+            ['title' => 'Compacto', 'description' => 'Ideal para cidade e economia de combustível.', 'image_slug' => 'amigurumi', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'SUV', 'description' => 'Conforto para família e viagens.', 'image_slug' => 'manta', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'Sedan', 'description' => 'Espaço e conforto para o dia a dia executivo.', 'image_slug' => 'sousplat', 'category' => 'Frota', 'active' => 1],
+            ['title' => 'Utilitário', 'description' => 'Pickup para carga e trabalho.', 'image_slug' => 'top', 'category' => 'Frota', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('locacao', [
+        'hero' => 'Frota pronta',
+        'casal' => 'Atendimento na retirada',
+        'amigurumi' => 'Compacto',
+        'manta' => 'SUV',
+        'sousplat' => 'Sedan',
+        'top' => 'Utilitário',
+    ]);
     return $pack;
 }
 
@@ -593,6 +878,7 @@ function preset_apply(PDO $pdo, string $id): string
 {
     require_once __DIR__ . '/settings.php';
     require_once __DIR__ . '/services.php';
+    require_once __DIR__ . '/images.php';
 
     $map = [
         'xhybrid' => 'preset_xhybrid',
@@ -600,6 +886,8 @@ function preset_apply(PDO $pdo, string $id): string
         'clinica' => 'preset_clinica',
         'restaurante' => 'preset_restaurante',
         'advocacia' => 'preset_advocacia',
+        'limpeza' => 'preset_limpeza',
+        'locacao' => 'preset_locacao',
     ];
     if (!isset($map[$id])) {
         throw new InvalidArgumentException('Preset desconhecido.');
@@ -609,5 +897,8 @@ function preset_apply(PDO $pdo, string $id): string
 
     settings_save_many($pdo, $preset['settings']);
     services_replace_all($pdo, $preset['services']);
+    if (!empty($preset['images']) && is_array($preset['images'])) {
+        images_upsert_by_slug($pdo, $preset['images']);
+    }
     return $id;
 }

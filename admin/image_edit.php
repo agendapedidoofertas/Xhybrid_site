@@ -12,6 +12,7 @@ require_once dirname(__DIR__) . '/lib/uploads.php';
 
 auth_boot_session();
 $user = require_admin();
+$canUpload = user_is_admin($user);
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $image = null;
@@ -61,16 +62,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = db();
 
     if (!empty($_FILES['file']['name'])) {
-        $up = uploads_handle($_FILES['file'], $slug !== '' ? $slug : 'file');
-        if (!$up['ok']) {
-            $error = $up['error'] ?? 'Falha no upload.';
+        if (!$canUpload) {
+            $error = 'Upload de arquivo é só para admin. Use o link do Google Drive.';
         } else {
-            $url = (string) $up['path'];
+            $up = uploads_handle($_FILES['file'], $slug !== '' ? $slug : 'file');
+            if (!$up['ok']) {
+                $error = $up['error'] ?? 'Falha no upload.';
+            } else {
+                $url = (string) $up['path'];
+            }
         }
     }
 
     if ($error === '' && ($title === '' || $slug === '' || $url === '')) {
-        $error = 'Preencha título, slug e URL — ou envie um arquivo.';
+        $error = $canUpload
+            ? 'Preencha título, slug e URL — ou envie um arquivo.'
+            : 'Preencha título, slug e o link do Google Drive (ou URL da imagem).';
     }
 
     if ($error === '') {
@@ -178,12 +185,16 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Imagens</p>
         <h1 class="font-display"><?= $isEdit ? 'Editar imagem' : 'Nova imagem' ?></h1>
-        <p>Envie arquivo para <code>assets/uploads/</code> (não entra no SQLite) ou cole uma URL. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code>, vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>.</p>
+        <?php if ($canUpload): ?>
+          <p>Admin: pode enviar arquivo para <code>assets/uploads/</code> ou colar URL. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code>, vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>.</p>
+        <?php else: ?>
+          <p>Cole o link de compartilhamento do <strong>Google Drive</strong> (qualquer um com o link). Assim a imagem não ocupa espaço no servidor. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code> e vídeos Signature.</p>
+        <?php endif; ?>
       </header>
 
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
 
-      <form method="post" enctype="multipart/form-data" class="contact-form admin-form" style="margin-top:1.5rem;">
+      <form method="post"<?= $canUpload ? ' enctype="multipart/form-data"' : '' ?> class="contact-form admin-form" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
         <div class="form-group">
           <label for="title">Título</label>
@@ -193,14 +204,26 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
           <label for="slug">Slug</label>
           <input id="slug" name="slug" class="form-input" required pattern="[a-z0-9\-]+" value="<?= h((string) ($image['slug'] ?? '')) ?>">
         </div>
+        <?php if ($canUpload): ?>
         <div class="form-group">
-          <label for="file">Arquivo (upload)</label>
+          <label for="file">Arquivo (upload) — só admin</label>
           <input id="file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.svg,.gif,.mp4,.webm,image/*,video/mp4,video/webm">
           <p class="text-muted" style="margin:0.35rem 0 0;font-size:0.8rem;">jpg, png, webp, svg, mp4, webm — até 40 MB. O path relativo é salvo no banco.</p>
         </div>
+        <?php endif; ?>
         <div class="form-group">
-          <label for="url">URL ou path (se não enviar arquivo)</label>
-          <input id="url" name="url" class="form-input" value="<?= h((string) ($image['url'] ?? '')) ?>" placeholder="assets/uploads/... ou https://...">
+          <label for="url"><?= $canUpload ? 'URL ou path (se não enviar arquivo)' : 'Link do Google Drive (ou URL da imagem)' ?></label>
+          <input
+            id="url"
+            name="url"
+            class="form-input"
+            <?= $canUpload ? '' : 'required' ?>
+            value="<?= h((string) ($image['url'] ?? '')) ?>"
+            placeholder="<?= $canUpload ? 'assets/uploads/... ou https://drive.google.com/...' : 'https://drive.google.com/file/d/.../view' ?>"
+          >
+          <?php if (!$canUpload): ?>
+            <p class="text-muted" style="margin:0.35rem 0 0;font-size:0.8rem;">No Drive: Compartilhar → “Qualquer pessoa com o link” → cole a URL aqui.</p>
+          <?php endif; ?>
         </div>
         <div class="form-group">
           <label for="description">Descrição (galeria) <span class="admin-charlimit" data-for="description">0/250</span></label>

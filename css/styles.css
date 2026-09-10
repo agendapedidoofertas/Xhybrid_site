@@ -2118,14 +2118,14 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
 .error-page .btn { margin-top: 1.5rem; }
 .error-page .badge { margin-top: 0.25rem; }
 
-.crochet-buddy {
+.xh-robot {
   display: flex;
   justify-content: center;
   margin: 0 auto 0.5rem;
   width: min(220px, 70vw);
-  opacity: 0.9;
+  opacity: 0.95;
 }
-.crochet-buddy__svg {
+.xh-robot__svg {
   width: 100%;
   height: auto;
   overflow: visible;
@@ -2134,14 +2134,11 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
 }
 
 .buddy-shadow { transform-box: fill-box; transform-origin: center; animation: buddyShadow 4.2s ease-in-out infinite; }
-.buddy-head { transform-box: fill-box; transform-origin: 50% 80%; animation: buddyTilt 5.5s ease-in-out infinite; }
-.buddy-ear-l { transform-box: fill-box; transform-origin: 50% 90%; animation: earWiggle 3.4s ease-in-out infinite; }
-.buddy-ear-r { transform-box: fill-box; transform-origin: 50% 90%; animation: earWiggle 3.4s ease-in-out infinite 0.4s; }
-.buddy-arm-r { transform-box: fill-box; transform-origin: 20% 20%; animation: armWave 3.8s ease-in-out infinite; }
+.buddy-head { transform-box: fill-box; transform-origin: 50% 90%; animation: buddyTilt 5.5s ease-in-out infinite; }
+.buddy-arm-r { transform-box: fill-box; transform-origin: 10% 50%; animation: armWave 3.8s ease-in-out infinite; }
 .buddy-eye { transform-box: fill-box; transform-origin: center; animation: blink 4.8s ease-in-out infinite; }
 .buddy-eye-r { animation-delay: 0.08s; }
-.yarn-ball { transform-box: fill-box; transform-origin: center; animation: yarnRoll 6s ease-in-out infinite; }
-.yarn-thread { stroke-dasharray: 6 5; animation: threadCrawl 2.4s linear infinite; }
+.bot-antenna__tip { transform-box: fill-box; transform-origin: center; animation: sparkFloat 2.4s ease-in-out infinite; }
 .spark-1, .spark-2, .spark-3, .spark-4 { transform-box: fill-box; transform-origin: center; }
 .spark-1 { animation: sparkFloat 3.6s ease-in-out infinite; }
 .spark-2 { animation: sparkFloat 4.1s ease-in-out infinite 0.6s; }
@@ -5799,15 +5796,12 @@ html[data-look="neon-night"] .gallery__btn img {
   .fab-whatsapp__ping,
   .fab-whatsapp__label,
   .skeleton,
-  .crochet-buddy__svg,
+  .xh-robot__svg,
   .buddy-shadow,
   .buddy-head,
-  .buddy-ear-l,
-  .buddy-ear-r,
   .buddy-arm-r,
   .buddy-eye,
-  .yarn-ball,
-  .yarn-thread,
+  .bot-antenna__tip,
   .spark-1, .spark-2, .spark-3, .spark-4 {
     animation: none !important;
   }

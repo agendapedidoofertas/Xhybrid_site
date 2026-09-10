@@ -40,12 +40,15 @@ const SITE_DEFAULTS = {
   home_weave_subtitle:
     "Do site institucional à manutenção contínua — tecnologia sob medida para o seu negócio.",
   home_feat_1_title: "Criação de sites",
+  home_feat_1_icon: "layout",
   home_feat_1_text:
     "Landing pages e sites corporativos modernos, rápidos e alinhados à sua marca.",
   home_feat_2_title: "Manutenção",
+  home_feat_2_icon: "wrench",
   home_feat_2_text:
     "Atualizações, backups, performance e correções para o site ficar sempre no ar.",
   home_feat_3_title: "Tecnologia",
+  home_feat_3_icon: "cpu",
   home_feat_3_text:
     "Integrações, automações e melhorias digitais para otimizar o dia a dia.",
   home_destaques_title: "Projetos em destaque",

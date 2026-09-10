@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/feat_icons.php';
+
 /**
  * Definições dos textos/canais editáveis do site.
  * max = limite de caracteres (responsividade + segurança).
@@ -178,6 +180,10 @@ function settings_definitions(): array
             'group' => 'home', 'label' => 'Card 1 — título', 'max' => 30, 'type' => 'short',
             'default' => 'Criação de sites',
         ],
+        'home_feat_1_icon' => [
+            'group' => 'home', 'label' => 'Card 1 — ícone', 'max' => 24, 'type' => 'icon',
+            'choices' => feat_icon_catalog(), 'default' => 'layout',
+        ],
         'home_feat_1_text' => [
             'group' => 'home', 'label' => 'Card 1 — texto', 'max' => 120, 'type' => 'text',
             'default' => 'Landing pages e sites corporativos modernos, rápidos e alinhados à sua marca.',
@@ -186,6 +192,10 @@ function settings_definitions(): array
             'group' => 'home', 'label' => 'Card 2 — título', 'max' => 30, 'type' => 'short',
             'default' => 'Manutenção',
         ],
+        'home_feat_2_icon' => [
+            'group' => 'home', 'label' => 'Card 2 — ícone', 'max' => 24, 'type' => 'icon',
+            'choices' => feat_icon_catalog(), 'default' => 'wrench',
+        ],
         'home_feat_2_text' => [
             'group' => 'home', 'label' => 'Card 2 — texto', 'max' => 120, 'type' => 'text',
             'default' => 'Atualizações, backups, performance e correções para o site ficar sempre no ar.',
@@ -193,6 +203,10 @@ function settings_definitions(): array
         'home_feat_3_title' => [
             'group' => 'home', 'label' => 'Card 3 — título', 'max' => 30, 'type' => 'short',
             'default' => 'Tecnologia',
+        ],
+        'home_feat_3_icon' => [
+            'group' => 'home', 'label' => 'Card 3 — ícone', 'max' => 24, 'type' => 'icon',
+            'choices' => feat_icon_catalog(), 'default' => 'cpu',
         ],
         'home_feat_3_text' => [
             'group' => 'home', 'label' => 'Card 3 — texto', 'max' => 120, 'type' => 'text',
@@ -623,10 +637,15 @@ function settings_sanitize(string $key, string $value): string
         if ($value !== '' && !filter_var($value, FILTER_VALIDATE_URL)) {
             $value = (string) $def['default'];
         }
-    } elseif ($type === 'choice') {
+    } elseif ($type === 'choice' || $type === 'icon') {
         $choices = $def['choices'] ?? [];
-        if (!is_array($choices) || !in_array($value, $choices, true)) {
+        if (!is_array($choices) || $choices === []) {
             $value = (string) $def['default'];
+        } else {
+            $allowed = array_is_list($choices) ? $choices : array_keys($choices);
+            if (!in_array($value, $allowed, true)) {
+                $value = (string) $def['default'];
+            }
         }
     } else {
         // Textos: sem HTML

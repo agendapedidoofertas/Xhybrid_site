@@ -15,113 +15,93 @@
     (function(){try{var d=document.documentElement;var looks={'xhybrid-signature':{t:'preto',f:'saas',l:'soft',m:'classic',dark:1},'tech-glass':{t:'preto',f:'tech',l:'soft',m:'classic',dark:1},'editorial':{t:'branco',f:'editorial',l:'editorial',m:'flip',dark:0},'sharp-saas':{t:'graphite',f:'saas',l:'sharp',m:'media-wide',dark:1},'warm-studio':{t:'marrom-claro',f:'classic',l:'loft',m:'center',dark:0},'neon-night':{t:'neon',f:'mono',l:'strip',m:'hero-flip',dark:1},'obsidian':{t:'preto',f:'display',l:'frame',m:'copy-wide',dark:1},'navy-depth':{t:'midnight',f:'geometric',l:'magazine',m:'about-flip',dark:1},'ash-glass':{t:'slate',f:'saas',l:'compact',m:'stack-media',dark:1},'ivory-soft':{t:'cinza',f:'soft',l:'pill',m:'stack-copy',dark:0},'petal-sky':{t:'peonia',f:'rounded',l:'bento',m:'flip',dark:0},'crimson-volt':{t:'vinho',f:'display',l:'sharp',m:'classic',dark:1},'azure-blast':{t:'azul',f:'geometric',l:'frame',m:'media-wide',dark:1},'volt-lime':{t:'lime',f:'mono',l:'strip',m:'hero-flip',dark:1},'amber-flare':{t:'amber',f:'saas',l:'bento',m:'flip',dark:0},'berry-pop':{t:'berry',f:'rounded',l:'pill',m:'center',dark:1},'teal-rush':{t:'teal',f:'tech',l:'soft',m:'copy-wide',dark:1},'indigo-flare':{t:'indigo',f:'display',l:'magazine',m:'about-flip',dark:1},'fire-sunset':{t:'sunset',f:'condensed',l:'loft',m:'stack-media',dark:0},'copper-heat':{t:'cobre',f:'classic',l:'frame',m:'classic',dark:1},'ocean-vivid':{t:'oceano',f:'soft',l:'editorial',m:'flip',dark:0},'blood-noir':{t:'sangue',f:'display',l:'sharp',m:'classic',dark:1},'violet-pulse':{t:'violeta',f:'geometric',l:'magazine',m:'about-flip',dark:1},'neon-orchid':{t:'neon-roxo',f:'mono',l:'strip',m:'hero-flip',dark:1},'plum-ember':{t:'ameixa',f:'classic',l:'frame',m:'media-wide',dark:1},'cyber-magenta':{t:'fuchsia-night',f:'saas',l:'soft',m:'copy-wide',dark:1}};var look=localStorage.getItem('xhybrid-look');if(!looks[look])look='xhybrid-signature';var p=looks[look];d.setAttribute('data-look',look);d.setAttribute('data-theme',p.t);d.setAttribute('data-font',p.f);d.setAttribute('data-layout',p.l);d.setAttribute('data-media',p.m);if(p.dark)d.classList.add('dark');else d.classList.remove('dark');}catch(e){}})();
   </script>
 </head>
-<body data-page="">
+<body data-page="404">
   <div class="page">
     <div id="site-header"></div>
     <main class="error-page">
       <div class="error-page__inner">
-        <div class="crochet-buddy" aria-hidden="true">
-          <svg class="crochet-buddy__svg" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg">
+        <div class="xh-robot" aria-hidden="true">
+          <svg class="xh-robot__svg" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <pattern id="stitches" width="10" height="8" patternUnits="userSpaceOnUse">
-                <path d="M1.5 5 Q5 1.5 8.5 5" fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" opacity="0.22"/>
-              </pattern>
-              <radialGradient id="yarnShine" cx="35%" cy="32%" r="70%">
-                <stop offset="0%" stop-color="var(--card)" stop-opacity="0.55"/>
-                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
-              </radialGradient>
-              <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="1.2" result="b"/>
-                <feMerge>
-                  <feMergeNode in="b"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
+              <linearGradient id="botGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0.02)"/>
+              </linearGradient>
+              <linearGradient id="botBody" x1="20%" y1="0%" x2="80%" y2="100%">
+                <stop offset="0%" stop-color="#2a2a2a"/>
+                <stop offset="100%" stop-color="#111111"/>
+              </linearGradient>
             </defs>
 
-            <ellipse class="buddy-shadow" cx="140" cy="278" rx="62" ry="10" fill="var(--foreground)" opacity="0.12"/>
+            <ellipse class="buddy-shadow" cx="140" cy="278" rx="58" ry="9" fill="var(--foreground)" opacity="0.14"/>
 
-            <!-- Yarn ball -->
-            <g transform="translate(198 214)">
-              <g class="yarn-ball">
-                <circle cx="22" cy="22" r="22" fill="var(--primary)"/>
-                <circle cx="22" cy="22" r="22" fill="url(#yarnShine)"/>
-                <path d="M6 18 C14 8, 30 8, 38 18 M5 26 C16 16, 30 16, 40 28 M10 12 C18 22, 28 22, 34 12 M8 32 C20 24, 32 26, 36 34" fill="none" stroke="var(--primary-foreground)" stroke-width="1.4" opacity="0.45" stroke-linecap="round"/>
-                <path class="yarn-thread" d="M2 30 C-18 48, 40 62, 18 78" fill="none" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round"/>
-              </g>
-            </g>
-
-            <!-- Body -->
-            <g class="buddy-body">
-              <ellipse cx="88" cy="228" rx="22" ry="16" fill="var(--primary)"/>
-              <ellipse cx="148" cy="228" rx="22" ry="16" fill="var(--primary)"/>
-              <ellipse cx="118" cy="186" rx="58" ry="52" fill="var(--primary)"/>
-              <ellipse cx="118" cy="186" rx="58" ry="52" fill="url(#stitches)"/>
-              <ellipse cx="118" cy="196" rx="32" ry="26" fill="var(--secondary)"/>
-              <ellipse cx="118" cy="196" rx="32" ry="26" fill="url(#stitches)" opacity="0.5"/>
-
-              <g class="buddy-arm-l">
-                <ellipse cx="58" cy="176" rx="16" ry="22" fill="var(--primary)" transform="rotate(-18 58 176)"/>
-                <ellipse cx="58" cy="176" rx="16" ry="22" fill="url(#stitches)" transform="rotate(-18 58 176)"/>
-              </g>
-              <g class="buddy-arm-r">
-                <ellipse cx="180" cy="172" rx="16" ry="22" fill="var(--primary)" transform="rotate(22 180 172)"/>
-                <ellipse cx="180" cy="172" rx="16" ry="22" fill="url(#stitches)" transform="rotate(22 180 172)"/>
-              </g>
+            <!-- Antenna -->
+            <g class="bot-antenna">
+              <line x1="140" y1="58" x2="140" y2="34" stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round"/>
+              <circle class="bot-antenna__tip" cx="140" cy="28" r="7" fill="var(--primary)"/>
+              <circle cx="140" cy="28" r="3" fill="#fff" opacity="0.85"/>
             </g>
 
             <!-- Head -->
             <g class="buddy-head">
-              <g class="buddy-ear-l">
-                <circle cx="72" cy="78" r="22" fill="var(--primary)"/>
-                <circle cx="72" cy="78" r="22" fill="url(#stitches)"/>
-                <circle cx="74" cy="82" r="12" fill="var(--secondary)"/>
-              </g>
-              <g class="buddy-ear-r">
-                <circle cx="168" cy="78" r="22" fill="var(--primary)"/>
-                <circle cx="168" cy="78" r="22" fill="url(#stitches)"/>
-                <circle cx="166" cy="82" r="12" fill="var(--secondary)"/>
-              </g>
-
-              <circle cx="120" cy="112" r="52" fill="var(--primary)"/>
-              <circle cx="120" cy="112" r="52" fill="url(#stitches)"/>
-
-              <ellipse cx="120" cy="128" rx="26" ry="20" fill="var(--secondary)"/>
-              <ellipse class="buddy-blush" cx="88" cy="122" rx="8" ry="5" fill="var(--accent)" opacity="0.55"/>
-              <ellipse class="buddy-blush" cx="152" cy="122" rx="8" ry="5" fill="var(--accent)" opacity="0.55"/>
-
-              <ellipse cx="120" cy="126" rx="8" ry="6" fill="var(--foreground)"/>
-              <ellipse cx="117" cy="124" rx="2.2" ry="1.4" fill="var(--card)" opacity="0.7"/>
-              <path d="M120 132 Q120 140 112 142" fill="none" stroke="var(--foreground)" stroke-width="1.6" stroke-linecap="round"/>
-              <path d="M120 132 Q120 140 128 142" fill="none" stroke="var(--foreground)" stroke-width="1.6" stroke-linecap="round"/>
-
+              <rect x="78" y="62" width="124" height="88" rx="22" fill="url(#botBody)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+              <rect x="78" y="62" width="124" height="88" rx="22" fill="url(#botGlass)"/>
+              <rect x="96" y="88" width="88" height="40" rx="12" fill="#050505" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
               <g class="buddy-eye buddy-eye-l">
-                <ellipse cx="100" cy="108" rx="7.5" ry="9" fill="var(--foreground)"/>
-                <circle cx="97.5" cy="105" r="2.4" fill="var(--card)"/>
+                <rect x="108" y="98" width="18" height="18" rx="5" fill="var(--primary)"/>
+                <rect x="112" y="102" width="6" height="6" rx="2" fill="#fff" opacity="0.9"/>
               </g>
               <g class="buddy-eye buddy-eye-r">
-                <ellipse cx="140" cy="108" rx="7.5" ry="9" fill="var(--foreground)"/>
-                <circle cx="137.5" cy="105" r="2.4" fill="var(--card)"/>
+                <rect x="154" y="98" width="18" height="18" rx="5" fill="var(--primary)"/>
+                <rect x="158" y="102" width="6" height="6" rx="2" fill="#fff" opacity="0.9"/>
               </g>
-              <path class="buddy-brow" d="M90 94 Q100 90 110 94" fill="none" stroke="var(--foreground)" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-              <path class="buddy-brow" d="M130 94 Q140 88 150 94" fill="none" stroke="var(--foreground)" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+              <path d="M126 136 H154" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
             </g>
 
-            <!-- Floating stitches -->
-            <g class="buddy-sparkles" fill="var(--primary)" opacity="0.7">
-              <circle class="spark spark-1" cx="38" cy="120" r="3.2"/>
-              <circle class="spark spark-2" cx="236" cy="96" r="2.4"/>
-              <circle class="spark spark-3" cx="48" cy="210" r="2"/>
-              <path class="spark spark-4" d="M230 168 l4.5 1.4 -3.1 3.6 .2-4.7 3.4-3.3z" fill="var(--accent)"/>
+            <!-- Neck -->
+            <rect x="128" y="148" width="24" height="14" rx="4" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+
+            <!-- Body -->
+            <g class="buddy-body">
+              <rect x="92" y="160" width="96" height="78" rx="18" fill="url(#botBody)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+              <rect x="92" y="160" width="96" height="78" rx="18" fill="url(#botGlass)"/>
+              <text x="140" y="208" text-anchor="middle" font-family="Outfit, Space Grotesk, sans-serif" font-size="22" font-weight="700" fill="rgba(255,255,255,0.85)">X</text>
+              <circle cx="118" cy="178" r="4" fill="var(--primary)" opacity="0.8"/>
+              <circle cx="140" cy="178" r="4" fill="rgba(255,255,255,0.35)"/>
+              <circle cx="162" cy="178" r="4" fill="rgba(255,255,255,0.2)"/>
+            </g>
+
+            <!-- Arms -->
+            <g class="buddy-arm-l">
+              <rect x="58" y="168" width="30" height="14" rx="7" fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <circle cx="56" cy="175" r="9" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            </g>
+            <g class="buddy-arm-r">
+              <rect x="192" y="168" width="30" height="14" rx="7" fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <circle cx="224" cy="175" r="9" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            </g>
+
+            <!-- Legs -->
+            <rect x="108" y="236" width="22" height="28" rx="8" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+            <rect x="150" y="236" width="22" height="28" rx="8" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+            <ellipse cx="119" cy="266" rx="16" ry="6" fill="#2a2a2a"/>
+            <ellipse cx="161" cy="266" rx="16" ry="6" fill="#2a2a2a"/>
+
+            <!-- Sparks / pixels -->
+            <g class="buddy-sparkles" fill="var(--primary)" opacity="0.75">
+              <rect class="spark spark-1" x="36" y="110" width="8" height="8" rx="2"/>
+              <rect class="spark spark-2" x="236" y="92" width="6" height="6" rx="1.5"/>
+              <rect class="spark spark-3" x="44" y="210" width="5" height="5" rx="1"/>
+              <path class="spark spark-4" d="M228 168 l5 1.5 -3.5 4 .2-5.2 3.8-3.6z" fill="rgba(255,255,255,0.55)"/>
             </g>
           </svg>
         </div>
 
-        <p class="badge">Novelo perdido</p>
+        <p class="badge">Sinal perdido</p>
         <h1 class="font-display">404</h1>
-        <h2>Esse ponto se soltou do tapete.</h2>
+        <h2>Esse link saiu do ar.</h2>
         <p>A página que você procura não existe ou foi movida.</p>
-        <a href="index.html" class="btn btn-primary">Voltar ao ateliê</a>
+        <a href="index.html" class="btn btn-primary">Voltar à Xhybrid</a>
       </div>
     </main>
     <div id="site-footer"></div>

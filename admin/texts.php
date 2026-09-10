@@ -64,6 +64,8 @@ $tabLabels = [
     'faq' => 'FAQ',
 ];
 
+$needsIconLib = $tab === 'home';
+
 admin_header('Textos do site', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
@@ -89,7 +91,54 @@ admin_header('Textos do site', $user);
           <?php if (($def['group'] ?? '') !== $tab) continue; ?>
           <div class="form-group">
             <label for="<?= h($key) ?>"><?= h($def['label']) ?> <span class="admin-charlimit" data-for="<?= h($key) ?>">0/<?= (int) $def['max'] ?></span></label>
-            <?php if ((int) $def['max'] > 80): ?>
+            <?php if (($def['type'] ?? '') === 'icon'): ?>
+              <?php
+                $choices = $def['choices'] ?? feat_icon_catalog();
+                $current = (string) ($values[$key] ?? $def['default'] ?? 'layout');
+                if (!isset($choices[$current])) {
+                    $current = (string) ($def['default'] ?? 'layout');
+                }
+              ?>
+              <input type="hidden" id="<?= h($key) ?>" name="<?= h($key) ?>" value="<?= h($current) ?>">
+              <div
+                class="icon-lib"
+                data-icon-library
+                data-for="<?= h($key) ?>"
+                data-value="<?= h($current) ?>"
+              >
+                <div class="icon-lib__current">
+                  <span class="icon-lib__preview" data-icon-preview aria-hidden="true"></span>
+                  <div class="icon-lib__preview-meta">
+                    <span class="icon-lib__preview-kicker">Selecionado</span>
+                    <span class="icon-lib__preview-label" data-icon-preview-label><?= h((string) ($choices[$current] ?? $current)) ?></span>
+                  </div>
+                </div>
+                <input
+                  type="search"
+                  class="form-input icon-lib__search"
+                  data-icon-search
+                  placeholder="Buscar ícone (ex.: raio, clínica, limpeza…)"
+                  autocomplete="off"
+                >
+                <div class="icon-lib__chips" data-icon-chips role="group" aria-label="Categorias"></div>
+                <div class="icon-lib__grid" data-icon-grid role="listbox" aria-label="Biblioteca de ícones"></div>
+              </div>
+            <?php elseif (($def['type'] ?? '') === 'choice'): ?>
+              <?php
+                $choices = $def['choices'] ?? [];
+                $current = (string) ($values[$key] ?? $def['default'] ?? '');
+                $isAssoc = is_array($choices) && !array_is_list($choices);
+              ?>
+              <select id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input">
+                <?php foreach ($choices as $optKey => $optLabel): ?>
+                  <?php
+                    $optValue = $isAssoc ? (string) $optKey : (string) $optLabel;
+                    $optText = $isAssoc ? (string) $optLabel : (string) $optLabel;
+                  ?>
+                  <option value="<?= h($optValue) ?>"<?= $current === $optValue ? ' selected' : '' ?>><?= h($optText) ?></option>
+                <?php endforeach; ?>
+              </select>
+            <?php elseif ((int) $def['max'] > 80): ?>
               <textarea id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" rows="<?= (int) $def['max'] > 200 ? 4 : 2 ?>" maxlength="<?= (int) $def['max'] ?>"><?= h($values[$key] ?? '') ?></textarea>
             <?php else: ?>
               <input id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" maxlength="<?= (int) $def['max'] ?>" value="<?= h($values[$key] ?? '') ?>">
@@ -99,5 +148,15 @@ admin_header('Textos do site', $user);
         <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Salvar esta seção</button>
       </form>
       <script src="admin-limits.js"></script>
+      <?php if ($needsIconLib): ?>
+      <script>
+        window.FEAT_ICON_META = <?= json_encode([
+            'labels' => feat_icon_catalog(),
+            'categories' => feat_icon_categories(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+      </script>
+      <script src="../js/feat-icons.js"></script>
+      <script src="icon-library.js"></script>
+      <?php endif; ?>
 <?php
 admin_footer();

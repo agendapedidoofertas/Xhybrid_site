@@ -129,7 +129,7 @@ admin_header('Painel', $user);
         <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
           <p class="eyebrow">Catálogo</p>
           <h1 class="font-display">Imagens</h1>
-          <p>Slots fixos: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code> + vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>. Demais entram na galeria.</p>
+          <p>Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>casal</code> + vídeos Signature. Editores usam link do Google Drive; upload de arquivo só para admin.</p>
         </header>
         <a href="image_edit.php" class="btn btn-primary">Adicionar imagem</a>
       </div>
