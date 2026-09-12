@@ -27,6 +27,90 @@ if ($blockedByPath || $blockedByUri) {
     exit;
 }
 
+/**
+ * Lead público: /{slug}/{leadId}{letra}[/página]
+ * Ex.: /eletricista-silva/15f  ou  /eletricista-silva/15f/sobre.html
+ * Inativo/ausente → 404.html; ativo → HTML com assets absolutos.
+ */
+if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, $m)) {
+    require_once __DIR__ . '/lib/db.php';
+    require_once __DIR__ . '/lib/published_sites.php';
+
+    $slug = strtolower($m[1]);
+    $leadId = (int) $m[2];
+    $letter = strtolower($m[3]);
+    $rest = isset($m[4]) ? trim($m[4], '/') : '';
+
+    try {
+        $row = published_site_find_public(db(), $slug, $leadId, $letter);
+    } catch (Throwable $e) {
+        $row = null;
+    }
+
+    if (!$row || (int) ($row['site_active'] ?? 0) !== 1) {
+        http_response_code(404);
+        header('Content-Type: text/html; charset=utf-8');
+        $notFound = __DIR__ . '/404.html';
+        if (is_file($notFound)) {
+            readfile($notFound);
+        } else {
+            echo 'Not Found';
+        }
+        exit;
+    }
+
+    $page = 'index.html';
+    if ($rest !== '') {
+        $baseName = basename($rest);
+        if (preg_match('/^[a-z0-9_-]+\.html$/i', $baseName) && is_file(__DIR__ . '/' . $baseName)) {
+            $page = $baseName;
+        } elseif ($rest !== '' && $rest !== 'index.html') {
+            http_response_code(404);
+            header('Content-Type: text/html; charset=utf-8');
+            $notFound = __DIR__ . '/404.html';
+            if (is_file($notFound)) {
+                readfile($notFound);
+            } else {
+                echo 'Not Found';
+            }
+            exit;
+        }
+    }
+
+    $htmlPath = __DIR__ . DIRECTORY_SEPARATOR . $page;
+    $html = file_get_contents($htmlPath);
+    if ($html === false) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Failed to load page';
+        exit;
+    }
+
+    // Settings do lead no HTML (evita flash de textos da agência: "Projetos", etc.)
+    $leadSettings = published_site_settings_overlay($row);
+    $leadBoot = '<style id="lead-boot-style">html.lead-booting body{visibility:hidden!important}</style>'
+        . '<script>'
+        . 'document.documentElement.classList.add("lead-booting");'
+        . 'window.__xhybridLeadPath=' . json_encode([
+            'slug' => $slug,
+            'leadId' => $leadId,
+            'code' => $letter,
+        ], JSON_UNESCAPED_UNICODE) . ';'
+        . 'window.__xhybridLeadSettings=' . json_encode(
+            $leadSettings,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        ) . ';'
+        . 'setTimeout(function(){document.documentElement.classList.remove("lead-booting");},4000);'
+        . '</script>';
+    $html = preg_replace('/<head([^>]*)>/i', '<head$1>' . $leadBoot, $html, 1) ?? ($leadBoot . $html);
+    $html = published_site_absolutize_html($html);
+
+    header('Content-Type: text/html; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo $html;
+    exit;
+}
+
 $path = __DIR__ . $uri;
 
 if (is_dir($path)) {

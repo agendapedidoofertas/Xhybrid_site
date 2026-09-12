@@ -125,22 +125,26 @@ function resolveAppearance() {
   if (!isLookId(look)) look = DEFAULT_LOOK;
 
   const preset = getLookPreset(look);
+  const themeFromSite = site("appearance_theme");
+  const fontFromSite = site("appearance_font");
+  const layoutFromSite = site("appearance_layout");
+  const mediaFromSite = site("appearance_media");
   return {
     look: preset.id,
-    theme: preset.theme,
-    font: preset.font,
-    layout: preset.layout,
-    media: preset.media,
+    theme: isThemeId(themeFromSite) ? themeFromSite : preset.theme,
+    font: isFontId(fontFromSite) ? fontFromSite : preset.font,
+    layout: isLayoutId(layoutFromSite) ? layoutFromSite : preset.layout,
+    media: isMediaId(mediaFromSite) ? mediaFromSite : preset.media,
   };
 }
 
 function applyAppearance(appearance, { persist = true } = {}) {
   const look = isLookId(appearance.look) ? appearance.look : DEFAULT_LOOK;
   const preset = getLookPreset(look);
-  const theme = preset.theme;
-  const font = preset.font;
-  const layout = preset.layout;
-  const media = preset.media;
+  const theme = isThemeId(appearance.theme) ? appearance.theme : preset.theme;
+  const font = isFontId(appearance.font) ? appearance.font : preset.font;
+  const layout = isLayoutId(appearance.layout) ? appearance.layout : preset.layout;
+  const media = isMediaId(appearance.media) ? appearance.media : preset.media;
 
   applyLook(look);
   applyTheme(theme);
@@ -154,6 +158,8 @@ function applyAppearance(appearance, { persist = true } = {}) {
 }
 
 function setupAppearancePreviewListener() {
+  if (window.__xhybridAppearanceListenerBound) return;
+  window.__xhybridAppearanceListenerBound = true;
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin) return;
     const data = event.data;
@@ -180,6 +186,34 @@ function setupAppearancePreviewListener() {
   }
 }
 
+function isLeadSite() {
+  try {
+    return !!(window.__xhybridLeadPath && window.__xhybridLeadPath.leadId);
+  } catch (_) {
+    return false;
+  }
+}
+
+/** Logo do header: na vitrine usa imagem da agência; no lead usa nome (ou logo própria). */
+function resolveLogoInner(brand) {
+  const name = brand || "Xhybrid";
+  const leadLogo = isLeadSite() ? String(site("logo_url") || "").trim() : "";
+  if (leadLogo) {
+    return `<img class="site-logo__img" src="${escapeHtml(leadLogo)}" alt="${escapeHtml(name)}" width="140" height="40" referrerpolicy="no-referrer">`;
+  }
+  // Lead publicado: nunca herdar logo da agência Xhybrid
+  if (isLeadSite()) {
+    return escapeHtml(name);
+  }
+  if (IMAGES.logo) {
+    return `<img class="site-logo__img" src="${escapeHtml(IMAGES.logo)}" alt="${escapeHtml(name)}" width="140" height="40" referrerpolicy="no-referrer">`;
+  }
+  if (name.toLowerCase() === "xhybrid") {
+    return `X<span class="text-primary italic">hybrid</span>`;
+  }
+  return escapeHtml(name);
+}
+
 function renderHeader(currentPage) {
   const navLinks = getNavLinks().map((l) => {
     const active = l.page === currentPage ? " is-active" : "";
@@ -192,19 +226,12 @@ function renderHeader(currentPage) {
   }).join("");
 
   const brand = site("brand_name") || "Xhybrid";
-  let logoInner;
-  if (IMAGES.logo) {
-    logoInner = `<img class="site-logo__img" src="${escapeHtml(IMAGES.logo)}" alt="${escapeHtml(brand)}" width="140" height="40" referrerpolicy="no-referrer">`;
-  } else if (brand.toLowerCase() === "xhybrid") {
-    logoInner = `X<span class="text-primary italic">hybrid</span>`;
-  } else {
-    logoInner = escapeHtml(brand);
-  }
+  const logoInner = resolveLogoInner(brand);
 
   return `
     <header class="site-header">
       <div class="container site-header__inner">
-        <a href="index.html" class="site-logo" aria-label="${escapeHtml(brand)} — página inicial">
+        <a href="${leadPageHref("index.html")}" class="site-logo" aria-label="${escapeHtml(brand)} — página inicial">
           ${logoInner}
         </a>
         <nav class="site-nav" aria-label="Navegação principal">${navLinks}</nav>
@@ -232,8 +259,8 @@ function renderFooter() {
   const maps = site("maps_url").trim();
   const brand = site("brand_name") || "Xhybrid";
   const hoursTitle = site("footer_hours_title");
-  const hoursLines = ["footer_hours_line1", "footer_hours_line2", "footer_hours_line3"]
-    .map((key) => site(key).trim())
+  const hoursLines = [1, 2, 3, 4, 5, 6, 7]
+    .map((n) => site("footer_hours_line" + n).trim())
     .filter(Boolean)
     .map((line) => `<li>${escapeHtml(line)}</li>`)
     .join("");
@@ -247,7 +274,7 @@ function renderFooter() {
     : "";
 
   const brandHtml =
-    brand.toLowerCase() === "xhybrid"
+    !isLeadSite() && brand.toLowerCase() === "xhybrid"
       ? `X<span class="text-primary italic">hybrid</span>`
       : escapeHtml(brand);
 
@@ -270,9 +297,9 @@ function renderFooter() {
         <nav aria-label="Links do rodapé">
           <p class="site-footer__heading">Navegue</p>
           <ul class="site-footer__links">
-            ${pageIsEnabled("sobre") ? `<li><a href="sobre.html">${escapeHtml(site("footer_link_sobre"))}</a></li>` : ""}
-            ${pageIsEnabled("galeria") ? `<li><a href="galeria.html">${escapeHtml(site("nav_galeria"))}</a></li>` : ""}
-            ${pageIsEnabled("contato") ? `<li><a href="contato.html">${escapeHtml(site("nav_contato"))}</a></li>` : ""}
+            ${pageIsEnabled("sobre") ? `<li><a href="${leadPageHref("sobre.html")}">${escapeHtml(site("footer_link_sobre"))}</a></li>` : ""}
+            ${pageIsEnabled("galeria") ? `<li><a href="${leadPageHref("galeria.html")}">${escapeHtml(site("nav_galeria"))}</a></li>` : ""}
+            ${pageIsEnabled("contato") ? `<li><a href="${leadPageHref("contato.html")}">${escapeHtml(site("nav_contato"))}</a></li>` : ""}
           </ul>
         </nav>
         <div>
@@ -312,7 +339,7 @@ function setupLayout(currentPage) {
   if (footerMount) footerMount.innerHTML = renderFooter();
   if (fabMount) fabMount.innerHTML = renderFabWhatsApp();
 
-  applyAppearance(resolveAppearance());
+  applyAppearance(resolveAppearance(), { persist: !window.__xhybridLeadPath });
   setupAppearancePreviewListener();
   setupMobileMenu();
 }
@@ -634,6 +661,46 @@ function setupContactForm() {
     status.hidden = false;
     status.textContent = "Enviando…";
     status.classList.remove("form-status--error", "form-status--ok");
+
+    // Honeypot: bots
+    if (website) {
+      status.textContent = "Mensagem enviada. Obrigado!";
+      status.classList.add("form-status--ok");
+      form.reset();
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    if (!nome || !mensagem) {
+      status.textContent = "Preencha nome e mensagem.";
+      status.classList.add("form-status--error");
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    const waDigits = String(site("whatsapp_number") || "").replace(/\D+/g, "");
+
+    // Preferência: WhatsApp do site/lead (número publicado) — sem SMTP
+    if (waDigits) {
+      try {
+        const brand = site("brand_name") || "site";
+        const text =
+          `Olá! Vim pelo site de ${brand}.\n\n` +
+          `Nome: ${nome}\n` +
+          `Mensagem: ${mensagem}`;
+        const waUrl = `https://wa.me/${waDigits}?text=${encodeURIComponent(text)}`;
+        status.textContent = "Abrindo WhatsApp…";
+        status.classList.add("form-status--ok");
+        window.open(waUrl, "_blank", "noopener,noreferrer");
+        form.reset();
+      } catch (err) {
+        status.textContent = err.message || "Não foi possível abrir o WhatsApp.";
+        status.classList.add("form-status--error");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+      return;
+    }
 
     try {
       const res = await fetch(apiUrl("api/contact.php"), {
@@ -983,9 +1050,98 @@ function apiUrl(file) {
   return file.replace(/^\//, "");
 }
 
+/** Path público de lead: /{slug}/{leadId}{letra}  ex.: /eletricista-silva/15f */
+function parsePublishedLeadPath() {
+  try {
+    if (window.__xhybridLeadPath && typeof window.__xhybridLeadPath === "object") {
+      const p = window.__xhybridLeadPath;
+      if (p.slug && p.code && p.leadId) {
+        return {
+          slug: String(p.slug).toLowerCase(),
+          code: String(p.code).toLowerCase(),
+          leadId: Number(p.leadId) || 0,
+        };
+      }
+    }
+    const path = window.location.pathname || "";
+    const m = path.match(/^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/(\d+)([a-z])(?:\/|$)/i);
+    if (!m) return null;
+    return {
+      slug: m[1].toLowerCase(),
+      leadId: Number(m[2]) || 0,
+      code: m[3].toLowerCase(),
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+async function fetchPublishedOverlay(lead) {
+  const url =
+    apiUrl("api/published_site.php") +
+    "?slug=" +
+    encodeURIComponent(lead.slug) +
+    "&code=" +
+    encodeURIComponent(lead.code) +
+    "&lead_id=" +
+    encodeURIComponent(String(lead.leadId || ""));
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("published " + res.status);
+  const data = await res.json();
+  if (!data || typeof data !== "object" || data.error || !data.settings) {
+    throw new Error("published inválido");
+  }
+  return data.settings;
+}
+
+/** Reescreve links .html do HTML estático para permanecer no path do lead. */
+function rewriteLeadInternalLinks() {
+  const base = leadPublicBase();
+  if (!base) return;
+  document.querySelectorAll('a[href]').forEach((a) => {
+    const href = a.getAttribute("href") || "";
+    if (!href || /^(https?:|mailto:|tel:|#|\/\/)/i.test(href)) return;
+    const clean = href.replace(/^\.\//, "").replace(/^\//, "");
+    if (!/\.html(?:[?#].*)?$/i.test(clean) && clean !== "index.html") return;
+    // Já no path do lead
+    if (href.startsWith(base)) return;
+    const file = clean.split(/[?#]/)[0] || "index.html";
+    a.setAttribute("href", leadPageHref(file));
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   let apiRows = [];
   let apiOk = false;
+  const leadPath = parsePublishedLeadPath();
+  window.__xhybridLeadPath = leadPath || window.__xhybridLeadPath || null;
+
+  function revealLeadPage() {
+    document.documentElement.classList.remove("lead-booting");
+  }
+
+  function paintLeadShell() {
+    syncContactGlobals();
+    const page = document.body.dataset.page || "index";
+    setupLayout(page);
+    rewriteLeadInternalLinks();
+    applyBrandMeta();
+    applySiteTexts();
+    if (typeof applyFeatureIcons === "function") {
+      applyFeatureIcons();
+    }
+    applySections();
+    revealLeadPage();
+  }
+
+  // Lead: overlay do router já no HTML — pinta textos certos e revela (sem flash "Projetos")
+  if (leadPath && window.__xhybridLeadSettings && typeof window.__xhybridLeadSettings === "object") {
+    applySiteSettings(window.__xhybridLeadSettings);
+    paintLeadShell();
+  }
 
   const [imagesResult, settingsResult, servicesResult] = await Promise.allSettled([
     fetch(apiUrl("api/images.php"), {
@@ -1027,9 +1183,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     applyFallbackCatalog();
   }
 
-  if (settingsResult.status === "fulfilled") {
+  // Vitrine: settings da agência. Lead: não misturar agência (evita flash Xhybrid/"Projetos")
+  if (!leadPath && settingsResult.status === "fulfilled") {
     applySiteSettings(settingsResult.value);
   }
+
+  if (leadPath) {
+    if (window.__xhybridLeadSettings && typeof window.__xhybridLeadSettings === "object") {
+      applySiteSettings(window.__xhybridLeadSettings);
+    } else {
+      try {
+        const overlay = await fetchPublishedOverlay(leadPath);
+        applySiteSettings(overlay);
+      } catch (_) {
+        /* sem overlay */
+      }
+      paintLeadShell();
+    }
+  }
+
   syncContactGlobals();
 
   if (servicesResult.status === "fulfilled") {
@@ -1046,11 +1218,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const page = document.body.dataset.page || "index";
   setupLayout(page);
+  rewriteLeadInternalLinks();
   document.querySelectorAll(".site-logo__img, .product-card img, .gallery__item img").forEach((img) => {
     attachImageFallback(img);
   });
   applyVideos();
-  // Reaplica imagens depois dos vídeos para não “ressuscitar” src/poster de desativadas
   applyImages();
   applySiteTexts();
   if (typeof applyFeatureIcons === "function") {
@@ -1064,4 +1236,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupContactForm();
   initRevealAnimations();
   setupPageTransitions();
+  revealLeadPage();
 });

@@ -198,6 +198,49 @@ function db_migrate(PDO $pdo): void
     );
 
     db_migrate_image_slugs($pdo);
+    db_migrate_published_sites($pdo);
+}
+
+/** Sites de leads publicados pelo CRM (cópia independente da vitrine). */
+function db_migrate_published_sites(PDO $pdo): void
+{
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS published_sites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            crm_lead_id INTEGER NOT NULL UNIQUE,
+            slug TEXT NOT NULL DEFAULT \'\',
+            url_code TEXT NOT NULL DEFAULT \'\',
+            site_active INTEGER NOT NULL DEFAULT 0,
+            company_name TEXT NOT NULL DEFAULT \'\',
+            category TEXT NOT NULL DEFAULT \'\',
+            phone TEXT NOT NULL DEFAULT \'\',
+            whatsapp TEXT NOT NULL DEFAULT \'\',
+            email TEXT NOT NULL DEFAULT \'\',
+            address_street TEXT NOT NULL DEFAULT \'\',
+            address_number TEXT NOT NULL DEFAULT \'\',
+            address_complement TEXT NOT NULL DEFAULT \'\',
+            neighborhood TEXT NOT NULL DEFAULT \'\',
+            city TEXT NOT NULL DEFAULT \'\',
+            state TEXT NOT NULL DEFAULT \'\',
+            postal_code TEXT NOT NULL DEFAULT \'\',
+            maps_url TEXT NOT NULL DEFAULT \'\',
+            website_url TEXT NOT NULL DEFAULT \'\',
+            has_website INTEGER NOT NULL DEFAULT 0,
+            instagram_url TEXT NOT NULL DEFAULT \'\',
+            facebook_url TEXT NOT NULL DEFAULT \'\',
+            opening_hours TEXT NOT NULL DEFAULT \'\',
+            site_preset TEXT NOT NULL DEFAULT \'eletricista\',
+            site_look TEXT NOT NULL DEFAULT \'\',
+            site_theme TEXT NOT NULL DEFAULT \'\',
+            site_font TEXT NOT NULL DEFAULT \'\',
+            site_layout TEXT NOT NULL DEFAULT \'\',
+            site_media TEXT NOT NULL DEFAULT \'\',
+            payload_json TEXT NOT NULL DEFAULT \'\',
+            updated_at TEXT NOT NULL
+        )'
+    );
+    $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_published_slug_code ON published_sites(slug, url_code)');
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_published_active ON published_sites(site_active)');
 }
 
 /** Renomeia slugs legados → nomes Xhybrid em bancos já existentes */

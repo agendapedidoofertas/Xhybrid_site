@@ -30,6 +30,10 @@ const SITE_DEFAULTS = {
   footer_hours_line1: "Segunda a sexta: 9h – 18h",
   footer_hours_line2: "Sábado: 9h – 13h",
   footer_hours_line3: "Domingo: fechado",
+  footer_hours_line4: "",
+  footer_hours_line5: "",
+  footer_hours_line6: "",
+  footer_hours_line7: "",
   appearance_theme: "preto",
   appearance_font: "saas",
   appearance_layout: "soft",
@@ -93,6 +97,7 @@ const SITE_DEFAULTS = {
   contact_form_intro: "Preencha abaixo e sua mensagem abre direto no seu e-mail.",
   contact_form_btn: "Enviar mensagem",
   brand_name: "Xhybrid",
+  logo_url: "",
   brand_tagline: "Sites, manutenção e tecnologia",
   brand_city: "",
   brand_seo_title: "Xhybrid — Criação de sites, manutenção e tecnologia",
@@ -234,18 +239,38 @@ function pageIsEnabled(page) {
 
 function getNavLinks() {
   const links = [
-    { href: "index.html", label: site("nav_index"), page: "index" },
+    { href: leadPageHref("index.html"), label: site("nav_index"), page: "index" },
   ];
   if (pageIsEnabled("sobre")) {
-    links.push({ href: "sobre.html", label: site("nav_sobre"), page: "sobre" });
+    links.push({ href: leadPageHref("sobre.html"), label: site("nav_sobre"), page: "sobre" });
   }
   if (pageIsEnabled("galeria")) {
-    links.push({ href: "galeria.html", label: site("nav_galeria"), page: "galeria" });
+    links.push({ href: leadPageHref("galeria.html"), label: site("nav_galeria"), page: "galeria" });
   }
   if (pageIsEnabled("contato")) {
-    links.push({ href: "contato.html", label: site("nav_contato"), page: "contato" });
+    links.push({ href: leadPageHref("contato.html"), label: site("nav_contato"), page: "contato" });
   }
   return links;
+}
+
+/** Base pública do lead: /{slug}/{leadId}{letra} — ou "" na vitrine. */
+function leadPublicBase() {
+  try {
+    const p = window.__xhybridLeadPath;
+    if (p && p.slug && p.code && p.leadId) {
+      return "/" + String(p.slug).toLowerCase() + "/" + String(p.leadId) + String(p.code).toLowerCase();
+    }
+  } catch (_) { /* ignore */ }
+  return "";
+}
+
+/** Link de página preservando o path do lead quando ativo. */
+function leadPageHref(file) {
+  const name = String(file || "index.html").replace(/^\//, "");
+  const base = leadPublicBase();
+  if (!base) return name;
+  if (name === "index.html" || name === "") return base;
+  return base + "/" + name;
 }
 
 /** Looks liberados conforme plano / flag premium */
