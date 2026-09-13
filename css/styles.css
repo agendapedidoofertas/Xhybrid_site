@@ -2236,13 +2236,13 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
 .buddy-shadow { transform-box: fill-box; transform-origin: center; animation: buddyShadow 4.2s ease-in-out infinite; }
 .buddy-head { transform-box: fill-box; transform-origin: 50% 90%; animation: buddyTilt 5.5s ease-in-out infinite; }
 .buddy-arm-l {
-  transform-box: fill-box;
-  transform-origin: 55% 10%;
+  transform-box: view-box;
+  transform-origin: 84px 174px;
   animation: armWaveL 3.8s ease-in-out infinite;
 }
 .buddy-arm-r {
-  transform-box: fill-box;
-  transform-origin: 45% 10%;
+  transform-box: view-box;
+  transform-origin: 196px 174px;
   animation: armWaveR 3.8s ease-in-out infinite;
 }
 .buddy-eye { transform-box: fill-box; transform-origin: center; animation: blink 4.8s ease-in-out infinite; }
@@ -2254,15 +2254,15 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
 .spark-3 { animation: sparkFloat 3.2s ease-in-out infinite 1.1s; }
 .spark-4 { animation: sparkTwirl 5s ease-in-out infinite; }
 
-/* Robô do QR: só o braço balança; pinça é SMIL no SVG */
+/* Robô do QR: braço balança; pinça estática (sem abrir/fechar) */
 .pix-bot__arm--l {
   transform-box: fill-box;
-  transform-origin: 65% 8%;
+  transform-origin: 100% 50%;
   animation: pixArmL 3.4s ease-in-out infinite;
 }
 .pix-bot__arm--r {
   transform-box: fill-box;
-  transform-origin: 35% 8%;
+  transform-origin: 0% 50%;
   animation: pixArmR 3.4s ease-in-out infinite;
 }
 
@@ -2449,14 +2449,6 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
 @keyframes pixArmR {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(6deg); }
-}
-@keyframes clawOpenU {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-22deg); }
-}
-@keyframes clawOpenD {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(22deg); }
 }
 @keyframes blink {
   0%, 42%, 48%, 100% { transform: scaleY(1); }

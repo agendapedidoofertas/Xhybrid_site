@@ -8,6 +8,7 @@ require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/published_sites.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
+require_once dirname(__DIR__) . '/lib/permissions.php';
 
 auth_boot_session();
 $user = require_role_admin();
@@ -45,6 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $tier = plan_normalize((string) ($site['plan_tier'] ?? 'basic'));
                     if ($tier === 'basic') {
                         throw new InvalidArgumentException('Plano Basic não possui login de cliente.');
+                    }
+                    if (!permissions_plan_allows(db(), $tier, 'login')) {
+                        throw new InvalidArgumentException('Este plano está com login de cliente desligado na matriz de permissões.');
+                    }
+                    if ($role === 'client_medium' && $tier !== 'medium') {
+                        throw new InvalidArgumentException('client_medium exige plano Medium no lead.');
                     }
                     if ($role === 'client_pro' && $tier !== 'pro') {
                         throw new InvalidArgumentException('client_pro exige plano Pro no lead.');
@@ -110,14 +117,25 @@ admin_header('Usuários', $user);
             <label for="confirm">Confirmar senha</label>
             <input id="confirm" name="confirm" type="password" class="form-input" required minlength="8" autocomplete="new-password">
           </div>
-          <div class="form-group">
-            <label for="role">Tipo</label>
+          <div class="form-group form-group--role-help">
+            <label for="role" class="admin-label-with-help">
+              Tipo
+              <button type="button" class="admin-help-btn" id="role-help-btn" aria-expanded="false" aria-controls="role-help-panel" title="Ajuda deste tipo">
+                <span class="admin-help-btn__mark" aria-hidden="true">?</span>
+                <span class="admin-sr-only">Ajuda sobre o tipo selecionado</span>
+              </button>
+            </label>
             <select id="role" name="role" class="form-input">
               <option value="editor">Editor (staff)</option>
               <option value="admin">Admin (staff)</option>
               <option value="client_medium">Cliente Medium</option>
               <option value="client_pro">Cliente Pro</option>
             </select>
+            <div class="admin-help-tour" id="role-help-panel" hidden>
+              <p class="admin-help-tour__title" id="role-help-title">Editor (staff)</p>
+              <p class="admin-help-tour__body" id="role-help-body">Staff: edita vitrine e leads. Sem gestão.</p>
+              <p class="admin-help-tour__note">Basic não gera login de cliente. Cliente só o lead vinculado.</p>
+            </div>
           </div>
           <div class="form-group">
             <label for="crm_lead_id">Lead CRM (obrigatório para cliente)</label>
@@ -177,5 +195,74 @@ admin_header('Usuários', $user);
           </tbody>
         </table>
       </div>
+<script>
+(function () {
+  var btn = document.getElementById('role-help-btn');
+  var panel = document.getElementById('role-help-panel');
+  var select = document.getElementById('role');
+  var titleEl = document.getElementById('role-help-title');
+  var bodyEl = document.getElementById('role-help-body');
+  if (!btn || !panel || !select || !titleEl || !bodyEl) return;
+
+  var tips = {
+    editor: {
+      title: 'Editor (staff)',
+      body: 'Staff: edita vitrine e leads. Sem gestão.'
+    },
+    admin: {
+      title: 'Admin (staff)',
+      body: 'Staff total: usuários, backup, plano, marca…'
+    },
+    client_medium: {
+      title: 'Cliente Medium',
+      body: 'Só o próprio site (contato/textos). Sem Marca.'
+    },
+    client_pro: {
+      title: 'Cliente Pro',
+      body: 'Medium + aparência, preset, marca, seções.'
+    }
+  };
+
+  function syncTip() {
+    var tip = tips[select.value] || tips.editor;
+    titleEl.textContent = tip.title;
+    bodyEl.textContent = tip.body;
+  }
+
+  function closeHelp() {
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function openHelp() {
+    syncTip();
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+
+  syncTip();
+
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (panel.hidden) openHelp();
+    else closeHelp();
+  });
+
+  select.addEventListener('change', function () {
+    syncTip();
+    if (!panel.hidden) openHelp();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!panel.hidden && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+      closeHelp();
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeHelp();
+  });
+})();
+</script>
 <?php
 admin_footer();

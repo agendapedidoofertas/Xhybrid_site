@@ -24,6 +24,17 @@ if ($leadId !== null) {
         admin_footer();
         exit;
     }
+    require_once dirname(__DIR__) . '/lib/plans.php';
+    $tier = plan_normalize((string) ($leadRow['plan_tier'] ?? 'basic'));
+    // Cliente: Marca só no Pro. Staff continua podendo ajustar.
+    if (user_is_client($user) && !plan_allows_brand_edit($tier)) {
+        http_response_code(403);
+        admin_header('Marca indisponível', $user);
+        echo '<p class="admin-flash admin-flash--error">O plano Medium não inclui edição de Marca (nome da empresa). Fale com a agência ou faça upgrade para Pro.</p>';
+        echo '<p><a href="lead_hub.php?lead_id=' . (int) $leadId . '">← Hub do lead</a></p>';
+        admin_footer();
+        exit;
+    }
     lead_admin_set_context($leadId);
 } else {
     $user = require_role_admin();

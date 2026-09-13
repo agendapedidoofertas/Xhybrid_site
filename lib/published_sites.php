@@ -375,3 +375,21 @@ function published_site_update_admin(PDO $pdo, int $crmLeadId, array $fields): a
     }
     return $updated;
 }
+
+/**
+ * Hard delete só para scripts de teste/manutenção.
+ * Remove a trigger, apaga, e recria a proteção.
+ */
+function published_site_purge(PDO $pdo, int $crmLeadId): void
+{
+    if ($crmLeadId <= 0) {
+        return;
+    }
+    require_once __DIR__ . '/db.php';
+    $pdo->exec('DROP TRIGGER IF EXISTS published_sites_block_hard_delete');
+    try {
+        $pdo->prepare('DELETE FROM published_sites WHERE crm_lead_id = :id')->execute([':id' => $crmLeadId]);
+    } finally {
+        db_ensure_published_sites_block_delete_trigger($pdo);
+    }
+}

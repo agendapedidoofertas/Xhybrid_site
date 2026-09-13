@@ -13,7 +13,7 @@ require_once dirname(__DIR__) . '/lib/uploads.php';
 require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_page('index');
+$user = require_page('images');
 $canUpload = user_is_admin($user) || user_is_client($user);
 
 $leadId = lead_admin_request_id();

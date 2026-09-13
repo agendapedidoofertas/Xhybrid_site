@@ -16,7 +16,7 @@ if (user_count() === 0) {
     exit;
 }
 
-$user = require_page('index');
+$user = require_page('images');
 $isAdmin = user_is_admin($user);
 $isStaff = user_is_staff($user);
 $canManage = $isAdmin || user_is_client($user);

@@ -9,6 +9,7 @@ require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/published_sites.php';
 require_once dirname(__DIR__) . '/lib/crm_bridge.php';
 require_once dirname(__DIR__) . '/lib/security.php';
+require_once dirname(__DIR__) . '/lib/plans.php';
 
 auth_boot_session();
 $user = require_admin();
@@ -23,6 +24,9 @@ if (!$row) {
     admin_footer();
     exit;
 }
+
+$planTier = plan_normalize((string) ($row['plan_tier'] ?? 'basic'));
+$canEditBrand = user_is_staff($user) || plan_allows_brand_edit($planTier);
 
 $lookBundles = [
     'xhybrid-signature' => ['theme' => 'preto', 'font' => 'saas', 'layout' => 'soft', 'media' => 'classic'],
@@ -71,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bundle = $lookBundles[$look];
 
     $fields = [
-        'company_name' => trim((string) ($_POST['company_name'] ?? '')),
         'phone' => trim((string) ($_POST['phone'] ?? '')),
         'whatsapp' => trim((string) ($_POST['whatsapp'] ?? '')),
         'email' => trim((string) ($_POST['email'] ?? '')),
@@ -92,18 +95,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'site_layout' => $bundle['layout'],
         'site_media' => $bundle['media'],
         'payload' => [
-            'brand_tagline' => trim((string) ($_POST['brand_tagline'] ?? '')),
-            'brand_short' => trim((string) ($_POST['brand_short'] ?? '')),
-            'brand_tag' => trim((string) ($_POST['brand_tag'] ?? '')),
             'home_hero_title_1' => trim((string) ($_POST['home_hero_title_1'] ?? '')),
             'home_hero_title_2' => trim((string) ($_POST['home_hero_title_2'] ?? '')),
             'home_hero_text' => trim((string) ($_POST['home_hero_text'] ?? '')),
             'whatsapp_message' => trim((string) ($_POST['whatsapp_message'] ?? '')),
             'logo_url' => url_http_only(trim((string) ($_POST['logo_url'] ?? ''))),
-            'brand_seo_title' => trim((string) ($_POST['brand_seo_title'] ?? '')),
-            'brand_seo_description' => trim((string) ($_POST['brand_seo_description'] ?? '')),
         ],
     ];
+    if ($canEditBrand) {
+        $fields['company_name'] = trim((string) ($_POST['company_name'] ?? ''));
+        $fields['payload']['brand_tagline'] = trim((string) ($_POST['brand_tagline'] ?? ''));
+        $fields['payload']['brand_short'] = trim((string) ($_POST['brand_short'] ?? ''));
+        $fields['payload']['brand_tag'] = trim((string) ($_POST['brand_tag'] ?? ''));
+        $fields['payload']['brand_seo_title'] = trim((string) ($_POST['brand_seo_title'] ?? ''));
+        $fields['payload']['brand_seo_description'] = trim((string) ($_POST['brand_seo_description'] ?? ''));
+    }
 
     try {
         $row = published_site_update_admin(db(), $leadId, $fields);
@@ -180,9 +186,12 @@ admin_header('Lead #' . $leadId, $user);
         <input type="hidden" name="lead_id" value="<?= (int) $leadId ?>">
 
         <h2 class="admin-appearance__label">Contato</h2>
+        <?php if (!$canEditBrand): ?>
+          <p class="text-muted" style="font-size:.875rem;margin:0 0 1rem;">Nome da empresa e Marca são definidos pela agência no plano Medium.</p>
+          <p class="muted" style="margin:0 0 1rem;"><strong><?= h((string) ($row['company_name'] ?? '')) ?></strong></p>
+        <?php endif; ?>
         <?php
         $contactFields = [
-            'company_name' => 'Nome da empresa',
             'whatsapp' => 'WhatsApp',
             'phone' => 'Telefone',
             'email' => 'E-mail',
@@ -197,6 +206,9 @@ admin_header('Lead #' . $leadId, $user);
             'instagram_url' => 'Instagram (URL)',
             'facebook_url' => 'Facebook (URL)',
         ];
+        if ($canEditBrand) {
+            $contactFields = ['company_name' => 'Nome da empresa'] + $contactFields;
+        }
         foreach ($contactFields as $key => $label):
         ?>
           <div class="form-group">
@@ -223,17 +235,22 @@ admin_header('Lead #' . $leadId, $user);
         <h2 class="admin-appearance__label" style="margin-top:1.5rem;">Textos do site</h2>
         <?php
         $textFields = [
-            'brand_short' => 'Logo — marca curta (header)',
-            'brand_tag' => 'Logo — complemento (accent)',
-            'brand_tagline' => 'Slogan',
             'home_hero_title_1' => 'Hero — linha 1',
             'home_hero_title_2' => 'Hero — linha 2',
             'home_hero_text' => 'Hero — texto',
             'whatsapp_message' => 'Mensagem padrão WhatsApp',
             'logo_url' => 'Logo (URL)',
-            'brand_seo_title' => 'SEO — título',
-            'brand_seo_description' => 'SEO — descrição',
         ];
+        if ($canEditBrand) {
+            $textFields = [
+                'brand_short' => 'Logo — marca curta (header)',
+                'brand_tag' => 'Logo — complemento (accent)',
+                'brand_tagline' => 'Slogan',
+            ] + $textFields + [
+                'brand_seo_title' => 'SEO — título',
+                'brand_seo_description' => 'SEO — descrição',
+            ];
+        }
         foreach ($textFields as $key => $label):
             $isLong = in_array($key, ['home_hero_text', 'brand_seo_description', 'whatsapp_message'], true);
             $value = $val($row, $payload, $overlay, $key);

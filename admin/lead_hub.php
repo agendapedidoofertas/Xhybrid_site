@@ -33,7 +33,7 @@ $active = (int) ($row['site_active'] ?? 0) === 1;
 $qs = lead_admin_qs($leadId);
 $plan = (string) ($row['plan_tier'] ?? 'basic');
 
-$links = admin_lead_hub_links($user);
+$links = admin_lead_hub_links($user, $plan);
 
 admin_header('Lead #' . $leadId, $user);
 $backLeads = user_is_staff($user);
@@ -55,6 +55,7 @@ $backLeads = user_is_staff($user);
             · <a href="<?= h($path) ?>" target="_blank" rel="noopener"><?= h($path) ?></a>
           <?php endif; ?>
         </p>
+        <p class="text-muted roboto-hub-hint">Alguma dúvida? Pergunte ao Roboto.</p>
       </header>
 
       <div class="admin-hub-grid">

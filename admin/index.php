@@ -38,6 +38,7 @@ admin_header('Painel', $user);
         <p class="eyebrow">Agência</p>
         <h1 class="font-display">Painel</h1>
         <p>Escolha uma área para editar a vitrine Xhybrid.</p>
+        <p class="text-muted roboto-hub-hint">Alguma dúvida? Pergunte ao Roboto.</p>
       </header>
 
       <div class="admin-hub-grid">

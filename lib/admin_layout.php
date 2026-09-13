@@ -78,7 +78,7 @@ function admin_agency_hub_links(array $user): array
         ['href' => 'appearance.php', 'icon' => 'appearance', 'label' => 'Aparência', 'desc' => 'Tema, fonte e layout', 'show' => user_can_page($user, 'appearance')],
         ['href' => 'backup.php', 'icon' => 'backup', 'label' => 'Backup', 'desc' => 'Exportar e restaurar', 'show' => user_is_admin($user)],
         ['href' => 'contact.php', 'icon' => 'contact', 'label' => 'Contato', 'desc' => 'Editar contato da vitrine', 'show' => user_can_page($user, 'contact')],
-        ['href' => 'images.php', 'icon' => 'images', 'label' => 'Imagens', 'desc' => 'Logo, favicon, hero e about', 'show' => user_can_page($user, 'index')],
+        ['href' => 'images.php', 'icon' => 'images', 'label' => 'Imagens', 'desc' => 'Logo, favicon, hero e about', 'show' => user_can_page($user, 'images')],
         ['href' => 'leads.php', 'icon' => 'leads', 'label' => 'Leads', 'desc' => 'Sites publicados do CRM', 'show' => user_is_staff($user) && user_can_page($user, 'leads')],
         ['href' => 'brand.php', 'icon' => 'brand', 'label' => 'Marca', 'desc' => 'Nome e identidade', 'show' => user_can_page($user, 'brand')],
         ['href' => 'plan.php', 'icon' => 'plan', 'label' => 'Plano', 'desc' => 'Plano e recursos', 'show' => user_can_page($user, 'plan')],
@@ -97,18 +97,22 @@ function admin_agency_hub_links(array $user): array
  *
  * @return list<array{href:string,icon:string,label:string,show:bool}>
  */
-function admin_lead_hub_links(array $user): array
+function admin_lead_hub_links(array $user, string $planTier = 'basic'): array
 {
+    require_once __DIR__ . '/plans.php';
+    $planTier = plan_normalize($planTier);
+    $showBrand = user_can_page($user, 'brand')
+        && (user_is_staff($user) || plan_allows_brand_edit($planTier));
     $items = [
         ['href' => 'appearance.php', 'icon' => 'appearance', 'label' => 'Aparência', 'show' => user_can_page($user, 'appearance')],
-        ['href' => 'contact.php', 'icon' => 'contact', 'label' => 'Contato', 'show' => true],
-        ['href' => 'images.php', 'icon' => 'images', 'label' => 'Imagens', 'show' => true],
-        ['href' => 'brand.php', 'icon' => 'brand', 'label' => 'Marca', 'show' => user_can_page($user, 'brand')],
+        ['href' => 'contact.php', 'icon' => 'contact', 'label' => 'Contato', 'show' => user_can_page($user, 'contact') || user_is_staff($user)],
+        ['href' => 'images.php', 'icon' => 'images', 'label' => 'Imagens', 'show' => user_is_staff($user) || user_can_page($user, 'images')],
+        ['href' => 'brand.php', 'icon' => 'brand', 'label' => 'Marca', 'show' => $showBrand],
         ['href' => 'plan.php', 'icon' => 'plan', 'label' => 'Plano', 'show' => user_can_page($user, 'plan')],
         ['href' => 'preset.php', 'icon' => 'preset', 'label' => 'Preset', 'show' => user_can_page($user, 'preset')],
-        ['href' => 'lead_site.php', 'icon' => 'lead_site', 'label' => 'Resumo rápido', 'show' => true],
+        ['href' => 'lead_site.php', 'icon' => 'lead_site', 'label' => 'Resumo rápido', 'show' => user_can_page($user, 'lead_site') || user_is_staff($user)],
         ['href' => 'services.php', 'icon' => 'services', 'label' => 'Serviços', 'show' => user_can_page($user, 'services')],
-        ['href' => 'texts.php', 'icon' => 'texts', 'label' => 'Textos', 'show' => true],
+        ['href' => 'texts.php', 'icon' => 'texts', 'label' => 'Textos', 'show' => user_can_page($user, 'texts') || user_is_staff($user)],
         ['href' => 'sections.php', 'icon' => 'sections', 'label' => 'Visibilidade', 'show' => user_can_page($user, 'sections')],
     ];
     return admin_sort_by_label($items);
@@ -125,8 +129,22 @@ function admin_nav_items(array $user, ?int $leadId): array
     $items = [];
 
     if ($leadId) {
+        $planTier = 'basic';
+        if (is_file(__DIR__ . '/published_sites.php') && is_file(__DIR__ . '/db.php')) {
+            require_once __DIR__ . '/db.php';
+            require_once __DIR__ . '/published_sites.php';
+            require_once __DIR__ . '/plans.php';
+            try {
+                $ps = published_site_get_by_lead(db(), $leadId);
+                if (is_array($ps)) {
+                    $planTier = plan_normalize((string) ($ps['plan_tier'] ?? 'basic'));
+                }
+            } catch (Throwable $e) {
+                // menu sem plano
+            }
+        }
         $items[] = ['href' => 'lead_hub.php?lead_id=' . $leadId, 'icon' => 'hub', 'label' => 'Hub lead'];
-        foreach (admin_lead_hub_links($user) as $row) {
+        foreach (admin_lead_hub_links($user, $planTier) as $row) {
             if (!$row['show'] || ($row['href'] ?? '') === 'lead_site.php') {
                 continue;
             }
@@ -299,6 +317,24 @@ function admin_back_target(?array $user, ?int $leadId): ?array
     return ['href' => 'index.php', 'label' => 'Painel'];
 }
 
+/** Cabeça SVG do Roboto (inline na bolha/painel). */
+function admin_roboto_head_svg(): string
+{
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+    $path = dirname(__DIR__) . '/assets/roboto-head.svg';
+    if (!is_file($path)) {
+        $cached = '';
+        return $cached;
+    }
+    $svg = (string) file_get_contents($path);
+    $svg = preg_replace('/<\?xml[^>]*\?>\s*/', '', $svg) ?? $svg;
+    $cached = trim($svg);
+    return $cached;
+}
+
 function admin_header(string $title, ?array $user = null): void
 {
     require_once __DIR__ . '/security.php';
@@ -369,9 +405,68 @@ function admin_header(string $title, ?array $user = null): void
 
 function admin_footer(): void
 {
+    require_once __DIR__ . '/auth.php';
+    $user = current_user();
+    $leadId = null;
+    if ($user) {
+        if (is_file(__DIR__ . '/lead_admin.php')) {
+            require_once __DIR__ . '/lead_admin.php';
+        }
+        if (function_exists('lead_admin_context_id')) {
+            $leadId = lead_admin_context_id();
+        }
+        if ($leadId === null) {
+            $raw = $_GET['lead_id'] ?? null;
+            if ($raw !== null && $raw !== '' && (int) $raw > 0) {
+                $candidate = (int) $raw;
+                if (user_is_staff($user) || user_crm_lead_id($user) === $candidate) {
+                    $leadId = $candidate;
+                }
+            }
+        }
+    }
+    $headSvg = $user ? admin_roboto_head_svg() : '';
+    $payloadJson = '';
+    if ($user) {
+        require_once __DIR__ . '/roboto.php';
+        $payloadJson = json_encode(
+            roboto_payload($user, $leadId),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS
+        );
+        if ($payloadJson === false) {
+            $payloadJson = '{"context":{},"chips":[]}';
+        }
+    }
     ?>
     </main>
   </div>
+  <?php if ($user && $headSvg !== ''): ?>
+  <button type="button" class="roboto-fab" id="roboto-fab" aria-expanded="false" aria-controls="roboto-panel" title="Roboto — ajuda" aria-label="Abrir Roboto, ajuda do painel">
+    <?= $headSvg ?>
+  </button>
+  <div class="roboto-panel" id="roboto-panel" role="dialog" aria-labelledby="roboto-panel-title" hidden>
+    <div class="roboto-panel__head">
+      <div class="roboto-panel__head-icon" aria-hidden="true"><?= $headSvg ?></div>
+      <div>
+        <p class="roboto-panel__title" id="roboto-panel-title">Roboto</p>
+        <p class="roboto-panel__sub">Ajuda rápida do painel</p>
+      </div>
+      <button type="button" class="roboto-panel__close" id="roboto-close" aria-label="Fechar">×</button>
+    </div>
+    <div class="roboto-panel__filter">
+      <label class="visually-hidden" for="roboto-filter">Filtrar tópicos</label>
+      <input type="search" id="roboto-filter" placeholder="Filtrar tópicos…" autocomplete="off">
+    </div>
+    <div class="roboto-panel__body" id="roboto-groups"></div>
+    <div class="roboto-answer" id="roboto-answer" hidden>
+      <p class="roboto-answer__title" id="roboto-answer-title"></p>
+      <div class="roboto-answer__body" id="roboto-answer-body"></div>
+      <div class="roboto-answer__ctas" id="roboto-answer-ctas"></div>
+    </div>
+  </div>
+  <script type="application/json" id="roboto-data"><?= $payloadJson ?></script>
+  <script src="js/roboto.js" defer></script>
+  <?php endif; ?>
 </body>
 </html>
     <?php

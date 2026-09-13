@@ -9,6 +9,7 @@ require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
 require_once dirname(__DIR__) . '/lib/lead_admin.php';
+require_once dirname(__DIR__) . '/lib/permissions.php';
 
 auth_boot_session();
 $user = require_page('plan');
@@ -44,11 +45,43 @@ $defs = settings_definitions();
 $values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
 $labels = plan_labels();
 $values['site_plan'] = plan_normalize((string) ($values['site_plan'] ?? 'medium'));
+$isAgencyAdmin = $leadId === null && user_is_admin($user);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $action = (string) ($_POST['action'] ?? 'save');
     try {
+        if ($action === 'save_permissions') {
+            if (!$isAgencyAdmin) {
+                throw new RuntimeException('Só o Admin da agência edita a matriz de permissões.');
+            }
+            foreach (permissions_editable_roles() as $role) {
+                $pages = $_POST['perm_role'][$role] ?? [];
+                if (!is_array($pages)) {
+                    $pages = [];
+                }
+                permissions_save_role_pages(db(), $role, array_map('strval', $pages));
+            }
+            foreach (['basic', 'medium', 'pro'] as $plan) {
+                $feats = [];
+                foreach (array_keys(permissions_plan_feature_catalog()) as $feat) {
+                    $feats[$feat] = isset($_POST['perm_plan'][$plan][$feat]);
+                }
+                permissions_save_plan_features(db(), $plan, $feats);
+            }
+            header('Location: plan.php?ok=perms');
+            exit;
+        }
+
+        if ($action === 'reset_permissions') {
+            if (!$isAgencyAdmin) {
+                throw new RuntimeException('Só o Admin da agência pode resetar permissões.');
+            }
+            permissions_reset_defaults(db());
+            header('Location: plan.php?ok=perms_reset');
+            exit;
+        }
+
         if ($action === 'apply_bundle') {
             $plan = plan_normalize((string) ($_POST['site_plan'] ?? 'basic'));
             $bundle = plan_bundle($plan);
@@ -99,9 +132,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (isset($_GET['ok'])) {
-    $flash = $_GET['ok'] === 'bundle'
-        ? 'Pacote do plano aplicado (páginas, seções, limites e look).'
-        : 'Plano e flags salvos.';
+    $flash = match ((string) $_GET['ok']) {
+        'bundle' => 'Pacote do plano aplicado (páginas, seções, limites e look).',
+        'perms' => 'Matriz de permissões salva.',
+        'perms_reset' => 'Permissões restauradas para o padrão.',
+        default => 'Plano e flags salvos.',
+    };
     $values = $leadId
         ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
         : settings_all(db());
@@ -126,6 +162,22 @@ $sectionKeys = [
     'section_cta',
 ];
 
+$pageCatalog = permissions_page_catalog();
+$featCatalog = permissions_plan_feature_catalog();
+$rolePages = [];
+foreach (permissions_editable_roles() as $role) {
+    $rolePages[$role] = permissions_role_pages(db(), $role);
+}
+$planFeats = [];
+foreach (['basic', 'medium', 'pro'] as $pid) {
+    $planFeats[$pid] = permissions_plan_features(db(), $pid);
+}
+$roleLabels = [
+    'editor' => 'Editor',
+    'client_medium' => 'Cliente Medium',
+    'client_pro' => 'Cliente Pro',
+];
+
 admin_header('Plano', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
@@ -141,6 +193,131 @@ admin_header('Plano', $user);
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
+
+      <?php if ($isAgencyAdmin): ?>
+      <section class="admin-perm" style="margin-top:1.75rem;">
+        <h2 class="font-display" style="font-size:1.35rem;margin:0 0 .35rem;">Permissões (só Admin)</h2>
+        <p class="text-muted" style="margin:0 0 1rem;font-size:.875rem;">
+          Controle o que cada papel vê no painel e o que cada plano libera para o cliente.
+          Admin sempre tem acesso total.
+        </p>
+
+        <div class="admin-perm__tabs" role="tablist">
+          <button type="button" class="admin-perm__tab is-active" data-perm-tab="roles">Papéis × páginas</button>
+          <button type="button" class="admin-perm__tab" data-perm-tab="plans">Planos × recursos</button>
+        </div>
+
+        <form method="post" class="contact-form admin-form admin-form--wide">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="save_permissions">
+
+          <div class="admin-perm__panel is-active" data-perm-panel="roles">
+            <p class="text-muted" style="font-size:.8rem;margin:0 0 .75rem;">
+              Marque as áreas do painel liberadas para Editor e clientes. Use o filtro para achar rápido.
+            </p>
+            <div class="form-group" style="max-width:16rem;margin-bottom:.75rem;">
+              <label for="perm-filter">Filtrar páginas</label>
+              <input type="search" id="perm-filter" class="form-input" placeholder="ex.: marca, senha…" autocomplete="off">
+            </div>
+            <div class="admin-perm-table-wrap">
+              <table class="admin-perm-table">
+                <thead>
+                  <tr>
+                    <th>Página</th>
+                    <?php foreach ($roleLabels as $rid => $rlabel): ?>
+                      <th><?= h($rlabel) ?></th>
+                    <?php endforeach; ?>
+                  </tr>
+                </thead>
+                <tbody>
+                <?php
+                $lastGroup = '';
+                foreach ($pageCatalog as $pageKey => $meta):
+                    $group = (string) $meta['group'];
+                    if ($group !== $lastGroup):
+                        $lastGroup = $group;
+                ?>
+                  <tr class="admin-perm-table__group" data-perm-group="<?= h($group) ?>">
+                    <td colspan="4"><?= h($group) ?></td>
+                  </tr>
+                <?php endif; ?>
+                  <tr data-perm-row="<?= h(strtolower($meta['label'] . ' ' . $pageKey)) ?>">
+                    <td><?= h($meta['label']) ?></td>
+                    <?php foreach ($roleLabels as $rid => $_rlabel): ?>
+                      <td>
+                        <label class="admin-perm-check">
+                          <input type="checkbox"
+                            name="perm_role[<?= h($rid) ?>][]"
+                            value="<?= h($pageKey) ?>"
+                            <?= in_array($pageKey, $rolePages[$rid], true) ? 'checked' : '' ?>>
+                        </label>
+                      </td>
+                    <?php endforeach; ?>
+                  </tr>
+                <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-perm__panel" data-perm-panel="plans" hidden>
+            <p class="text-muted" style="font-size:.8rem;margin:0 0 .75rem;">
+              Recursos liberados por plano (intersectam com o papel Cliente). Basic não permite login.
+            </p>
+            <div class="admin-perm-table-wrap">
+              <table class="admin-perm-table">
+                <thead>
+                  <tr>
+                    <th>Recurso</th>
+                    <?php foreach ($labels as $pid => $plabel): ?>
+                      <th><?= h($plabel) ?></th>
+                    <?php endforeach; ?>
+                  </tr>
+                </thead>
+                <tbody>
+                <?php
+                $lastGroup = '';
+                foreach ($featCatalog as $featKey => $meta):
+                    $group = (string) $meta['group'];
+                    if ($group !== $lastGroup):
+                        $lastGroup = $group;
+                ?>
+                  <tr class="admin-perm-table__group">
+                    <td colspan="4"><?= h($group) ?></td>
+                  </tr>
+                <?php endif; ?>
+                  <tr>
+                    <td><?= h($meta['label']) ?></td>
+                    <?php foreach ($labels as $pid => $_plabel): ?>
+                      <td>
+                        <label class="admin-perm-check">
+                          <input type="checkbox"
+                            name="perm_plan[<?= h($pid) ?>][<?= h($featKey) ?>]"
+                            value="1"
+                            <?= !empty($planFeats[$pid][$featKey]) ? 'checked' : '' ?>
+                            <?= ($pid === 'basic' && $featKey === 'login') ? 'disabled' : '' ?>>
+                        </label>
+                      </td>
+                    <?php endforeach; ?>
+                  </tr>
+                <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-perm__actions">
+            <button type="submit" class="btn btn-primary">Salvar permissões</button>
+          </div>
+        </form>
+
+        <form method="post" style="margin-top:.75rem;" onsubmit="return confirm('Restaurar padrões de Editor / Clientes / planos?');">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="reset_permissions">
+          <button type="submit" class="btn btn-outline">Restaurar padrões</button>
+        </form>
+      </section>
+      <?php endif; ?>
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
@@ -219,5 +396,35 @@ admin_header('Plano', $user);
 
         <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Salvar plano e flags</button>
       </form>
+
+<?php if ($isAgencyAdmin): ?>
+<script>
+(function () {
+  var tabs = document.querySelectorAll('[data-perm-tab]');
+  var panels = document.querySelectorAll('[data-perm-panel]');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var id = tab.getAttribute('data-perm-tab');
+      tabs.forEach(function (t) { t.classList.toggle('is-active', t === tab); });
+      panels.forEach(function (p) {
+        var on = p.getAttribute('data-perm-panel') === id;
+        p.hidden = !on;
+        p.classList.toggle('is-active', on);
+      });
+    });
+  });
+  var filter = document.getElementById('perm-filter');
+  if (filter) {
+    filter.addEventListener('input', function () {
+      var q = (filter.value || '').toLowerCase().trim();
+      document.querySelectorAll('[data-perm-row]').forEach(function (row) {
+        var hay = row.getAttribute('data-perm-row') || '';
+        row.style.display = !q || hay.indexOf(q) !== -1 ? '' : 'none';
+      });
+    });
+  }
+})();
+</script>
+<?php endif; ?>
 <?php
 admin_footer();

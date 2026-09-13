@@ -86,7 +86,7 @@ function user_is_client(?array $user = null): bool
 }
 
 /**
- * Páginas permitidas por papel (para clients e filtros de nav).
+ * Páginas permitidas por papel (matriz editável pelo Admin + filtros de plano).
  *
  * @return list<string>
  */
@@ -96,30 +96,8 @@ function user_allowed_pages(?array $user = null): array
     if ($user === null) {
         return [];
     }
-    $role = (string) ($user['role'] ?? '');
-    if ($role === 'admin') {
-        return [
-            'index', 'contact', 'texts', 'leads', 'lead_hub', 'lead_site', 'services',
-            'password', 'plan', 'brand', 'sections', 'backup', 'preset', 'appearance', 'users',
-        ];
-    }
-    if ($role === 'editor') {
-        return [
-            'index', 'contact', 'texts', 'leads', 'lead_hub', 'lead_site', 'services', 'password',
-        ];
-    }
-    if ($role === 'client_pro') {
-        return [
-            'index', 'contact', 'texts', 'lead_hub', 'lead_site', 'services',
-            'password', 'brand', 'sections', 'preset', 'appearance',
-        ];
-    }
-    if ($role === 'client_medium') {
-        return [
-            'index', 'contact', 'texts', 'lead_hub', 'lead_site', 'password',
-        ];
-    }
-    return ['password'];
+    require_once __DIR__ . '/permissions.php';
+    return permissions_effective_pages($user);
 }
 
 function user_can_page(?array $user, string $page): bool

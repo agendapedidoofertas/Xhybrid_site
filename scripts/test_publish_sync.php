@@ -125,7 +125,9 @@ assert_true($active2 === 1, 'lead2 still active');
 // Cleanup
 crm_lead_delete($crm, $id1);
 crm_lead_delete($crm, $id2);
-$x->exec('DELETE FROM published_sites WHERE crm_lead_id IN (' . (int) $id1 . ',' . (int) $id2 . ')');
+require_once dirname(__DIR__) . '/lib/published_sites.php';
+published_site_purge($x, (int) $id1);
+published_site_purge($x, (int) $id2);
 
 echo "\nPassed: {$passed}  Failed: {$failed}\n";
 echo 'Agency brand still: ' . $brandAfter . "\n";

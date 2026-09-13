@@ -35,6 +35,28 @@ function plan_normalize(string $plan): string
     return in_array($plan, plan_ids(), true) ? $plan : 'basic';
 }
 
+/** Edição de Marca (nome da empresa / identidade) — matriz do plano (default: só Pro). */
+function plan_allows_brand_edit(string $plan): bool
+{
+    $plan = plan_normalize($plan);
+    if (!function_exists('db') || !function_exists('permissions_plan_allows')) {
+        if (is_file(__DIR__ . '/permissions.php')) {
+            require_once __DIR__ . '/permissions.php';
+        }
+        if (is_file(__DIR__ . '/db.php')) {
+            require_once __DIR__ . '/db.php';
+        }
+    }
+    try {
+        if (function_exists('db') && function_exists('permissions_plan_allows')) {
+            return permissions_plan_allows(db(), $plan, 'brand_edit');
+        }
+    } catch (Throwable $e) {
+        // fallback
+    }
+    return $plan === 'pro';
+}
+
 function plan_labels(): array
 {
     return [
@@ -53,8 +75,8 @@ function plan_blurbs(): array
 {
     return [
         'basic' => 'Subcaminho Xhybrid · site completo · personalização mínima',
-        'medium' => 'Domínio próprio · personalização limitada · mesma base do Pro',
-        'pro' => 'Domínio próprio · personalização total · manutenção mensal maior',
+        'medium' => 'Domínio próprio · personalização limitada · sem edição de Marca pelo cliente',
+        'pro' => 'Domínio próprio · personalização total · Marca e looks premium · manutenção mensal maior',
     ];
 }
 

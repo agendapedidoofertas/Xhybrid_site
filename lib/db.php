@@ -320,6 +320,24 @@ function db_migrate_published_sites(PDO $pdo): void
     if (!in_array('plan_tier', $psNames, true)) {
         $pdo->exec('ALTER TABLE published_sites ADD COLUMN plan_tier TEXT NOT NULL DEFAULT \'basic\'');
     }
+
+    db_ensure_published_sites_block_delete_trigger($pdo);
+}
+
+/**
+ * Bloqueia DELETE físico em published_sites.
+ * Desative com site_active=0; purge só em scripts de teste/manutenção.
+ */
+function db_ensure_published_sites_block_delete_trigger(PDO $pdo): void
+{
+    $pdo->exec('DROP TRIGGER IF EXISTS published_sites_block_hard_delete');
+    $pdo->exec(
+        "CREATE TRIGGER published_sites_block_hard_delete
+         BEFORE DELETE ON published_sites
+         BEGIN
+           SELECT RAISE(ABORT, 'Exclusão física bloqueada. Desative o site (site_active=0) em vez de apagar.');
+         END"
+    );
 }
 
 /** Renomeia slugs legados → nomes Xhybrid em bancos já existentes */
