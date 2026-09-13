@@ -140,6 +140,18 @@ function published_site_settings_overlay(array $row): array
             : $name;
         $contact['brand_seo_description'] = 'Site de ' . $name . ($city !== '' ? ' em ' . $city : '') . '. Contato pelo WhatsApp.';
         $contact['whatsapp_message'] = 'Olá! Vim pelo site de ' . $name . '.';
+        // Wordmark: só preenche se o payload ainda não tiver override manual
+        $hasShort = trim((string) ($payload['brand_short'] ?? '')) !== '';
+        if (!$hasShort) {
+            require_once __DIR__ . '/brand_mark.php';
+            $mark = brand_mark_split($name);
+            if ($mark['short'] !== '') {
+                $contact['brand_short'] = $mark['short'];
+            }
+            if ($mark['tag'] !== '') {
+                $contact['brand_tag'] = $mark['tag'];
+            }
+        }
     }
 
     // Formulário de contato → WhatsApp do lead (não SMTP/e-mail)
@@ -305,6 +317,15 @@ function published_site_update_admin(PDO $pdo, int $crmLeadId, array $fields): a
     // Espelha contato/aparência no payload usado pelo overlay
     if (isset($fields['company_name'])) {
         $payload['brand_name'] = (string) $fields['company_name'];
+        require_once __DIR__ . '/brand_mark.php';
+        $mark = brand_mark_split((string) $fields['company_name']);
+        // Só auto-preenche se o admin não enviou brand_short no payload
+        $manualShort = isset($fields['payload']['brand_short'])
+            && trim((string) $fields['payload']['brand_short']) !== '';
+        if (!$manualShort) {
+            $payload['brand_short'] = $mark['short'];
+            $payload['brand_tag'] = $mark['tag'];
+        }
     }
     if (isset($fields['city'])) {
         $payload['brand_city'] = (string) $fields['city'];

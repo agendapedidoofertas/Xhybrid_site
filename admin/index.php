@@ -30,21 +30,7 @@ if (user_is_client($user)) {
     }
 }
 
-$links = [
-    ['contact.php', 'Contato', 'Editar contato da vitrine', user_can_page($user, 'contact')],
-    ['texts.php', 'Textos', 'Editar textos da vitrine', user_can_page($user, 'texts')],
-    ['images.php', 'Imagens', 'Logo, favicon, hero e about', user_can_page($user, 'index')],
-    ['services.php', 'Serviços', 'Catálogo de serviços', user_can_page($user, 'services')],
-    ['appearance.php', 'Aparência', 'Tema, fonte e layout', user_can_page($user, 'appearance')],
-    ['preset.php', 'Preset', 'Aplicar preset de nicho', user_can_page($user, 'preset')],
-    ['brand.php', 'Marca', 'Nome e identidade', user_can_page($user, 'brand')],
-    ['plan.php', 'Plano', 'Plano e recursos', user_can_page($user, 'plan')],
-    ['sections.php', 'Visibilidade', 'Seções do site', user_can_page($user, 'sections')],
-    ['leads.php', 'Leads', 'Sites publicados do CRM', user_is_staff($user) && user_can_page($user, 'leads')],
-    ['backup.php', 'Backup', 'Exportar e restaurar', user_is_admin($user)],
-    ['users.php', 'Usuários', 'Contas e permissões', user_is_admin($user)],
-    ['password.php', 'Senha', 'Alterar sua senha', true],
-];
+$links = admin_agency_hub_links($user);
 
 admin_header('Painel', $user);
 ?>
@@ -55,13 +41,16 @@ admin_header('Painel', $user);
       </header>
 
       <div class="admin-hub-grid">
-        <?php foreach ($links as [$href, $label, $desc, $show]): ?>
-          <?php if (!$show) {
+        <?php foreach ($links as $link): ?>
+          <?php if (!$link['show']) {
               continue;
           } ?>
-          <a class="admin-hub-card" href="<?= h($href) ?>">
-            <h2 class="font-display"><?= h($label) ?></h2>
-            <p class="text-muted"><?= h($desc) ?></p>
+          <a class="admin-hub-card" href="<?= h($link['href']) ?>">
+            <?= admin_hub_icon($link['icon']) ?>
+            <span class="admin-hub-card__body">
+              <h2 class="font-display"><?= h($link['label']) ?></h2>
+              <p class="text-muted"><?= h($link['desc']) ?></p>
+            </span>
           </a>
         <?php endforeach; ?>
       </div>

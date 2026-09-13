@@ -8,6 +8,157 @@ function h(string $value): string
 }
 
 /**
+ * Paths internos dos ícones do admin (painel + menu).
+ */
+function admin_icon_paths(string $key): string
+{
+    return match ($key) {
+        'contact' => '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.74.32 1.53.55 2.34.68A2 2 0 0 1 22 16.92z"/>',
+        'texts' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+        'images' => '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+        'services' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+        'appearance' => '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+        'preset' => '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/><path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6L15.5 18.5l2.6-.9L19 15z"/>',
+        'brand' => '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5"/>',
+        'plan' => '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+        'sections' => '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+        'leads' => '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        'backup' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+        'users' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+        'password' => '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+        'lead_site' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+        'painel' => '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+        'hub' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+        'logout' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+        default => '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+    };
+}
+
+/** Ícone SVG do card do painel / hub. */
+function admin_hub_icon(string $key): string
+{
+    $common = ' class="admin-hub-icon__svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    return '<span class="admin-hub-icon" aria-hidden="true"><svg' . $common . '>' . admin_icon_paths($key) . '</svg></span>';
+}
+
+/** Ícone compacto para o menu superior. */
+function admin_nav_icon(string $key): string
+{
+    $common = ' class="admin-nav-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    return '<svg' . $common . '>' . admin_icon_paths($key) . '</svg>';
+}
+
+/** Ordena itens por rótulo (pt-BR aproximado). */
+function admin_sort_by_label(array $items): array
+{
+    usort($items, static function (array $a, array $b): int {
+        $la = (string) ($a['label'] ?? '');
+        $lb = (string) ($b['label'] ?? '');
+        if (function_exists('iconv')) {
+            $na = (string) @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $la);
+            $nb = (string) @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $lb);
+            if ($na !== '' && $nb !== '') {
+                $la = $na;
+                $lb = $nb;
+            }
+        }
+        return strcasecmp($la, $lb);
+    });
+    return $items;
+}
+
+/**
+ * Cards do painel da agência (ordem alfabética).
+ *
+ * @return list<array{href:string,icon:string,label:string,desc:string,show:bool}>
+ */
+function admin_agency_hub_links(array $user): array
+{
+    $items = [
+        ['href' => 'appearance.php', 'icon' => 'appearance', 'label' => 'Aparência', 'desc' => 'Tema, fonte e layout', 'show' => user_can_page($user, 'appearance')],
+        ['href' => 'backup.php', 'icon' => 'backup', 'label' => 'Backup', 'desc' => 'Exportar e restaurar', 'show' => user_is_admin($user)],
+        ['href' => 'contact.php', 'icon' => 'contact', 'label' => 'Contato', 'desc' => 'Editar contato da vitrine', 'show' => user_can_page($user, 'contact')],
+        ['href' => 'images.php', 'icon' => 'images', 'label' => 'Imagens', 'desc' => 'Logo, favicon, hero e about', 'show' => user_can_page($user, 'index')],
+        ['href' => 'leads.php', 'icon' => 'leads', 'label' => 'Leads', 'desc' => 'Sites publicados do CRM', 'show' => user_is_staff($user) && user_can_page($user, 'leads')],
+        ['href' => 'brand.php', 'icon' => 'brand', 'label' => 'Marca', 'desc' => 'Nome e identidade', 'show' => user_can_page($user, 'brand')],
+        ['href' => 'plan.php', 'icon' => 'plan', 'label' => 'Plano', 'desc' => 'Plano e recursos', 'show' => user_can_page($user, 'plan')],
+        ['href' => 'preset.php', 'icon' => 'preset', 'label' => 'Preset', 'desc' => 'Aplicar preset de nicho', 'show' => user_can_page($user, 'preset')],
+        ['href' => 'password.php', 'icon' => 'password', 'label' => 'Senha', 'desc' => 'Alterar sua senha', 'show' => true],
+        ['href' => 'services.php', 'icon' => 'services', 'label' => 'Serviços', 'desc' => 'Catálogo de serviços', 'show' => user_can_page($user, 'services')],
+        ['href' => 'texts.php', 'icon' => 'texts', 'label' => 'Textos', 'desc' => 'Editar textos da vitrine', 'show' => user_can_page($user, 'texts')],
+        ['href' => 'users.php', 'icon' => 'users', 'label' => 'Usuários', 'desc' => 'Contas e permissões', 'show' => user_is_admin($user)],
+        ['href' => 'sections.php', 'icon' => 'sections', 'label' => 'Visibilidade', 'desc' => 'Seções do site', 'show' => user_can_page($user, 'sections')],
+    ];
+    return admin_sort_by_label($items);
+}
+
+/**
+ * Cards do hub de um lead (ordem alfabética).
+ *
+ * @return list<array{href:string,icon:string,label:string,show:bool}>
+ */
+function admin_lead_hub_links(array $user): array
+{
+    $items = [
+        ['href' => 'appearance.php', 'icon' => 'appearance', 'label' => 'Aparência', 'show' => user_can_page($user, 'appearance')],
+        ['href' => 'contact.php', 'icon' => 'contact', 'label' => 'Contato', 'show' => true],
+        ['href' => 'images.php', 'icon' => 'images', 'label' => 'Imagens', 'show' => true],
+        ['href' => 'brand.php', 'icon' => 'brand', 'label' => 'Marca', 'show' => user_can_page($user, 'brand')],
+        ['href' => 'plan.php', 'icon' => 'plan', 'label' => 'Plano', 'show' => user_can_page($user, 'plan')],
+        ['href' => 'preset.php', 'icon' => 'preset', 'label' => 'Preset', 'show' => user_can_page($user, 'preset')],
+        ['href' => 'lead_site.php', 'icon' => 'lead_site', 'label' => 'Resumo rápido', 'show' => true],
+        ['href' => 'services.php', 'icon' => 'services', 'label' => 'Serviços', 'show' => user_can_page($user, 'services')],
+        ['href' => 'texts.php', 'icon' => 'texts', 'label' => 'Textos', 'show' => true],
+        ['href' => 'sections.php', 'icon' => 'sections', 'label' => 'Visibilidade', 'show' => user_can_page($user, 'sections')],
+    ];
+    return admin_sort_by_label($items);
+}
+
+/**
+ * Itens do menu superior (ordem alfabética; Sair por último).
+ *
+ * @return list<array{href:string,icon:string,label:string}>
+ */
+function admin_nav_items(array $user, ?int $leadId): array
+{
+    $qs = $leadId ? ('?lead_id=' . $leadId) : '';
+    $items = [];
+
+    if ($leadId) {
+        $items[] = ['href' => 'lead_hub.php?lead_id=' . $leadId, 'icon' => 'hub', 'label' => 'Hub lead'];
+        foreach (admin_lead_hub_links($user) as $row) {
+            if (!$row['show'] || ($row['href'] ?? '') === 'lead_site.php') {
+                continue;
+            }
+            $items[] = [
+                'href' => $row['href'] . $qs,
+                'icon' => $row['icon'],
+                'label' => $row['label'],
+            ];
+        }
+        $items[] = ['href' => 'password.php', 'icon' => 'password', 'label' => 'Senha'];
+    } else {
+        if (user_can_page($user, 'index')) {
+            $items[] = ['href' => 'index.php', 'icon' => 'painel', 'label' => 'Painel'];
+        }
+        foreach (admin_agency_hub_links($user) as $row) {
+            if (!$row['show']) {
+                continue;
+            }
+            $items[] = [
+                'href' => $row['href'],
+                'icon' => $row['icon'],
+                'label' => $row['label'],
+            ];
+        }
+    }
+
+    $items = admin_sort_by_label($items);
+    $items[] = ['href' => 'logout.php', 'icon' => 'logout', 'label' => 'Sair'];
+    return $items;
+}
+
+/**
  * URL de mídia relativa ao site → caminho usable a partir de /admin/.
  * URLs absolutas (http/https/data) permanecem iguais.
  */
@@ -169,9 +320,6 @@ function admin_header(string $title, ?array $user = null): void
             $leadId = (int) $raw;
         }
     }
-    $leadQs = $leadId ? ('?lead_id=' . $leadId) : '';
-    $isAdmin = $user && user_is_admin($user);
-    $isStaff = $user && user_is_staff($user);
     $back = $user ? admin_back_target($user, $leadId) : null;
     $script = basename((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
     $showLeadCrumb = $leadId && $script !== 'lead_hub.php';
@@ -203,49 +351,9 @@ function admin_header(string $title, ?array $user = null): void
         <?php if ($user): ?>
         <p class="admin-user"><?= h($user['username']) ?> · <?= h((string) ($user['role'] ?? '')) ?></p>
         <nav class="site-nav" aria-label="Admin">
-          <?php if ($leadId): ?>
-          <a href="lead_hub.php?lead_id=<?= (int) $leadId ?>">Hub lead</a>
-          <a href="contact.php<?= h($leadQs) ?>">Contato</a>
-          <a href="texts.php<?= h($leadQs) ?>">Textos</a>
-          <?php if (user_can_page($user, 'services')): ?>
-          <a href="services.php<?= h($leadQs) ?>">Serviços</a>
-          <?php endif; ?>
-          <a href="images.php<?= h($leadQs) ?>">Imagens</a>
-          <?php if (user_can_page($user, 'appearance')): ?>
-          <a href="appearance.php<?= h($leadQs) ?>">Aparência</a>
-          <?php endif; ?>
-          <?php if (user_can_page($user, 'preset')): ?>
-          <a href="preset.php<?= h($leadQs) ?>">Preset</a>
-          <?php endif; ?>
-          <?php if (user_can_page($user, 'brand')): ?>
-          <a href="brand.php<?= h($leadQs) ?>">Marca</a>
-          <?php endif; ?>
-          <?php if (user_can_page($user, 'plan')): ?>
-          <a href="plan.php<?= h($leadQs) ?>">Plano</a>
-          <?php endif; ?>
-          <?php if (user_can_page($user, 'sections')): ?>
-          <a href="sections.php<?= h($leadQs) ?>">Visibilidade</a>
-          <?php endif; ?>
-          <a href="password.php">Senha</a>
-          <a href="logout.php">Sair</a>
-          <?php else: ?>
-          <?php if (user_can_page($user, 'index')): ?><a href="index.php">Painel</a><?php endif; ?>
-          <?php if (user_can_page($user, 'contact')): ?><a href="contact.php">Contato</a><?php endif; ?>
-          <?php if (user_can_page($user, 'texts')): ?><a href="texts.php">Textos</a><?php endif; ?>
-          <?php if ($isStaff && user_can_page($user, 'leads')): ?><a href="leads.php">Leads</a><?php endif; ?>
-          <?php if (user_can_page($user, 'services')): ?><a href="services.php">Serviços</a><?php endif; ?>
-          <a href="password.php">Senha</a>
-          <?php if ($isAdmin): ?>
-          <a href="plan.php">Plano</a>
-          <a href="brand.php">Marca</a>
-          <a href="sections.php">Visibilidade</a>
-          <a href="backup.php">Backup</a>
-          <a href="preset.php">Preset</a>
-          <a href="appearance.php">Aparência</a>
-          <a href="users.php">Usuários</a>
-          <?php endif; ?>
-          <a href="logout.php">Sair</a>
-          <?php endif; ?>
+          <?php foreach (admin_nav_items($user, $leadId) as $navItem): ?>
+          <a href="<?= h($navItem['href']) ?>"><?= admin_nav_icon($navItem['icon']) ?><span><?= h($navItem['label']) ?></span></a>
+          <?php endforeach; ?>
         </nav>
         <?php endif; ?>
       </div>

@@ -241,22 +241,74 @@ function isLeadSite() {
   }
 }
 
-/** Logo do header: na vitrine usa imagem da agência; no lead usa nome (ou logo própria). */
+/** Logo do header: na vitrine usa imagem da agência; no lead usa marca curta + tag (ou logo própria). */
+function splitBrandMark(name) {
+  const raw = String(name || "").trim().replace(/\s+/g, " ");
+  if (!raw) return { short: "", tag: "" };
+  const chunks = raw.split(/\s*(?:\/\/|\||·|•|–|—)\s*|\s+-\s+|,\s+/);
+  const primary = (chunks[0] || "")
+    .trim()
+    .replace(/^[\s.,;:|/\\]+|[\s.,;:|/\\]+$/g, "");
+  const words = primary.split(/\s+/).filter(Boolean);
+  if (!words.length) return { short: "", tag: "" };
+  const chars = (s) => Array.from(String(s));
+  const cut = (s, n) => chars(s).slice(0, n).join("");
+  // CSS .site-logo__mark aplica uppercase (evita bug de acentos no JS)
+  const short = cut(words[0], 18);
+  let tag = "";
+  if (words[1] && chars(words[1]).length <= 18) {
+    const w = words[1].toLocaleLowerCase("pt-BR");
+    tag = cut(w.charAt(0).toLocaleUpperCase("pt-BR") + w.slice(1), 16);
+  } else if (words.length === 1 && chunks[1]) {
+    const rest = String(chunks[1]).trim().split(/\s+/).filter(Boolean);
+    if (rest[0] && chars(rest[0]).length <= 18) {
+      const w0 = rest[0];
+      tag =
+        chars(w0).length <= 4
+          ? cut(w0.toLocaleUpperCase("pt-BR"), 16)
+          : cut(
+              w0.toLocaleLowerCase("pt-BR").replace(/^./u, (c) => c.toLocaleUpperCase("pt-BR")),
+              16,
+            );
+    }
+  }
+  return { short, tag };
+}
+
+function brandMarkParts(fullName) {
+  const short = String(site("brand_short") || "").trim();
+  const tag = String(site("brand_tag") || "").trim();
+  if (short) return { short, tag };
+  return splitBrandMark(fullName);
+}
+
 function resolveLogoInner(brand) {
   const name = brand || "Xhybrid";
   const leadLogo = isLeadSite() ? String(site("logo_url") || "").trim() : "";
   if (leadLogo) {
     return `<img class="site-logo__img" src="${escapeHtml(leadLogo)}" alt="${escapeHtml(name)}" width="140" height="40" referrerpolicy="no-referrer">`;
   }
-  // Lead publicado: nunca herdar logo da agência Xhybrid
+  // Lead publicado: nunca herdar logo da agência Xhybrid — wordmark curto
   if (isLeadSite()) {
-    return escapeHtml(name);
+    const parts = brandMarkParts(name);
+    if (!parts.short) return escapeHtml(name);
+    const tagHtml = parts.tag
+      ? `<span class="site-logo__tag">${escapeHtml(parts.tag)}</span>`
+      : "";
+    return `<span class="site-logo__mark">${escapeHtml(parts.short)}</span>${tagHtml}`;
   }
   if (IMAGES.logo) {
     return `<img class="site-logo__img" src="${escapeHtml(IMAGES.logo)}" alt="${escapeHtml(name)}" width="140" height="40" referrerpolicy="no-referrer">`;
   }
   if (name.toLowerCase() === "xhybrid") {
     return `X<span class="text-primary italic">hybrid</span>`;
+  }
+  const parts = brandMarkParts(name);
+  if (parts.short && parts.short.toLowerCase() !== name.toLowerCase()) {
+    const tagHtml = parts.tag
+      ? `<span class="site-logo__tag">${escapeHtml(parts.tag)}</span>`
+      : "";
+    return `<span class="site-logo__mark">${escapeHtml(parts.short)}</span>${tagHtml}`;
   }
   return escapeHtml(name);
 }

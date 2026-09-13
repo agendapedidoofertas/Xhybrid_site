@@ -68,12 +68,45 @@ if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, 
         exit;
     };
 
+    $serveInactive = static function (array $row) use ($serveHtmlFile): void {
+        require_once __DIR__ . '/lib/payment_grace.php';
+        $ctx = payment_inactive_context(db(), $row);
+        $json = json_encode($ctx, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+        http_response_code(403);
+        header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: no-store');
+        $path = __DIR__ . '/site-inactive.html';
+        $html = file_get_contents($path);
+        if ($html === false) {
+            echo 'Unavailable';
+            exit;
+        }
+        $html = published_site_absolutize_html($html);
+        $html = preg_replace(
+            '#<script type="application/json" id="xh-inactive-ctx">.*?</script>#s',
+            '<script type="application/json" id="xh-inactive-ctx">' . $json . '</script>',
+            $html,
+            1
+        ) ?? $html;
+        echo $html;
+        exit;
+    };
+
     if (!$row) {
         $serveHtmlFile('404.html', 404);
     }
 
+    // Grace 72h: se pending_confirm expirou, desativa antes de decidir a página
+    require_once __DIR__ . '/lib/payment_grace.php';
+    payment_expire_if_needed(db(), $leadId);
+    try {
+        $row = published_site_find_public(db(), $slug, $leadId, $letter) ?? $row;
+    } catch (Throwable $e) {
+        // keep $row
+    }
+
     if ((int) ($row['site_active'] ?? 0) !== 1) {
-        $serveHtmlFile('site-inactive.html', 403);
+        $serveInactive($row);
     }
 
     $page = 'index.html';

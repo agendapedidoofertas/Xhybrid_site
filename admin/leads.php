@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
 require_once dirname(__DIR__) . '/lib/published_sites.php';
+require_once dirname(__DIR__) . '/lib/brand_mark.php';
 
 auth_boot_session();
 $user = require_page('leads');
@@ -89,7 +90,10 @@ admin_header('Leads (sites)', $user);
               ?>
               <tr style="border-bottom:1px solid rgba(255,255,255,.06);">
                 <td style="padding:.5rem;"><?= (int) $row['crm_lead_id'] ?></td>
-                <td style="padding:.5rem;"><?= h((string) $row['company_name']) ?></td>
+                <td style="padding:.5rem;">
+                  <?= brand_mark_html((string) $row['company_name'], 'h') ?>
+                  <div class="text-muted" style="font-size:.78rem;margin-top:.2rem;max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<?= h((string) $row['company_name']) ?>"><?= h((string) $row['company_name']) ?></div>
+                </td>
                 <td style="padding:.5rem;" title="<?= h($blurbs[$tier] ?? '') ?>"><?= h($labels[$tier] ?? $tier) ?></td>
                 <td style="padding:.5rem;"><?= h((string) $row['city']) ?></td>
                 <td style="padding:.5rem;"><?= $active ? 'Ativo' : 'Inativo' ?></td>

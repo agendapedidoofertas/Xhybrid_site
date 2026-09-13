@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Exemplo — copie para pix_config.php
+ */
+return [
+    'key' => '68351639000155',
+    'merchant_name' => 'XHYBRID',
+    'merchant_city' => 'SAO PAULO',
+    'amount' => '',
+    'support_whatsapp' => '5511999999999',
+    'txid_prefix' => 'XH',
+];

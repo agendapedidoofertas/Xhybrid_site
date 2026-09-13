@@ -33,18 +33,7 @@ $active = (int) ($row['site_active'] ?? 0) === 1;
 $qs = lead_admin_qs($leadId);
 $plan = (string) ($row['plan_tier'] ?? 'basic');
 
-$links = [
-    ['contact.php', 'Contato', true],
-    ['texts.php', 'Textos', true],
-    ['appearance.php', 'Aparência', user_can_page($user, 'appearance')],
-    ['preset.php', 'Preset', user_can_page($user, 'preset')],
-    ['brand.php', 'Marca', user_can_page($user, 'brand')],
-    ['plan.php', 'Plano', user_can_page($user, 'plan')],
-    ['sections.php', 'Visibilidade', user_can_page($user, 'sections')],
-    ['services.php', 'Serviços', user_can_page($user, 'services')],
-    ['images.php', 'Imagens', true],
-    ['lead_site.php', 'Resumo rápido', true],
-];
+$links = admin_lead_hub_links($user);
 
 admin_header('Lead #' . $leadId, $user);
 $backLeads = user_is_staff($user);
@@ -69,13 +58,16 @@ $backLeads = user_is_staff($user);
       </header>
 
       <div class="admin-hub-grid">
-        <?php foreach ($links as [$href, $label, $show]): ?>
-          <?php if (!$show) {
+        <?php foreach ($links as $link): ?>
+          <?php if (!$link['show']) {
               continue;
           } ?>
-          <a class="admin-hub-card" href="<?= h($href . '?' . $qs) ?>">
-            <h2 class="font-display"><?= h($label) ?></h2>
-            <p class="text-muted">Editar <?= h(strtolower($label)) ?> deste lead</p>
+          <a class="admin-hub-card" href="<?= h($link['href'] . '?' . $qs) ?>">
+            <?= admin_hub_icon($link['icon']) ?>
+            <span class="admin-hub-card__body">
+              <h2 class="font-display"><?= h($link['label']) ?></h2>
+              <p class="text-muted">Editar <?= h(strtolower($link['label'])) ?> deste lead</p>
+            </span>
           </a>
         <?php endforeach; ?>
       </div>

@@ -384,6 +384,14 @@ function settings_definitions(): array
             'group' => 'brand', 'label' => 'Nome da marca', 'max' => 48, 'type' => 'short',
             'default' => 'Xhybrid',
         ],
+        'brand_short' => [
+            'group' => 'brand', 'label' => 'Logo — marca curta (header)', 'max' => 18, 'type' => 'short',
+            'default' => '',
+        ],
+        'brand_tag' => [
+            'group' => 'brand', 'label' => 'Logo — complemento (cor accent)', 'max' => 16, 'type' => 'short',
+            'default' => '',
+        ],
         'brand_tagline' => [
             'group' => 'brand', 'label' => 'Slogan curto', 'max' => 80, 'type' => 'short',
             'default' => 'Sites, manutenção e tecnologia',

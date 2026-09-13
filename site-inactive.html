@@ -72,14 +72,32 @@
               <circle cx="162" cy="178" r="4" fill="rgba(255,255,255,0.2)"/>
             </g>
 
-            <!-- Arms -->
+            <!-- Braço de lado + pinça geométrica (ref. aberta, sem animação) -->
             <g class="buddy-arm-l">
-              <rect x="58" y="168" width="30" height="14" rx="7" fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-              <circle cx="56" cy="175" r="9" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <g transform="translate(92 190)">
+                <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+                <path fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" d="M -2,-4.5 H -24 a 4.5 4.5 0 0 0 0 9 H -2 Z"/>
+                <g transform="translate(-24 0)">
+                  <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.25)" stroke-width="1.2"/>
+                  <!-- Pinça aberta para a esquerda (3 segmentos) -->
+                  <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M -2,-2 L -9,-11 L -21,-11 L -26,-4.5 L -20,-5.5 L -11,-5.5 L -4,-2.5 Z"/>
+                  <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M -2,2 L -9,11 L -21,11 L -26,4.5 L -20,5.5 L -11,5.5 L -4,2.5 Z"/>
+                  <circle r="2" fill="#333"/>
+                </g>
+              </g>
             </g>
             <g class="buddy-arm-r">
-              <rect x="192" y="168" width="30" height="14" rx="7" fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-              <circle cx="224" cy="175" r="9" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <g transform="translate(188 190)">
+                <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+                <path fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" d="M 2,-4.5 H 24 a 4.5 4.5 0 0 1 0 9 H 2 Z"/>
+                <g transform="translate(24 0)">
+                  <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.25)" stroke-width="1.2"/>
+                  <!-- Pinça aberta para a direita (igual à referência) -->
+                  <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M 2,-2 L 9,-11 L 21,-11 L 26,-4.5 L 20,-5.5 L 11,-5.5 L 4,-2.5 Z"/>
+                  <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M 2,2 L 9,11 L 21,11 L 26,4.5 L 20,5.5 L 11,5.5 L 4,2.5 Z"/>
+                  <circle r="2" fill="#333"/>
+                </g>
+              </g>
             </g>
 
             <!-- Legs -->
@@ -101,8 +119,92 @@
         <p class="badge">Acesso suspenso</p>
         <h1 class="font-display">Indisponível</h1>
         <h2>Site temporariamente indisponível</h2>
-        <p>Este site encontra-se desativado em razão de pendência de pagamento. Regularize a mensalidade para restabelecer o acesso e a publicação do conteúdo. Em caso de dúvidas, entre em contato com o suporte comercial.</p>
-        <a href="/" class="btn btn-primary">Página inicial</a>
+        <p>Este site encontra-se desativado em razão de pendência de pagamento. Pague via PIX e confirme abaixo para reativar provisoriamente, ou fale com o comercial.</p>
+
+        <div class="inactive-pix" id="inactive-pix-block">
+          <div class="inactive-pix__frame">
+            <img id="inactive-qr" class="inactive-pix__qr" alt="QR Code PIX" width="240" height="240" referrerpolicy="no-referrer">
+            <span class="inactive-pix__logo" aria-hidden="true">
+              <svg class="pix-bot" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" width="48" height="56">
+                <defs>
+                  <linearGradient id="pixBotGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+                    <stop offset="100%" stop-color="rgba(255,255,255,0.02)"/>
+                  </linearGradient>
+                  <linearGradient id="pixBotBody" x1="20%" y1="0%" x2="80%" y2="100%">
+                    <stop offset="0%" stop-color="#2a2a2a"/>
+                    <stop offset="100%" stop-color="#111111"/>
+                  </linearGradient>
+                </defs>
+                <rect width="120" height="140" rx="18" fill="#121212"/>
+                <!-- Mesmo robô do topo, escala estática -->
+                <g transform="translate(10 12) scale(0.36)">
+                  <g>
+                    <line x1="140" y1="58" x2="140" y2="34" stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="140" cy="28" r="7" fill="#e8e8e8"/>
+                    <circle cx="140" cy="28" r="3" fill="#fff" opacity="0.85"/>
+                  </g>
+                  <g>
+                    <rect x="78" y="62" width="124" height="88" rx="22" fill="url(#pixBotBody)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                    <rect x="78" y="62" width="124" height="88" rx="22" fill="url(#pixBotGlass)"/>
+                    <rect x="96" y="88" width="88" height="40" rx="12" fill="#050505" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <rect x="108" y="98" width="18" height="18" rx="5" fill="#e8e8e8"/>
+                    <rect x="112" y="102" width="6" height="6" rx="2" fill="#fff" opacity="0.9"/>
+                    <rect x="154" y="98" width="18" height="18" rx="5" fill="#e8e8e8"/>
+                    <rect x="158" y="102" width="6" height="6" rx="2" fill="#fff" opacity="0.9"/>
+                    <path d="M126 136 H154" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
+                  </g>
+                  <rect x="128" y="148" width="24" height="14" rx="4" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+                  <g>
+                    <rect x="92" y="160" width="96" height="78" rx="18" fill="url(#pixBotBody)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+                    <rect x="92" y="160" width="96" height="78" rx="18" fill="url(#pixBotGlass)"/>
+                    <text x="140" y="208" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="22" font-weight="700" fill="rgba(255,255,255,0.85)">X</text>
+                    <circle cx="118" cy="178" r="4" fill="#e8e8e8" opacity="0.8"/>
+                    <circle cx="140" cy="178" r="4" fill="rgba(255,255,255,0.35)"/>
+                    <circle cx="162" cy="178" r="4" fill="rgba(255,255,255,0.2)"/>
+                  </g>
+                  <g transform="translate(92 190)">
+                    <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+                    <path fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" d="M -2,-4.5 H -24 a 4.5 4.5 0 0 0 0 9 H -2 Z"/>
+                    <g transform="translate(-24 0)">
+                      <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.25)" stroke-width="1.2"/>
+                      <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M -2,-2 L -9,-11 L -21,-11 L -26,-4.5 L -20,-5.5 L -11,-5.5 L -4,-2.5 Z"/>
+                      <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M -2,2 L -9,11 L -21,11 L -26,4.5 L -20,5.5 L -11,5.5 L -4,2.5 Z"/>
+                      <circle r="2" fill="#333"/>
+                    </g>
+                  </g>
+                  <g transform="translate(188 190)">
+                    <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+                    <path fill="#1c1c1c" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" d="M 2,-4.5 H 24 a 4.5 4.5 0 0 1 0 9 H 2 Z"/>
+                    <g transform="translate(24 0)">
+                      <circle r="5" fill="#2a2a2a" stroke="rgba(255,255,255,0.25)" stroke-width="1.2"/>
+                      <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M 2,-2 L 9,-11 L 21,-11 L 26,-4.5 L 20,-5.5 L 11,-5.5 L 4,-2.5 Z"/>
+                      <path fill="#1a1a1a" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" d="M 2,2 L 9,11 L 21,11 L 26,4.5 L 20,5.5 L 11,5.5 L 4,2.5 Z"/>
+                      <circle r="2" fill="#333"/>
+                    </g>
+                  </g>
+                  <rect x="108" y="236" width="22" height="28" rx="8" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                  <rect x="150" y="236" width="22" height="28" rx="8" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                  <ellipse cx="119" cy="266" rx="16" ry="6" fill="#2a2a2a"/>
+                  <ellipse cx="161" cy="266" rx="16" ry="6" fill="#2a2a2a"/>
+                </g>
+              </svg>
+            </span>
+          </div>
+          <p class="inactive-pix__hint">PIX · CNPJ da Xhybrid Tecnologia</p>
+          <label class="inactive-pix__copy-label" for="inactive-pix-payload">PIX copia e cola</label>
+          <textarea id="inactive-pix-payload" class="inactive-pix__payload" rows="3" readonly></textarea>
+          <div class="inactive-pix__actions">
+            <button type="button" class="btn btn-outline" id="inactive-copy-pix">Copiar PIX</button>
+            <button type="button" class="btn btn-primary" id="inactive-claim">Já paguei — reativar site</button>
+            <a class="btn btn-outline" id="inactive-whatsapp" href="#" target="_blank" rel="noopener noreferrer" hidden>WhatsApp comercial</a>
+          </div>
+          <p class="inactive-status" id="inactive-status" hidden></p>
+          <p class="inactive-pix__note">1ª confirmação: reativa por 72h até o admin marcar como pago. Na 2ª tentativa sem pagamento confirmado, só o comercial libera.</p>
+        </div>
+
+        <script type="application/json" id="xh-inactive-ctx">{}</script>
+        <script src="/js/inactive-payment.js" defer></script>
       </div>
     </main>
     <div id="site-footer"></div>

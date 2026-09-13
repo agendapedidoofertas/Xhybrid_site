@@ -101,6 +101,8 @@ const SITE_DEFAULTS = {
   contact_form_intro: "Preencha abaixo e sua mensagem abre direto no seu e-mail.",
   contact_form_btn: "Enviar mensagem",
   brand_name: "Xhybrid",
+  brand_short: "",
+  brand_tag: "",
   logo_url: "",
   brand_tagline: "Sites, manutenção e tecnologia",
   brand_city: "",

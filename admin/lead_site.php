@@ -93,6 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'site_media' => $bundle['media'],
         'payload' => [
             'brand_tagline' => trim((string) ($_POST['brand_tagline'] ?? '')),
+            'brand_short' => trim((string) ($_POST['brand_short'] ?? '')),
+            'brand_tag' => trim((string) ($_POST['brand_tag'] ?? '')),
             'home_hero_title_1' => trim((string) ($_POST['home_hero_title_1'] ?? '')),
             'home_hero_title_2' => trim((string) ($_POST['home_hero_title_2'] ?? '')),
             'home_hero_text' => trim((string) ($_POST['home_hero_text'] ?? '')),
@@ -221,6 +223,8 @@ admin_header('Lead #' . $leadId, $user);
         <h2 class="admin-appearance__label" style="margin-top:1.5rem;">Textos do site</h2>
         <?php
         $textFields = [
+            'brand_short' => 'Logo — marca curta (header)',
+            'brand_tag' => 'Logo — complemento (accent)',
             'brand_tagline' => 'Slogan',
             'home_hero_title_1' => 'Hero — linha 1',
             'home_hero_title_2' => 'Hero — linha 2',

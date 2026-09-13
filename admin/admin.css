@@ -127,29 +127,66 @@ body[data-page="admin"] .admin-hub-grid {
 }
 
 body[data-page="admin"] .admin-hub-card {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
   text-decoration: none;
   color: inherit;
-  padding: 1.15rem 1.2rem;
+  padding: 0.85rem 1rem;
   border-radius: 0.65rem;
   background: #141414;
   border: 1px solid #2a2a2a;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 body[data-page="admin"] .admin-hub-card:hover {
   background: #1a1a1a;
   border-color: #3f3f3f;
+  transform: translateY(-1px);
+}
+
+body[data-page="admin"] .admin-hub-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin: 0.1rem 0 0;
+  border-radius: 0.4rem;
+  background: #1c1c1c;
+  border: 1px solid #2e2e2e;
+  color: #c8c8c8;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+body[data-page="admin"] .admin-hub-icon__svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+}
+
+body[data-page="admin"] .admin-hub-card:hover .admin-hub-icon {
+  color: #f0f0f0;
+  background: #222;
+  border-color: #444;
+}
+
+body[data-page="admin"] .admin-hub-card__body {
+  min-width: 0;
+  flex: 1;
 }
 
 body[data-page="admin"] .admin-hub-card h2 {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   margin: 0;
+  line-height: 1.25;
 }
 
 body[data-page="admin"] .admin-hub-card p {
-  margin: 0.5rem 0 0;
-  font-size: 0.875rem;
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
 }
 
 body[data-page="admin"] .admin-crumb a {
@@ -382,11 +419,19 @@ body[data-page="admin"] .site-nav {
 }
 
 body[data-page="admin"] .site-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   color: #a3a3a3;
   font-size: 0.78rem;
   padding: 0.25rem 0.4rem;
   white-space: nowrap;
   border-radius: 0.3rem;
+}
+
+body[data-page="admin"] .site-nav .admin-nav-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 
 body[data-page="admin"] .admin-main {
