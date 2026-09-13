@@ -13,6 +13,14 @@ require_once dirname(__DIR__) . '/lib/lead_admin.php';
 auth_boot_session();
 $user = require_page('plan');
 
+if (!user_is_staff($user)) {
+    http_response_code(403);
+    admin_header('Sem permissão', $user);
+    echo '<p class="admin-flash admin-flash--error">Apenas a equipe da agência pode alterar o plano.</p>';
+    admin_footer();
+    exit;
+}
+
 $leadId = lead_admin_request_id();
 $leadRow = null;
 if ($leadId !== null) {

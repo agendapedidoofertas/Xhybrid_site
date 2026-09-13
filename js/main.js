@@ -153,10 +153,55 @@ function applyAppearance(appearance, { persist = true } = {}) {
   applyFont(font);
   applyLayout(layout);
   applyMedia(media);
+  applyFrameworkSkin();
 
   if (persist) cacheAppearance(theme, font, layout, media, look);
 
   return { look, theme, font, layout, media };
+}
+
+/** Skin CDN opcional (bootswatch|bulma|tailwind), antes de styles.css; polish depois. */
+function applyFrameworkSkin() {
+  const allowed = new Set(["none", "bootswatch", "bulma", "tailwind"]);
+  const skin = String(site("framework_skin") || "none").toLowerCase();
+  const active = allowed.has(skin) ? skin : "none";
+
+  document.querySelectorAll("link[data-framework-skin], script[data-framework-skin]").forEach((el) => el.remove());
+  document.documentElement.setAttribute("data-framework-skin", active);
+
+  if (active === "none") return;
+
+  const head = document.head;
+  const mainCss = document.querySelector('link[href*="css/styles.css"]');
+  const insertLink = (href) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.setAttribute("data-framework-skin", "1");
+    if (mainCss) head.insertBefore(link, mainCss);
+    else head.appendChild(link);
+  };
+
+  if (active === "bootswatch") {
+    const theme = String(site("framework_bootswatch") || "darkly").replace(/[^a-z0-9-]/gi, "") || "darkly";
+    insertLink("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css");
+    insertLink(`https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/${theme}/bootstrap.min.css`);
+  } else if (active === "bulma") {
+    insertLink("https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css");
+  } else if (active === "tailwind") {
+    // Depois de styles + polish, para reforçar ritmo sem preflight.
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "css/skin-tailwind.css";
+    link.setAttribute("data-framework-skin", "1");
+    const polish = document.querySelector('link[href*="framework-skins.css"]');
+    const anchor = polish || mainCss;
+    if (anchor && anchor.parentNode) {
+      anchor.parentNode.insertBefore(link, anchor.nextSibling);
+    } else {
+      head.appendChild(link);
+    }
+  }
 }
 
 function setupAppearancePreviewListener() {
@@ -778,10 +823,27 @@ function applySiteTexts() {
   });
 
   document.querySelectorAll("[data-site-href]").forEach((el) => {
-    const key = el.getAttribute("data-site-href");
+    let key = el.getAttribute("data-site-href");
     if (!key) return;
+    // Corrigir absolutize antigo que virava data-site-href="/whatsapp"
+    if (key === "/whatsapp" || key.endsWith("/whatsapp")) {
+      key = "whatsapp";
+      el.setAttribute("data-site-href", "whatsapp");
+    }
     if (key === "whatsapp") {
-      el.setAttribute("href", site("whatsapp_number").trim() ? whatsappUrl() : "#");
+      const wa = site("whatsapp_number").trim() ? whatsappUrl() : "";
+      if (!wa) {
+        el.hidden = true;
+        el.setAttribute("aria-disabled", "true");
+        el.removeAttribute("href");
+        el.removeAttribute("target");
+      } else {
+        el.hidden = false;
+        el.removeAttribute("aria-disabled");
+        el.setAttribute("href", wa);
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener noreferrer");
+      }
     } else if (key === "email") {
       const mail = site("email").trim();
       el.setAttribute("href", mail ? `mailto:${mail}` : "#");
@@ -1007,6 +1069,9 @@ function setupPageTransitions() {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       if (link.target && link.target !== "_self") return;
       if (link.hasAttribute("download")) return;
+      if (link.hasAttribute("data-site-href")) return;
+      if (link.id === "hero-whatsapp" || link.id === "cta-whatsapp") return;
+      if (link.classList.contains("fab-whatsapp")) return;
 
       let url;
       try {
@@ -1015,6 +1080,7 @@ function setupPageTransitions() {
         return;
       }
       if (url.origin !== window.location.origin) return;
+      if (url.protocol === "https:" && /wa\.me/i.test(url.hostname)) return;
       if (!/\.html?$/i.test(url.pathname) && !/\/$/.test(url.pathname)) return;
       if (
         url.pathname === window.location.pathname &&
@@ -1122,17 +1188,57 @@ function rewriteLeadInternalLinks() {
 /** Garante href wa.me nos botões de orçamento (nunca path do lead / vazio). */
 function bindQuoteWhatsAppButtons() {
   syncContactGlobals();
-  const url = site("whatsapp_number").trim() ? whatsappUrl() : "#";
-  document.querySelectorAll('[data-site-href="whatsapp"], #hero-whatsapp, #cta-whatsapp').forEach((el) => {
+  // Preferir número do lead publicado quando existir
+  if (window.__xhybridLeadSettings && typeof window.__xhybridLeadSettings === "object") {
+    const leadWa = window.__xhybridLeadSettings.whatsapp_number;
+    if (typeof leadWa === "string" && leadWa.trim() !== "") {
+      SITE.whatsapp_number = leadWa.trim();
+    }
+    const leadMsg = window.__xhybridLeadSettings.whatsapp_message;
+    if (typeof leadMsg === "string" && leadMsg.trim() !== "") {
+      SITE.whatsapp_message = leadMsg;
+    }
+    syncContactGlobals();
+  }
+  const url = site("whatsapp_number").trim() ? whatsappUrl() : "";
+  document.querySelectorAll('[data-site-href="whatsapp"], [data-site-href="/whatsapp"], #hero-whatsapp, #cta-whatsapp').forEach((el) => {
+    if (el.getAttribute("data-site-href") === "/whatsapp") {
+      el.setAttribute("data-site-href", "whatsapp");
+    }
+    if (!url) {
+      el.hidden = true;
+      el.setAttribute("aria-disabled", "true");
+      el.removeAttribute("href");
+      el.removeAttribute("target");
+      el.onclick = (e) => e.preventDefault();
+      return;
+    }
+    el.hidden = false;
+    el.removeAttribute("aria-disabled");
+    el.onclick = null;
     el.setAttribute("href", url);
-    if (url.startsWith("http")) {
-      el.setAttribute("target", "_blank");
-      el.setAttribute("rel", "noopener noreferrer");
+    el.setAttribute("target", "_blank");
+    el.setAttribute("rel", "noopener noreferrer");
+    // Ícone de orçamento (bolsa), não balão de WhatsApp
+    const iconHost = el.querySelector("svg");
+    if (iconHost && ICONS.quote) {
+      const wrap = document.createElement("span");
+      wrap.innerHTML = ICONS.quote;
+      const next = wrap.firstElementChild;
+      if (next) {
+        iconHost.replaceWith(next);
+      }
     }
   });
   const fab = document.querySelector(".fab-whatsapp");
-  if (fab && url.startsWith("http")) {
-    fab.setAttribute("href", url);
+  if (fab) {
+    if (url) {
+      fab.setAttribute("href", url);
+      fab.hidden = false;
+    } else {
+      fab.hidden = true;
+      fab.removeAttribute("href");
+    }
   }
 }
 
@@ -1168,10 +1274,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const [imagesResult, settingsResult, servicesResult] = await Promise.allSettled([
-    fetch(apiUrl("api/images.php"), {
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    }).then(async (res) => {
+    fetch(
+      apiUrl("api/images.php") +
+        (leadPath && leadPath.leadId
+          ? "?" +
+            new URLSearchParams({
+              lead_id: String(leadPath.leadId),
+              slug: String(leadPath.slug || ""),
+              code: String(leadPath.code || ""),
+            }).toString()
+          : ""),
+      {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      },
+    ).then(async (res) => {
       if (!res.ok) throw new Error("API " + res.status);
       const data = await res.json();
       if (!Array.isArray(data)) throw new Error("JSON inválido");
@@ -1188,10 +1305,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       return data;
     }),
-    fetch(apiUrl("api/services.php"), {
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    }).then(async (res) => {
+    fetch(
+      apiUrl("api/services.php") +
+        (leadPath && leadPath.leadId
+          ? "?" +
+            new URLSearchParams({
+              lead_id: String(leadPath.leadId),
+              slug: String(leadPath.slug || ""),
+              code: String(leadPath.code || ""),
+            }).toString()
+          : ""),
+      {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      },
+    ).then(async (res) => {
       if (!res.ok) throw new Error("API " + res.status);
       const data = await res.json();
       if (!Array.isArray(data)) throw new Error("Services inválido");
@@ -1251,6 +1379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyVideos();
   applyImages();
   applySiteTexts();
+  bindQuoteWhatsAppButtons();
   if (typeof applyFeatureIcons === "function") {
     applyFeatureIcons();
   }
@@ -1262,5 +1391,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupContactForm();
   initRevealAnimations();
   setupPageTransitions();
+  bindQuoteWhatsAppButtons();
   revealLeadPage();
 });

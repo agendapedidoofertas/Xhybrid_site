@@ -15,6 +15,18 @@ try {
     $leadId = null;
     if (isset($_GET['lead_id']) && (int) $_GET['lead_id'] > 0) {
         $leadId = (int) $_GET['lead_id'];
+        require_once dirname(__DIR__) . '/lib/published_sites.php';
+        $slug = strtolower(trim((string) ($_GET['slug'] ?? '')));
+        $code = strtolower(trim((string) ($_GET['code'] ?? '')));
+        if ($slug === '' || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug) || !preg_match('/^[a-z]$/', $code)) {
+            echo '[]';
+            exit;
+        }
+        $row = published_site_find_public($pdo, $slug, $leadId, $code);
+        if (!$row || (int) ($row['site_active'] ?? 0) !== 1) {
+            echo '[]';
+            exit;
+        }
     }
     images_deactivate_unavailable($pdo, $leadId);
     $rows = [];

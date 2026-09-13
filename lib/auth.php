@@ -111,7 +111,7 @@ function user_allowed_pages(?array $user = null): array
     if ($role === 'client_pro') {
         return [
             'index', 'contact', 'texts', 'lead_hub', 'lead_site', 'services',
-            'password', 'plan', 'brand', 'sections', 'preset', 'appearance',
+            'password', 'brand', 'sections', 'preset', 'appearance',
         ];
     }
     if ($role === 'client_medium') {

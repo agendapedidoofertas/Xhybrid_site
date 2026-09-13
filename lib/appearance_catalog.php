@@ -41,6 +41,74 @@ function appearance_themes(): array
 }
 
 /**
+ * Temas agrupados por paleta (mesmo eixo dos looks: Neutro → Roxo).
+ *
+ * @return list<array{name:string, themes:list<array{id:string,label:string,desc:string}>}>
+ */
+function appearance_themes_by_palette(): array
+{
+    $catalog = appearance_themes();
+    $groups = [
+        'Neutro' => [
+            'preto' => 'Preto profundo, contraste alto',
+            'graphite' => 'Carvão frio com acento azul',
+            'slate' => 'Cinza-azulado sóbrio',
+            'cinza' => 'Cinza claro, visual limpo',
+            'branco' => 'Minimalista claro',
+            'gelo' => 'Gelo claro com azul suave',
+        ],
+        'Azul' => [
+            'midnight' => 'Azul-noite denso',
+            'azul' => 'Azul elétrico clássico',
+            'oceano' => 'Azul oceânico vivo',
+            'indigo' => 'Índigo profundo',
+        ],
+        'Ciano' => [
+            'teal' => 'Teal saturado, clima tech',
+            'menta' => 'Menta fresca e clara',
+        ],
+        'Verde' => [
+            'verde' => 'Verde floresta sólido',
+            'lime' => 'Lima neon técnico',
+        ],
+        'Quente' => [
+            'amber' => 'Âmbar quente intenso',
+            'cobre' => 'Cobre metálico',
+            'sunset' => 'Laranja-coral forte',
+            'marrom-claro' => 'Bege e caramelo de estúdio',
+        ],
+        'Vermelho' => [
+            'sangue' => 'Vermelho sangue no escuro',
+            'vinho' => 'Rubi intenso, blocos fortes',
+        ],
+        'Roxo' => [
+            // indigo já aparece em Azul; sem ids roxos dedicados no catálogo atual
+        ],
+    ];
+
+    $out = [];
+    foreach ($groups as $name => $items) {
+        $themes = [];
+        foreach ($items as $id => $desc) {
+            if (!isset($catalog[$id])) {
+                continue;
+            }
+            $themes[] = [
+                'id' => $id,
+                'label' => (string) $catalog[$id]['label'],
+                'desc' => $desc,
+            ];
+        }
+        if ($themes === []) {
+            continue;
+        }
+        $out[] = ['name' => $name, 'themes' => $themes];
+    }
+
+    return $out;
+}
+
+/**
  * @return array<string, array{label: string, display: string, body: string}>
  */
 function appearance_fonts(): array

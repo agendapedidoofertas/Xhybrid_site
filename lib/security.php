@@ -61,7 +61,7 @@ function security_send_headers(): void
         . "img-src 'self' data: https: blob:; "
         . "media-src 'self' https: blob:; "
         . "font-src 'self' https://fonts.gstatic.com data:; "
-        . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
         . "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; "
         . "connect-src 'self' https:; "
         . "frame-ancestors 'self'; "

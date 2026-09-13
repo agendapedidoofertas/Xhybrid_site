@@ -142,6 +142,18 @@ function lead_admin_save_settings(PDO $pdo, int $leadId, array $input): array
         $payload[$key] = $val;
     }
 
+    // Qualquer alteração de aparência pelo admin trava o CRM de sobrescrever
+    $appearanceKeys = [
+        'appearance_look', 'appearance_theme', 'appearance_font', 'appearance_layout',
+        'appearance_media', 'appearance_combination_id', 'framework_skin', 'framework_bootswatch',
+    ];
+    foreach ($appearanceKeys as $ak) {
+        if (array_key_exists($ak, $input)) {
+            $payload['appearance_locked_by_admin'] = '1';
+            break;
+        }
+    }
+
     if ($payload !== []) {
         $fields['payload'] = $payload;
     }

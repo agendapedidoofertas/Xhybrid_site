@@ -1,0 +1,427 @@
+/**
+ * Framework skins + polish público.
+ * Carrega DEPOIS de styles.css para isolar Bootswatch/Bulma/Tailwind
+ * e reforçar tipografia/ritmo inspirados em Linear / Vercel / Stripe.
+ * Não altera a árvore de looks/themes/fonts existente.
+ */
+
+/* ===== Base polish (sempre ativo, suave) ===== */
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  letter-spacing: -0.011em;
+}
+
+.hero h1,
+.page-cover h1,
+.section-header h2,
+.font-display {
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.hero__text,
+.section-header p,
+.lead,
+.page-header p {
+  text-wrap: pretty;
+  max-width: 42rem;
+}
+
+.hero {
+  position: relative;
+}
+
+.hero__grid {
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+}
+
+@media (min-width: 960px) {
+  .hero h1 {
+    font-size: clamp(2.6rem, 4.6vw, 4.15rem);
+    line-height: 1.02;
+  }
+}
+
+.section {
+  padding-block: clamp(3.25rem, 6vw, 5.5rem);
+}
+
+.section-header {
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.btn {
+  letter-spacing: -0.01em;
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.site-header__inner {
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.card,
+.service-card,
+.plan-card,
+.gallery-item,
+.contact-card {
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+@media (hover: hover) {
+  .service-card:hover,
+  .plan-card:hover,
+  .contact-card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.reveal {
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ===== Isolation: Bootswatch / Bootstrap ===== */
+html[data-framework-skin="bootswatch"] {
+  --skin-accent: var(--primary);
+}
+
+html[data-framework-skin="bootswatch"] body {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-body) !important;
+}
+
+html[data-framework-skin="bootswatch"] .container {
+  max-width: var(--container) !important;
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 1.5rem);
+}
+
+html[data-framework-skin="bootswatch"] h1,
+html[data-framework-skin="bootswatch"] h2,
+html[data-framework-skin="bootswatch"] h3,
+html[data-framework-skin="bootswatch"] h4,
+html[data-framework-skin="bootswatch"] h5,
+html[data-framework-skin="bootswatch"] h6 {
+  color: inherit;
+  font-family: var(--font-display);
+  font-weight: inherit;
+  line-height: inherit;
+  margin: unset;
+}
+
+html[data-framework-skin="bootswatch"] a {
+  color: inherit;
+  text-decoration: none;
+}
+
+html[data-framework-skin="bootswatch"] .btn,
+html[data-framework-skin="bootswatch"] a.btn,
+html[data-framework-skin="bootswatch"] button.btn {
+  --bs-btn-padding-x: unset;
+  --bs-btn-padding-y: unset;
+  --bs-btn-font-size: unset;
+  --bs-btn-border-radius: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+html[data-framework-skin="bootswatch"] .btn-primary,
+html[data-framework-skin="bootswatch"] a.btn-primary {
+  background: var(--primary) !important;
+  border-color: color-mix(in oklch, var(--primary) 80%, #000) !important;
+  color: var(--primary-foreground) !important;
+}
+
+html[data-framework-skin="bootswatch"] .btn-outline,
+html[data-framework-skin="bootswatch"] .btn-secondary,
+html[data-framework-skin="bootswatch"] a.btn-outline,
+html[data-framework-skin="bootswatch"] a.btn-secondary {
+  background: color-mix(in oklch, var(--card) 55%, transparent) !important;
+  border-color: var(--glass-border) !important;
+  color: var(--foreground) !important;
+}
+
+html[data-framework-skin="bootswatch"] .card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-framework-skin="bootswatch"] .form-control,
+html[data-framework-skin="bootswatch"] .form-select,
+html[data-framework-skin="bootswatch"] input,
+html[data-framework-skin="bootswatch"] textarea,
+html[data-framework-skin="bootswatch"] select {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+  border-radius: var(--radius);
+}
+
+html[data-framework-skin="bootswatch"] .site-header,
+html[data-framework-skin="bootswatch"] .site-header__inner,
+html[data-framework-skin="bootswatch"] .hero,
+html[data-framework-skin="bootswatch"] .page-cover {
+  font-family: var(--font-body);
+}
+
+/* Bootswatch: leve “produto SaaS” — mais ar, menos chrome */
+html[data-framework-skin="bootswatch"] .site-header__inner {
+  border-radius: 0.85rem;
+  box-shadow: 0 8px 30px color-mix(in oklch, #000 18%, transparent);
+}
+
+html[data-framework-skin="bootswatch"] .hero h1 {
+  font-weight: 750;
+}
+
+html[data-framework-skin="bootswatch"] .badge {
+  border-radius: 0.45rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* ===== Isolation: Bulma ===== */
+html[data-framework-skin="bulma"] {
+  --skin-accent: var(--primary);
+}
+
+html[data-framework-skin="bulma"] body {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-body) !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+html[data-framework-skin="bulma"] .container {
+  max-width: var(--container) !important;
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 1.5rem);
+  flex-grow: unset;
+}
+
+html[data-framework-skin="bulma"] .title,
+html[data-framework-skin="bulma"] .subtitle,
+html[data-framework-skin="bulma"] h1,
+html[data-framework-skin="bulma"] h2,
+html[data-framework-skin="bulma"] h3 {
+  color: inherit !important;
+  font-family: var(--font-display);
+  font-weight: inherit;
+  line-height: inherit;
+  margin: unset;
+}
+
+html[data-framework-skin="bulma"] a:not(.btn) {
+  color: inherit;
+}
+
+html[data-framework-skin="bulma"] .button,
+html[data-framework-skin="bulma"] .btn {
+  height: auto;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+html[data-framework-skin="bulma"] .btn-primary,
+html[data-framework-skin="bulma"] .button.is-primary {
+  background: var(--primary) !important;
+  border-color: transparent !important;
+  color: var(--primary-foreground) !important;
+}
+
+html[data-framework-skin="bulma"] .card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-framework-skin="bulma"] .input,
+html[data-framework-skin="bulma"] .textarea,
+html[data-framework-skin="bulma"] .select select,
+html[data-framework-skin="bulma"] input,
+html[data-framework-skin="bulma"] textarea,
+html[data-framework-skin="bulma"] select {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+  border-radius: var(--radius);
+  box-shadow: none;
+  height: auto;
+}
+
+/* Bulma: ritmo editorial / magazine */
+html[data-framework-skin="bulma"] .section-header h2 {
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
+}
+
+html[data-framework-skin="bulma"] .site-nav a {
+  border-radius: 0.55rem;
+}
+
+html[data-framework-skin="bulma"] .service-card,
+html[data-framework-skin="bulma"] .plan-card {
+  border-radius: 1rem;
+}
+
+/* ===== Tailwind skin (CDN utilities, sem preflight) ===== */
+html[data-framework-skin="tailwind"] {
+  --skin-accent: var(--primary);
+}
+
+html[data-framework-skin="tailwind"] body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+html[data-framework-skin="tailwind"] .container {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 1.5rem);
+}
+
+/* Linear / Vercel: header mais preciso, hero centrado em respiração */
+html[data-framework-skin="tailwind"] .site-header__inner {
+  border-radius: 9999px;
+  border-color: color-mix(in oklch, var(--border) 70%, transparent);
+  background: color-mix(in oklch, var(--card) 72%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, #fff 4%, transparent), 0 10px 40px color-mix(in oklch, #000 22%, transparent);
+}
+
+html[data-framework-skin="tailwind"] .hero h1 {
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+html[data-framework-skin="tailwind"] .hero__text {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: color-mix(in oklch, var(--muted-foreground) 92%, var(--foreground));
+}
+
+html[data-framework-skin="tailwind"] .btn-primary {
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent),
+    0 8px 24px color-mix(in oklch, var(--primary) 28%, transparent);
+}
+
+html[data-framework-skin="tailwind"] .badge {
+  border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+  background: color-mix(in oklch, var(--secondary) 40%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+html[data-framework-skin="tailwind"] .section-header h2 {
+  letter-spacing: -0.05em;
+}
+
+html[data-framework-skin="tailwind"] .service-card,
+html[data-framework-skin="tailwind"] .plan-card,
+html[data-framework-skin="tailwind"] .contact-card {
+  border-radius: 1.15rem;
+  border-color: color-mix(in oklch, var(--border) 75%, transparent);
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+}
+
+/* ===== Tipografia mais expressiva por fonte ===== */
+html[data-font="editorial"] .hero h1,
+html[data-font="classic"] .hero h1,
+html[data-font="baskerville"] .hero h1,
+html[data-font="garamond"] .hero h1 {
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+html[data-font="mono"] body,
+html[data-font="mono"] .hero__text {
+  font-variant-ligatures: none;
+}
+
+html[data-font="condensed"] .hero h1 {
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+html[data-font="display"] .hero h1,
+html[data-font="syne"] .hero h1 {
+  letter-spacing: -0.06em;
+}
+
+/* ===== Temas: reforço de atmosfera (sem trocar tokens) ===== */
+html[data-theme="preto"] body::before,
+html[data-theme="graphite"] body::before,
+html[data-theme="midnight"] body::before,
+html[data-theme="slate"] body::before {
+  opacity: 0.45;
+}
+
+html[data-theme="branco"] .site-header__inner,
+html[data-theme="gelo"] .site-header__inner,
+html[data-theme="cinza"] .site-header__inner {
+  box-shadow: 0 8px 28px color-mix(in oklch, #000 6%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .card,
+  .service-card,
+  .plan-card,
+  .contact-card,
+  .reveal {
+    transition: none !important;
+  }
+  .btn:hover,
+  .service-card:hover,
+  .plan-card:hover,
+  .contact-card:hover {
+    transform: none !important;
+  }
+}

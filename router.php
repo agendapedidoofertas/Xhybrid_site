@@ -104,10 +104,10 @@ if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, 
             'slug' => $slug,
             'leadId' => $leadId,
             'code' => $letter,
-        ], JSON_UNESCAPED_UNICODE) . ';'
+        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE) . ';'
         . 'window.__xhybridLeadSettings=' . json_encode(
             $leadSettings,
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
         ) . ';'
         . 'setTimeout(function(){document.documentElement.classList.remove("lead-booting");},4000);'
         . '</script>';

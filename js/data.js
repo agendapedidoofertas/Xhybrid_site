@@ -39,6 +39,10 @@ const SITE_DEFAULTS = {
   appearance_layout: "soft",
   appearance_media: "classic",
   appearance_look: "xhybrid-signature",
+  appearance_combination_id: "",
+  framework_skin: "none",
+  framework_bootswatch: "",
+  appearance_locked_by_admin: "0",
   home_badge: "Sites & tecnologia",
   home_hero_title_1: "Seu negócio,",
   home_hero_title_2: "online de verdade.",
@@ -69,7 +73,7 @@ const SITE_DEFAULTS = {
   home_cta_text:
     "Conte o que precisa — site novo, manutenção ou melhoria tecnológica — e montamos a melhor proposta.",
   home_cta_btn: "Orçamento",
-  about_eyebrow: "About us",
+  about_eyebrow: "Sobre nós",
   about_title_1: "Tecnologia,",
   about_title_2: "com clareza.",
   about_p1:
@@ -140,7 +144,7 @@ const SITE_DEFAULTS = {
   faq_3_a: "",
   faq_4_q: "",
   faq_4_a: "",
-  site_plan: "profissional",
+  site_plan: "medium",
   feature_page_sobre: "1",
   feature_page_galeria: "1",
   feature_page_contato: "1",
@@ -278,16 +282,22 @@ function leadPageHref(file) {
 /** Looks liberados conforme plano / flag premium */
 function allowedLookPresets() {
   const premium = site("feature_looks_premium") === "1";
-  const plan = site("site_plan") || "profissional";
-  if (premium || plan === "personalizado") {
+  const plan = String(site("site_plan") || "basic").toLowerCase();
+  const normalized =
+    plan === "essencial" || plan === "basic"
+      ? "basic"
+      : plan === "profissional" || plan === "medium"
+        ? "medium"
+        : plan === "personalizado" || plan === "pro"
+          ? "pro"
+          : plan;
+  if (premium || normalized === "pro") {
     return LOOK_PRESETS;
   }
   const basicPalettes =
-    plan === "essencial"
+    normalized === "basic"
       ? ["Neutro"]
       : ["Neutro", "Azul", "Ciano", "Verde", "Quente"];
-  // Signature fica disponível na paleta Neutro (vitrine); pacotes Essencial/Profissional
-  // já forçam looks de cliente ao aplicar o plano (tech-glass / azure-blast).
   return LOOK_PRESETS.filter((l) => basicPalettes.includes(l.palette || "Neutro"));
 }
 
@@ -578,6 +588,16 @@ const FONT_PACKS = [
   { id: "classic", nome: "Classic", descricao: "Playfair + Lato" },
   { id: "rounded", nome: "Rounded", descricao: "Nunito + Nunito Sans" },
   { id: "condensed", nome: "Condensed", descricao: "Barlow Condensed + Barlow" },
+  { id: "inter", nome: "Inter", descricao: "Inter" },
+  { id: "montserrat", nome: "Montserrat", descricao: "Montserrat + Work Sans" },
+  { id: "raleway", nome: "Raleway", descricao: "Raleway" },
+  { id: "poppins", nome: "Poppins", descricao: "Poppins" },
+  { id: "slab", nome: "Slab", descricao: "Roboto Slab + Fira Sans" },
+  { id: "baskerville", nome: "Baskerville", descricao: "Libre Baskerville" },
+  { id: "garamond", nome: "Garamond", descricao: "Cormorant Garamond" },
+  { id: "figtree", nome: "Figtree", descricao: "Figtree" },
+  { id: "lexend", nome: "Lexend", descricao: "Lexend" },
+  { id: "work", nome: "Work Sans", descricao: "Work Sans" },
 ];
 
 /** Moldes de layout (data-layout) — visual: raios, glass, densidade */

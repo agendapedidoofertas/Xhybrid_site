@@ -1,0 +1,81 @@
+/**
+ * Skin "tailwind": utilitários e ritmo no estilo Linear/Vercel,
+ * sem Play CDN (evita preflight que sobrescreve o design system).
+ * Ativada via data-framework-skin="tailwind".
+ */
+
+html[data-framework-skin="tailwind"] {
+  --tw-ring: color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+html[data-framework-skin="tailwind"] .page {
+  isolation: isolate;
+}
+
+html[data-framework-skin="tailwind"] .hero {
+  min-height: min(88vh, 52rem);
+  display: flex;
+  align-items: center;
+}
+
+html[data-framework-skin="tailwind"] .hero__grid {
+  width: 100%;
+  padding-block: clamp(2rem, 6vw, 4.5rem);
+}
+
+html[data-framework-skin="tailwind"] .site-logo {
+  letter-spacing: -0.05em;
+  font-weight: 700;
+}
+
+html[data-framework-skin="tailwind"] .site-nav a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+}
+
+html[data-framework-skin="tailwind"] .site-nav a.is-active {
+  box-shadow: 0 0 0 1px var(--tw-ring);
+}
+
+html[data-framework-skin="tailwind"] .btn {
+  border-radius: 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+html[data-framework-skin="tailwind"] .btn-primary {
+  border-radius: 0.65rem;
+}
+
+html[data-framework-skin="tailwind"] .section-header {
+  max-width: 36rem;
+}
+
+html[data-framework-skin="tailwind"] .section-header h2 {
+  font-size: clamp(1.75rem, 3.2vw, 2.35rem);
+  line-height: 1.12;
+}
+
+html[data-framework-skin="tailwind"] .page-cover__content h1 {
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
+html[data-framework-skin="tailwind"] .footer,
+html[data-framework-skin="tailwind"] .site-footer {
+  border-top: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+}
+
+html[data-framework-skin="tailwind"] input,
+html[data-framework-skin="tailwind"] textarea,
+html[data-framework-skin="tailwind"] select {
+  border-radius: 0.65rem;
+}
+
+html[data-framework-skin="tailwind"] input:focus,
+html[data-framework-skin="tailwind"] textarea:focus,
+html[data-framework-skin="tailwind"] select:focus {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--tw-ring);
+}

@@ -8,7 +8,12 @@ require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/published_sites.php';
 
 auth_boot_session();
-$user = require_admin();
+$user = require_page('leads');
+if (user_is_client($user)) {
+    $own = user_crm_lead_id($user);
+    header('Location: ' . ($own ? ('lead_hub.php?lead_id=' . $own) : 'index.php'));
+    exit;
+}
 
 $rows = published_site_list(db());
 

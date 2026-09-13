@@ -107,7 +107,7 @@ function preset_xhybrid(): array
             'home_cta_title_2' => 'A gente desenvolve.',
             'home_cta_text' => 'Conte o que precisa — site novo, manutenção ou melhoria tecnológica — e montamos a melhor proposta.',
             'home_cta_btn' => 'Orçamento',
-            'about_eyebrow' => 'About us',
+            'about_eyebrow' => 'Sobre nós',
             'about_title_1' => 'Tecnologia,',
             'about_title_2' => 'com clareza.',
             'about_p1' => 'A Xhybrid nasceu para ajudar empresas a terem presença digital profissional: sites bem feitos, manutenção confiável e tecnologia aplicada ao negócio.',

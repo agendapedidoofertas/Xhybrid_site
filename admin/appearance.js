@@ -20,7 +20,10 @@
 
   function syncFields() {
     if (fieldLook) fieldLook.value = state.look;
-    if (lookSelect) lookSelect.value = state.look;
+    if (lookSelect) {
+      lookSelect.value = state.look;
+      lookSelect.dispatchEvent(new Event("change"));
+    }
   }
 
   function markDirty() {
@@ -56,16 +59,14 @@
         const items = group.looks
           .map((look) => {
             const active = look.id === state.look;
-            const swatches = look.swatch
+            const swatches = (look.swatch || [])
               .map((c) => `<span style="background:${c}"></span>`)
               .join("");
             return `
-        <button type="button" class="admin-appearance__look${active ? " is-active" : ""}" data-look-id="${escapeHtml(look.id)}" aria-pressed="${active}">
+        <button type="button" class="admin-appearance__look${active ? " is-active" : ""}" data-look-id="${escapeHtml(look.id)}" aria-pressed="${active}" title="${escapeHtml(look.descricao || "")}">
           <span class="admin-appearance__look-swatch">${swatches}</span>
-          <span class="admin-appearance__look-copy">
-            <span class="admin-appearance__look-name">${escapeHtml(look.nome)}${look.agencyExclusive ? " · agência" : ""}</span>
-            <span class="admin-appearance__look-desc">${escapeHtml(look.descricao)}</span>
-          </span>
+          <span class="admin-appearance__look-name">${escapeHtml(look.nome)}${look.agencyExclusive ? " · agência" : ""}</span>
+          <span class="admin-appearance__look-desc">${escapeHtml(look.descricao || "")}</span>
         </button>`;
           })
           .join("");
@@ -80,11 +81,15 @@
 
   function selectLook(id) {
     const source = typeof allowedLookPresets === "function" ? allowedLookPresets() : LOOK_PRESETS;
-    if (!source.some((l) => l.id === id)) return;
+    const preset = source.find((l) => l.id === id);
+    if (!preset) return;
     state.look = id;
     renderLooks();
     syncFields();
     markDirty();
+    if (typeof window.__xhybridAppearanceSyncFromLook === "function") {
+      window.__xhybridAppearanceSyncFromLook(preset);
+    }
   }
 
   root.addEventListener("click", (e) => {

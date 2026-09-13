@@ -55,7 +55,8 @@ function published_site_absolutize_html(string $html): string
     }
 
     $html = preg_replace_callback(
-        '~\b(href|src)=([\'"])(?!https?:|//|#|data:|mailto:|tel:|/)([^\'"]+)\2~i',
+        // Só atributos href/src reais (não data-site-href, data-img-src, etc.)
+        '~(?<=\s)(href|src)=([\'"])(?!https?:|//|#|data:|mailto:|tel:|/)([^\'"]+)\2~i',
         static function (array $m): string {
             $path = ltrim(str_replace('\\', '/', $m[3]), './');
             // Páginas HTML do site: manter relativo; o JS do lead prefixa o path público

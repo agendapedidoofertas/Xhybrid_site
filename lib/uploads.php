@@ -48,6 +48,22 @@ function uploads_handle(array $file, string $slugHint = 'file'): array
         return ['ok' => false, 'error' => 'Upload inválido.'];
     }
 
+    $mimeMap = [
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png' => ['image/png'],
+        'webp' => ['image/webp'],
+        'gif' => ['image/gif'],
+        'mp4' => ['video/mp4'],
+        'webm' => ['video/webm'],
+    ];
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $detected = (string) $finfo->file($tmp);
+    $allowedMimes = $mimeMap[$ext] ?? [];
+    if ($allowedMimes !== [] && !in_array($detected, $allowedMimes, true)) {
+        return ['ok' => false, 'error' => 'MIME não corresponde à extensão (detectado: ' . $detected . ').'];
+    }
+
     uploads_ensure_dir();
     $slug = preg_replace('/[^a-z0-9\-]+/', '-', strtolower($slugHint)) ?: 'file';
     $slug = trim($slug, '-') ?: 'file';

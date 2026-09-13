@@ -147,6 +147,8 @@ function settings_definitions(): array
             'choices' => [
                 'tech', 'soft', 'editorial', 'saas', 'mono', 'display',
                 'geometric', 'classic', 'rounded', 'condensed',
+                'inter', 'montserrat', 'raleway', 'poppins', 'slab',
+                'baskerville', 'garamond', 'figtree', 'lexend', 'work',
             ],
             'default' => 'saas',
         ],
@@ -165,6 +167,24 @@ function settings_definitions(): array
                 'center', 'media-wide', 'copy-wide', 'gallery-dense',
             ],
             'default' => 'classic',
+        ],
+        'appearance_combination_id' => [
+            'group' => 'appearance', 'label' => 'Combinação curada', 'max' => 48, 'type' => 'short',
+            'default' => '',
+        ],
+        'framework_skin' => [
+            'group' => 'appearance', 'label' => 'Framework skin', 'max' => 24, 'type' => 'choice',
+            'choices' => ['none', 'bootswatch', 'bulma', 'tailwind'],
+            'default' => 'none',
+        ],
+        'framework_bootswatch' => [
+            'group' => 'appearance', 'label' => 'Tema Bootswatch', 'max' => 24, 'type' => 'short',
+            'default' => '',
+        ],
+        'appearance_locked_by_admin' => [
+            'group' => 'appearance', 'label' => 'Aparência travada pelo admin', 'max' => 1, 'type' => 'choice',
+            'choices' => ['0', '1'],
+            'default' => '0',
         ],
 
         // Home
@@ -268,7 +288,7 @@ function settings_definitions(): array
         // Sobre
         'about_eyebrow' => [
             'group' => 'sobre', 'label' => 'Eyebrow', 'max' => 30, 'type' => 'short',
-            'default' => 'About us',
+            'default' => 'Sobre nós',
         ],
         'about_title_1' => [
             'group' => 'sobre', 'label' => 'Título (parte 1)', 'max' => 40, 'type' => 'short',
@@ -361,7 +381,7 @@ function settings_definitions(): array
 
         /* Marca / identidade */
         'brand_name' => [
-            'group' => 'brand', 'label' => 'Nome da marca', 'max' => 40, 'type' => 'short',
+            'group' => 'brand', 'label' => 'Nome da marca', 'max' => 48, 'type' => 'short',
             'default' => 'Xhybrid',
         ],
         'brand_tagline' => [
