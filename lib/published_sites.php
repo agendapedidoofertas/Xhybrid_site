@@ -178,3 +178,166 @@ function published_site_settings_overlay(array $row): array
     }
     return $out;
 }
+
+/**
+ * @return list<array<string, mixed>>
+ */
+function published_site_list(PDO $pdo, ?int $activeOnly = null): array
+{
+    $sql = 'SELECT * FROM published_sites';
+    $params = [];
+    if ($activeOnly !== null) {
+        $sql .= ' WHERE site_active = :a';
+        $params[':a'] = $activeOnly;
+    }
+    $sql .= ' ORDER BY updated_at DESC, company_name ASC';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll() ?: [];
+}
+
+/**
+ * @return array<string, mixed>|null
+ */
+function published_site_get_by_lead(PDO $pdo, int $crmLeadId): ?array
+{
+    if ($crmLeadId <= 0) {
+        return null;
+    }
+    $stmt = $pdo->prepare('SELECT * FROM published_sites WHERE crm_lead_id = :id LIMIT 1');
+    $stmt->execute([':id' => $crmLeadId]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function published_site_public_path(array $row): string
+{
+    $slug = trim((string) ($row['slug'] ?? ''));
+    $id = (int) ($row['crm_lead_id'] ?? 0);
+    $code = trim((string) ($row['url_code'] ?? ''));
+    if ($slug === '' || $id <= 0 || $code === '') {
+        return '';
+    }
+    return '/' . $slug . '/' . $id . $code;
+}
+
+/**
+ * @return array<string, string>
+ */
+function published_site_decode_payload(array $row): array
+{
+    $out = [];
+    $raw = trim((string) ($row['payload_json'] ?? ''));
+    if ($raw === '') {
+        return $out;
+    }
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return $out;
+    }
+    foreach ($decoded as $k => $v) {
+        if (is_string($k) && (is_string($v) || is_numeric($v))) {
+            $out[$k] = (string) $v;
+        }
+    }
+    return $out;
+}
+
+/**
+ * Atualiza site do lead a partir do admin Xhybrid.
+ *
+ * @param array<string, mixed> $fields Colunas + opcional payload (array|string)
+ * @return array<string, mixed> Row atualizada
+ */
+function published_site_update_admin(PDO $pdo, int $crmLeadId, array $fields): array
+{
+    $row = published_site_get_by_lead($pdo, $crmLeadId);
+    if (!$row) {
+        throw new RuntimeException('Site do lead #' . $crmLeadId . ' não encontrado');
+    }
+
+    $cols = [
+        'company_name', 'phone', 'whatsapp', 'email',
+        'address_street', 'address_number', 'address_complement',
+        'neighborhood', 'city', 'state', 'postal_code',
+        'maps_url', 'website_url', 'instagram_url', 'facebook_url',
+        'opening_hours', 'site_preset',
+        'site_look', 'site_theme', 'site_font', 'site_layout', 'site_media',
+    ];
+
+    $sets = ['updated_at = :updated_at'];
+    $params = [
+        ':updated_at' => gmdate('c'),
+        ':id' => $crmLeadId,
+    ];
+
+    foreach ($cols as $col) {
+        if (!array_key_exists($col, $fields)) {
+            continue;
+        }
+        $sets[] = $col . ' = :' . $col;
+        $params[':' . $col] = (string) $fields[$col];
+    }
+
+    $payload = published_site_decode_payload($row);
+    if (isset($fields['payload']) && is_array($fields['payload'])) {
+        foreach ($fields['payload'] as $k => $v) {
+            if (!is_string($k)) {
+                continue;
+            }
+            $payload[$k] = is_string($v) || is_numeric($v) ? (string) $v : '';
+        }
+    }
+
+    // Espelha contato/aparência no payload usado pelo overlay
+    if (isset($fields['company_name'])) {
+        $payload['brand_name'] = (string) $fields['company_name'];
+    }
+    if (isset($fields['city'])) {
+        $payload['brand_city'] = (string) $fields['city'];
+    }
+    if (isset($fields['whatsapp']) || isset($fields['phone'])) {
+        $wa = (string) ($fields['whatsapp'] ?? $row['whatsapp'] ?? '');
+        if ($wa === '') {
+            $wa = (string) ($fields['phone'] ?? $row['phone'] ?? '');
+        }
+        $payload['whatsapp_number'] = $wa;
+    }
+    if (isset($fields['email'])) {
+        $payload['email'] = (string) $fields['email'];
+    }
+    if (isset($fields['instagram_url'])) {
+        $payload['instagram_url'] = (string) $fields['instagram_url'];
+    }
+    if (isset($fields['facebook_url'])) {
+        $payload['facebook_url'] = (string) $fields['facebook_url'];
+    }
+    if (isset($fields['maps_url'])) {
+        $payload['maps_url'] = (string) $fields['maps_url'];
+    }
+    foreach (['site_look' => 'appearance_look', 'site_theme' => 'appearance_theme', 'site_font' => 'appearance_font', 'site_layout' => 'appearance_layout', 'site_media' => 'appearance_media'] as $col => $pkey) {
+        if (isset($fields[$col])) {
+            $payload[$pkey] = (string) $fields[$col];
+        }
+    }
+
+    $street = (string) ($fields['address_street'] ?? $row['address_street'] ?? '');
+    $number = (string) ($fields['address_number'] ?? $row['address_number'] ?? '');
+    $neigh = (string) ($fields['neighborhood'] ?? $row['neighborhood'] ?? '');
+    $city = (string) ($fields['city'] ?? $row['city'] ?? '');
+    $state = (string) ($fields['state'] ?? $row['state'] ?? '');
+    $payload['address'] = trim(implode(', ', array_filter([$street, $number, $neigh, $city, $state])));
+
+    $sets[] = 'payload_json = :payload_json';
+    $params[':payload_json'] = json_encode($payload, JSON_UNESCAPED_UNICODE) ?: '{}';
+
+    $pdo->prepare(
+        'UPDATE published_sites SET ' . implode(', ', $sets) . ' WHERE crm_lead_id = :id'
+    )->execute($params);
+
+    $updated = published_site_get_by_lead($pdo, $crmLeadId);
+    if (!$updated) {
+        throw new RuntimeException('Falha ao releitura do site do lead');
+    }
+    return $updated;
+}

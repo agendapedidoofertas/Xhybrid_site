@@ -96,6 +96,7 @@ function admin_header(string $title, ?array $user = null): void
           <a href="index.php#imagens">Imagens</a>
           <a href="contact.php">Contato</a>
           <a href="texts.php">Textos</a>
+          <a href="leads.php">Leads</a>
           <a href="services.php">Serviços</a>
           <a href="password.php">Senha</a>
           <?php if (user_is_admin($user)): ?>
