@@ -190,7 +190,7 @@ function settings_definitions(): array
         ],
         'home_btn_quote' => [
             'group' => 'home', 'label' => 'Botão orçamento', 'max' => 28, 'type' => 'short',
-            'default' => 'Pedir orçamento',
+            'default' => 'Orçamento',
         ],
         'home_weave_title' => [
             'group' => 'home', 'label' => 'Título “O que fazemos”', 'max' => 40, 'type' => 'short',
@@ -262,7 +262,7 @@ function settings_definitions(): array
         ],
         'home_cta_btn' => [
             'group' => 'home', 'label' => 'Botão do CTA', 'max' => 30, 'type' => 'short',
-            'default' => 'Chamar no WhatsApp',
+            'default' => 'Orçamento',
         ],
 
         // Sobre
@@ -570,8 +570,8 @@ function settings_definitions(): array
         /* Plano comercial */
         'site_plan' => [
             'group' => 'plan', 'label' => 'Plano contratado', 'max' => 24, 'type' => 'choice',
-            'choices' => ['essencial', 'profissional', 'personalizado'],
-            'default' => 'profissional',
+            'choices' => ['basic', 'medium', 'pro'],
+            'default' => 'medium',
         ],
         'feature_page_sobre' => [
             'group' => 'plan', 'label' => 'Mostrar página Sobre', 'max' => 1, 'type' => 'choice',
@@ -654,14 +654,8 @@ function settings_sanitize(string $key, string $value): string
             $value = '';
         }
     } elseif ($type === 'url') {
-        $value = str_replace(['<', '>', '"', "'"], '', $value);
-        if ($value !== '' && !preg_match('#^https?://#i', $value)) {
-            $value = 'https://' . ltrim($value, '/');
-        }
-        if ($value !== '' && !filter_var($value, FILTER_VALIDATE_URL)) {
-            // URL inválida: limpa em vez de forçar default (permite apagar Instagram/Facebook/etc.)
-            $value = '';
-        }
+        require_once __DIR__ . '/security.php';
+        $value = url_http_only($value);
     } elseif ($type === 'choice' || $type === 'icon') {
         $choices = $def['choices'] ?? [];
         if (!is_array($choices) || $choices === []) {
@@ -771,9 +765,9 @@ function settings_sync_page_from_text_tab(PDO $pdo, string $tab): void
 
     // Não religar se o plano Essencial (ou flag) proíbe a página
     require_once __DIR__ . '/plans.php';
-    $plan = (string) ($all['site_plan'] ?? 'profissional');
+    $plan = plan_normalize((string) ($all['site_plan'] ?? 'medium'));
     $bundle = plan_bundle($plan);
-    if (isset($bundle[$feature]) && (string) $bundle[$feature] === '0' && $plan === 'essencial') {
+    if (isset($bundle[$feature]) && (string) $bundle[$feature] === '0' && $plan === 'basic') {
         return;
     }
     settings_save_many($pdo, [$feature => '1']);

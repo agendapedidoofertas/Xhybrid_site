@@ -7,9 +7,7 @@
   };
 
   const fieldLook = document.getElementById("field-look");
-  const demo = document.getElementById("appearance-demo");
-  const demoToggle = document.getElementById("appearance-demo-toggle");
-  const frame = document.getElementById("appearance-frame");
+  const lookSelect = document.getElementById("appearance_look");
   const statusEl = document.getElementById("appearance-status");
 
   function escapeHtml(str) {
@@ -20,39 +18,16 @@
       .replace(/"/g, "&quot;");
   }
 
-  function currentPreset() {
-    const allowed = typeof allowedLookPresets === "function" ? allowedLookPresets() : LOOK_PRESETS;
-    return allowed.find((l) => l.id === state.look) || allowed[0] || LOOK_PRESETS[0];
-  }
-
   function syncFields() {
     if (fieldLook) fieldLook.value = state.look;
-  }
-
-  function pushPreview() {
-    if (!frame || !frame.contentWindow) return;
-    const preset = currentPreset();
-    try {
-      frame.contentWindow.postMessage(
-        {
-          type: "xhybrid-appearance-preview",
-          look: preset.id,
-          theme: preset.theme,
-          font: preset.font,
-          layout: preset.layout,
-          media: preset.media,
-        },
-        window.location.origin
-      );
-    } catch (_) {
-      /* ignore */
-    }
+    if (lookSelect) lookSelect.value = state.look;
   }
 
   function markDirty() {
-    const preset = currentPreset();
-    if (statusEl) {
-      statusEl.textContent = `Look “${preset.nome}” na demo — salve para publicar.`;
+    const source = typeof allowedLookPresets === "function" ? allowedLookPresets() : LOOK_PRESETS;
+    const preset = source.find((l) => l.id === state.look) || source[0];
+    if (statusEl && preset) {
+      statusEl.textContent = `Look “${preset.nome}” selecionado — salve para publicar.`;
     }
   }
 
@@ -109,7 +84,6 @@
     state.look = id;
     renderLooks();
     syncFields();
-    pushPreview();
     markDirty();
   }
 
@@ -117,47 +91,6 @@
     const lookBtn = e.target.closest("[data-look-id]");
     if (!lookBtn) return;
     selectLook(lookBtn.getAttribute("data-look-id"));
-  });
-
-  if (demoToggle && demo) {
-    demoToggle.addEventListener("click", () => {
-      const open = demo.hasAttribute("hidden");
-      if (open) {
-        demo.removeAttribute("hidden");
-        root.classList.add("is-demo-open");
-        demoToggle.setAttribute("aria-pressed", "true");
-        demoToggle.textContent = "Fechar demonstração";
-        pushPreview();
-      } else {
-        demo.setAttribute("hidden", "");
-        root.classList.remove("is-demo-open");
-        demoToggle.setAttribute("aria-pressed", "false");
-        demoToggle.textContent = "Demonstração";
-      }
-    });
-  }
-
-  document.querySelectorAll("[data-preview-page]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const page = btn.getAttribute("data-preview-page");
-      if (!page || !frame) return;
-      document.querySelectorAll("[data-preview-page]").forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      const sep = page.includes("?") ? "&" : "?";
-      frame.src = page + sep + "preview=1";
-    });
-  });
-
-  if (frame) {
-    frame.addEventListener("load", () => {
-      pushPreview();
-    });
-  }
-
-  window.addEventListener("message", (event) => {
-    if (event.origin !== window.location.origin) return;
-    if (!event.data || event.data.type !== "xhybrid-appearance-ready") return;
-    pushPreview();
   });
 
   renderLooks();

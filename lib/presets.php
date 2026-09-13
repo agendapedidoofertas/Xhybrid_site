@@ -88,7 +88,7 @@ function preset_xhybrid(): array
             'home_hero_title_2' => 'online de verdade.',
             'home_hero_text' => 'Somos a Xhybrid — criação de sites, manutenção e tecnologia para empresas que querem presença digital profissional.',
             'home_btn_gallery' => 'Ver projetos',
-            'home_btn_quote' => 'Pedir orçamento',
+            'home_btn_quote' => 'Orçamento',
             'home_weave_title' => 'O que fazemos',
             'home_weave_subtitle' => 'Do site institucional à manutenção contínua — tecnologia sob medida para o seu negócio.',
             'home_feat_1_title' => 'Criação de sites',
@@ -106,7 +106,7 @@ function preset_xhybrid(): array
             'home_cta_title_1' => 'Tem um projeto?',
             'home_cta_title_2' => 'A gente desenvolve.',
             'home_cta_text' => 'Conte o que precisa — site novo, manutenção ou melhoria tecnológica — e montamos a melhor proposta.',
-            'home_cta_btn' => 'Chamar no WhatsApp',
+            'home_cta_btn' => 'Orçamento',
             'about_eyebrow' => 'About us',
             'about_title_1' => 'Tecnologia,',
             'about_title_2' => 'com clareza.',
@@ -234,7 +234,7 @@ function preset_eletricista(): array
             'home_hero_title_2' => 'quando você precisa.',
             'home_hero_text' => 'Instalações, manutenção e emergências com atendimento ágil. Peça orçamento pelo WhatsApp.',
             'home_btn_gallery' => 'Ver serviços',
-            'home_btn_quote' => 'Orçamento no WhatsApp',
+            'home_btn_quote' => 'Orçamento',
             'home_weave_title' => 'O que faço',
             'home_weave_subtitle' => 'Soluções elétricas para casa, comércio e condomínio — com padrão de segurança.',
             'home_feat_1_title' => 'Instalações',
@@ -252,7 +252,7 @@ function preset_eletricista(): array
             'home_cta_title_1' => 'Precisa de eletricista?',
             'home_cta_title_2' => 'Chame agora.',
             'home_cta_text' => 'Conte o problema e a região — respondo rápido com orientação e orçamento.',
-            'home_cta_btn' => 'WhatsApp',
+            'home_cta_btn' => 'Orçamento',
             'about_eyebrow' => 'Sobre',
             'about_title_1' => 'Trabalho sério,',
             'about_title_2' => 'sem improviso.',
@@ -384,7 +384,7 @@ function preset_niche_base(array $over): array
         'address' => '',
         'maps_url' => '',
         'home_btn_gallery' => 'Ver serviços',
-        'home_btn_quote' => 'WhatsApp',
+        'home_btn_quote' => 'Orçamento',
         'home_destaques_link' => 'Ver mais',
         'about_btn' => 'Ver serviços',
         'gallery_eyebrow' => 'Serviços',
@@ -438,7 +438,7 @@ function preset_clinica(): array
         'home_cta_title_1' => 'Quer agendar?',
         'home_cta_title_2' => 'Fale conosco.',
         'home_cta_text' => 'Informe o horário preferido e retornamos com as opções.',
-        'home_cta_btn' => 'WhatsApp',
+        'home_cta_btn' => 'Orçamento',
         'about_eyebrow' => 'Sobre a clínica',
         'about_title_1' => 'Acolhimento,',
         'about_title_2' => 'com técnica.',
@@ -634,7 +634,7 @@ function preset_advocacia(): array
         'home_cta_title_1' => 'Precisa de orientação?',
         'home_cta_title_2' => 'Fale com a equipe.',
         'home_cta_text' => 'Conte o contexto em poucas linhas — retornamos com o próximo passo.',
-        'home_cta_btn' => 'WhatsApp',
+        'home_cta_btn' => 'Orçamento',
         'about_eyebrow' => 'Escritório',
         'about_title_1' => 'Estratégia,',
         'about_title_2' => 'sem enrolação.',
@@ -734,7 +734,7 @@ function preset_limpeza(): array
         'home_cta_title_1' => 'Quer orçamento?',
         'home_cta_title_2' => 'Chame no WhatsApp.',
         'home_cta_text' => 'Informe metragem, tipo de imóvel e frequência desejada.',
-        'home_cta_btn' => 'Pedir orçamento',
+        'home_cta_btn' => 'Orçamento',
         'about_eyebrow' => 'Quem somos',
         'about_title_1' => 'Limpeza com',
         'about_title_2' => 'padrão e confiança.',
@@ -832,7 +832,7 @@ function preset_locacao(): array
         'home_cta_title_1' => 'Quer reservar?',
         'home_cta_title_2' => 'Fale conosco.',
         'home_cta_text' => 'Informe datas, categoria e se precisa de motorista ou entrega.',
-        'home_cta_btn' => 'Reservar no WhatsApp',
+        'home_cta_btn' => 'Orçamento',
         'about_eyebrow' => 'A locadora',
         'about_title_1' => 'Mobilidade com',
         'about_title_2' => 'transparência.',
@@ -888,13 +888,9 @@ function preset_locacao(): array
     return $pack;
 }
 
-function preset_apply(PDO $pdo, string $id): string
+function preset_function_map(): array
 {
-    require_once __DIR__ . '/settings.php';
-    require_once __DIR__ . '/services.php';
-    require_once __DIR__ . '/images.php';
-
-    $map = [
+    return [
         'xhybrid' => 'preset_xhybrid',
         'eletricista' => 'preset_eletricista',
         'clinica' => 'preset_clinica',
@@ -902,7 +898,401 @@ function preset_apply(PDO $pdo, string $id): string
         'advocacia' => 'preset_advocacia',
         'limpeza' => 'preset_limpeza',
         'locacao' => 'preset_locacao',
+        'dentista' => 'preset_dentista',
+        'estetica' => 'preset_estetica',
+        'salao' => 'preset_salao',
+        'contador' => 'preset_contador',
+        'imobiliaria' => 'preset_imobiliaria',
+        'pet' => 'preset_pet',
+        'academia' => 'preset_academia',
+        'oficina' => 'preset_oficina',
+        'arquitetura' => 'preset_arquitetura',
+        'consultoria' => 'preset_consultoria',
     ];
+}
+
+function preset_dentista(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Consultório Odontológico',
+        'brand_tagline' => 'Sorriso saudável com atendimento próximo',
+        'brand_seo_title' => 'Dentista — consultas e tratamentos',
+        'brand_seo_description' => 'Clínica odontológica. Agende avaliação pelo WhatsApp.',
+        'appearance_look' => 'ocean-vivid',
+        'appearance_theme' => 'oceano',
+        'appearance_font' => 'soft',
+        'appearance_layout' => 'editorial',
+        'appearance_media' => 'flip',
+        'whatsapp_message' => 'Olá! Quero agendar uma avaliação odontológica.',
+        'home_badge' => 'Odontologia',
+        'home_hero_title_1' => 'Cuidado com o',
+        'home_hero_title_2' => 'seu sorriso.',
+        'home_hero_text' => 'Consultas, limpeza, clareamento e tratamentos com equipe preparada.',
+        'home_feat_1_title' => 'Avaliação',
+        'home_feat_1_icon' => 'stethoscope',
+        'home_feat_1_text' => 'Diagnóstico claro e plano de tratamento sem surpresas.',
+        'home_feat_2_title' => 'Limpeza',
+        'home_feat_2_icon' => 'sparkles',
+        'home_feat_2_text' => 'Profilaxia e prevenção para manter a saúde bucal.',
+        'home_feat_3_title' => 'Estética',
+        'home_feat_3_icon' => 'star',
+        'home_feat_3_text' => 'Clareamento e restaurações com resultado natural.',
+        'home_cta_title_1' => 'Quer agendar?',
+        'home_cta_title_2' => 'Fale conosco.',
+        'about_title_1' => 'Odontologia',
+        'about_title_2' => 'com acolhimento.',
+        '_services' => [
+            ['title' => 'Consulta', 'description' => 'Avaliação completa e orientação.', 'image_slug' => 'landing', 'category' => 'Clínica', 'active' => 1],
+            ['title' => 'Limpeza', 'description' => 'Profilaxia e prevenção.', 'image_slug' => 'corporate', 'category' => 'Clínica', 'active' => 1],
+            ['title' => 'Clareamento', 'description' => 'Protocolos seguros para um sorriso mais branco.', 'image_slug' => 'shop', 'category' => 'Estética', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('clinica', [
+        'hero' => 'Consultório', 'about' => 'Equipe', 'landing' => 'Consulta', 'corporate' => 'Limpeza', 'shop' => 'Clareamento', 'maintenance' => 'Ortodontia',
+    ]);
+    return $pack;
+}
+
+function preset_estetica(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Estética & Bem-estar',
+        'brand_tagline' => 'Beleza com cuidado e naturalidade',
+        'brand_seo_title' => 'Estética — tratamentos faciais e corporais',
+        'appearance_look' => 'ivory-soft',
+        'appearance_theme' => 'gelo',
+        'appearance_font' => 'rounded',
+        'appearance_layout' => 'pill',
+        'appearance_media' => 'flip',
+        'whatsapp_message' => 'Olá! Quero saber sobre tratamentos estéticos.',
+        'home_badge' => 'Estética',
+        'home_hero_title_1' => 'Cuidado que',
+        'home_hero_title_2' => 'realça você.',
+        'home_hero_text' => 'Procedimentos faciais e corporais com atendimento personalizado.',
+        'home_feat_1_title' => 'Facial',
+        'home_feat_1_icon' => 'sparkles',
+        'home_feat_1_text' => 'Limpeza, peeling e protocolos anti-idade.',
+        'home_feat_2_title' => 'Corporal',
+        'home_feat_2_icon' => 'heart',
+        'home_feat_2_text' => 'Modelagem e bem-estar com acompanhamento.',
+        'home_feat_3_title' => 'Agenda',
+        'home_feat_3_icon' => 'calendar',
+        'home_feat_3_text' => 'Horários flexíveis pelo WhatsApp.',
+        '_services' => [
+            ['title' => 'Limpeza de pele', 'description' => 'Protocolo completo para revitalizar a pele.', 'image_slug' => 'landing', 'category' => 'Facial', 'active' => 1],
+            ['title' => 'Peeling', 'description' => 'Renovação com orientação profissional.', 'image_slug' => 'corporate', 'category' => 'Facial', 'active' => 1],
+            ['title' => 'Corporal', 'description' => 'Tratamentos sob medida.', 'image_slug' => 'shop', 'category' => 'Corpo', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('clinica', [
+        'hero' => 'Espaço', 'about' => 'Atendimento', 'landing' => 'Facial', 'corporate' => 'Corporal', 'shop' => 'Resultados', 'maintenance' => 'Cuidados',
+    ]);
+    return $pack;
+}
+
+function preset_salao(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Salão & Barbearia',
+        'brand_tagline' => 'Corte, cor e estilo',
+        'brand_seo_title' => 'Salão de beleza — corte e coloração',
+        'appearance_look' => 'warm-studio',
+        'appearance_theme' => 'marrom-claro',
+        'appearance_font' => 'classic',
+        'appearance_layout' => 'loft',
+        'appearance_media' => 'center',
+        'whatsapp_message' => 'Olá! Quero agendar horário no salão.',
+        'home_badge' => 'Beleza',
+        'home_hero_title_1' => 'Seu visual,',
+        'home_hero_title_2' => 'do seu jeito.',
+        'home_hero_text' => 'Cortes, coloração e barba com profissionais experientes.',
+        'home_feat_1_title' => 'Corte',
+        'home_feat_1_icon' => 'scissors',
+        'home_feat_1_text' => 'Masculino e feminino com acabamento impecável.',
+        'home_feat_2_title' => 'Cor',
+        'home_feat_2_icon' => 'sparkles',
+        'home_feat_2_text' => 'Coloração e mechas com produtos de qualidade.',
+        'home_feat_3_title' => 'Barba',
+        'home_feat_3_icon' => 'user',
+        'home_feat_3_text' => 'Design e cuidados para barba e bigode.',
+        '_services' => [
+            ['title' => 'Corte', 'description' => 'Corte personalizado.', 'image_slug' => 'landing', 'category' => 'Salão', 'active' => 1],
+            ['title' => 'Coloração', 'description' => 'Cor e mechas.', 'image_slug' => 'corporate', 'category' => 'Salão', 'active' => 1],
+            ['title' => 'Barba', 'description' => 'Acabamento e design.', 'image_slug' => 'shop', 'category' => 'Barbearia', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('xhybrid', [
+        'hero' => 'Salão', 'about' => 'Equipe', 'landing' => 'Corte', 'corporate' => 'Cor', 'shop' => 'Barba', 'maintenance' => 'Ambiente',
+    ]);
+    return $pack;
+}
+
+function preset_contador(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Contabilidade',
+        'brand_tagline' => 'Números claros para o seu negócio',
+        'brand_seo_title' => 'Contador — contabilidade e fiscal',
+        'appearance_look' => 'sharp-saas',
+        'appearance_theme' => 'graphite',
+        'appearance_font' => 'saas',
+        'appearance_layout' => 'sharp',
+        'appearance_media' => 'media-wide',
+        'whatsapp_message' => 'Olá! Preciso de suporte contábil.',
+        'home_badge' => 'Contabilidade',
+        'home_hero_title_1' => 'Contabilidade',
+        'home_hero_title_2' => 'sem complicação.',
+        'home_hero_text' => 'Abertura, fiscal, folha e consultoria para MEI e empresas.',
+        'home_feat_1_title' => 'Fiscal',
+        'home_feat_1_icon' => 'file',
+        'home_feat_1_text' => 'Obrigações em dia com orientação clara.',
+        'home_feat_2_title' => 'Folha',
+        'home_feat_2_icon' => 'users',
+        'home_feat_2_text' => 'Departamento pessoal organizado.',
+        'home_feat_3_title' => 'Consultoria',
+        'home_feat_3_icon' => 'chart',
+        'home_feat_3_text' => 'Decisões com base em números reais.',
+        '_services' => [
+            ['title' => 'Abertura de empresa', 'description' => 'MEI e sociedades.', 'image_slug' => 'landing', 'category' => 'Contábil', 'active' => 1],
+            ['title' => 'Fiscal', 'description' => 'Impostos e obrigações.', 'image_slug' => 'corporate', 'category' => 'Contábil', 'active' => 1],
+            ['title' => 'Folha', 'description' => 'Admissão e encargos.', 'image_slug' => 'shop', 'category' => 'RH', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('advocacia', [
+        'hero' => 'Escritório', 'about' => 'Equipe', 'landing' => 'Fiscal', 'corporate' => 'Consultoria', 'shop' => 'Relatórios', 'maintenance' => 'Atendimento',
+    ]);
+    return $pack;
+}
+
+function preset_imobiliaria(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Imobiliária',
+        'brand_tagline' => 'Imóveis com transparência',
+        'brand_seo_title' => 'Imobiliária — compra, venda e aluguel',
+        'appearance_look' => 'navy-depth',
+        'appearance_theme' => 'midnight',
+        'appearance_font' => 'geometric',
+        'appearance_layout' => 'magazine',
+        'appearance_media' => 'about-flip',
+        'whatsapp_message' => 'Olá! Quero informações sobre imóveis.',
+        'home_badge' => 'Imóveis',
+        'home_hero_title_1' => 'O imóvel certo,',
+        'home_hero_title_2' => 'com segurança.',
+        'home_hero_text' => 'Compra, venda e locação com acompanhamento completo.',
+        'home_feat_1_title' => 'Venda',
+        'home_feat_1_icon' => 'home',
+        'home_feat_1_text' => 'Anúncio e negociação com suporte.',
+        'home_feat_2_title' => 'Aluguel',
+        'home_feat_2_icon' => 'key',
+        'home_feat_2_text' => 'Locação residencial e comercial.',
+        'home_feat_3_title' => 'Avaliação',
+        'home_feat_3_icon' => 'search',
+        'home_feat_3_text' => 'Valor de mercado com clareza.',
+        '_services' => [
+            ['title' => 'Venda', 'description' => 'Intermediação completa.', 'image_slug' => 'landing', 'category' => 'Imóveis', 'active' => 1],
+            ['title' => 'Aluguel', 'description' => 'Locação e contratos.', 'image_slug' => 'corporate', 'category' => 'Imóveis', 'active' => 1],
+            ['title' => 'Avaliação', 'description' => 'Laudo e orientação.', 'image_slug' => 'shop', 'category' => 'Imóveis', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('locacao', [
+        'hero' => 'Fachada', 'about' => 'Corretores', 'landing' => 'Apartamento', 'corporate' => 'Casa', 'shop' => 'Comercial', 'maintenance' => 'Chaves',
+    ]);
+    return $pack;
+}
+
+function preset_pet(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Pet Shop & Clínica',
+        'brand_tagline' => 'Cuidado para quem você ama',
+        'brand_seo_title' => 'Pet shop — banho, tosa e veterinário',
+        'appearance_look' => 'teal-rush',
+        'appearance_theme' => 'teal',
+        'appearance_font' => 'rounded',
+        'appearance_layout' => 'soft',
+        'appearance_media' => 'classic',
+        'whatsapp_message' => 'Olá! Quero agendar banho/tosa ou consulta pet.',
+        'home_badge' => 'Pets',
+        'home_hero_title_1' => 'Seu pet,',
+        'home_hero_title_2' => 'bem cuidado.',
+        'home_hero_text' => 'Banho, tosa, produtos e atendimento veterinário.',
+        'home_feat_1_title' => 'Banho e tosa',
+        'home_feat_1_icon' => 'heart',
+        'home_feat_1_text' => 'Higiene com carinho e segurança.',
+        'home_feat_2_title' => 'Veterinário',
+        'home_feat_2_icon' => 'cross',
+        'home_feat_2_text' => 'Consultas e vacinas.',
+        'home_feat_3_title' => 'Loja',
+        'home_feat_3_icon' => 'bag',
+        'home_feat_3_text' => 'Ração e acessórios.',
+        '_services' => [
+            ['title' => 'Banho e tosa', 'description' => 'Higiene completa.', 'image_slug' => 'landing', 'category' => 'Pet', 'active' => 1],
+            ['title' => 'Consulta', 'description' => 'Atendimento veterinário.', 'image_slug' => 'corporate', 'category' => 'Clínica', 'active' => 1],
+            ['title' => 'Produtos', 'description' => 'Ração e acessórios.', 'image_slug' => 'shop', 'category' => 'Loja', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('clinica', [
+        'hero' => 'Pet', 'about' => 'Equipe', 'landing' => 'Banho', 'corporate' => 'Consulta', 'shop' => 'Loja', 'maintenance' => 'Acessórios',
+    ]);
+    return $pack;
+}
+
+function preset_academia(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Academia & Personal',
+        'brand_tagline' => 'Treino com resultado',
+        'brand_seo_title' => 'Academia — musculação e personal trainer',
+        'appearance_look' => 'obsidian',
+        'appearance_theme' => 'preto',
+        'appearance_font' => 'display',
+        'appearance_layout' => 'frame',
+        'appearance_media' => 'copy-wide',
+        'whatsapp_message' => 'Olá! Quero informações sobre planos e treinos.',
+        'home_badge' => 'Fitness',
+        'home_hero_title_1' => 'Treine com',
+        'home_hero_title_2' => 'propósito.',
+        'home_hero_text' => 'Musculação, funcional e personal com acompanhamento.',
+        'home_feat_1_title' => 'Musculação',
+        'home_feat_1_icon' => 'zap',
+        'home_feat_1_text' => 'Equipamentos e treinos progressivos.',
+        'home_feat_2_title' => 'Personal',
+        'home_feat_2_icon' => 'user',
+        'home_feat_2_text' => 'Plano individual sob medida.',
+        'home_feat_3_title' => 'Aulas',
+        'home_feat_3_icon' => 'users',
+        'home_feat_3_text' => 'Funcional e coletivas.',
+        '_services' => [
+            ['title' => 'Plano mensal', 'description' => 'Acesso à musculação.', 'image_slug' => 'landing', 'category' => 'Planos', 'active' => 1],
+            ['title' => 'Personal', 'description' => 'Treino individual.', 'image_slug' => 'corporate', 'category' => 'Treino', 'active' => 1],
+            ['title' => 'Avaliação', 'description' => 'Anamnese e metas.', 'image_slug' => 'shop', 'category' => 'Treino', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('xhybrid', [
+        'hero' => 'Academia', 'about' => 'Treino', 'landing' => 'Musculação', 'corporate' => 'Personal', 'shop' => 'Aulas', 'maintenance' => 'Resultados',
+    ]);
+    return $pack;
+}
+
+function preset_oficina(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Oficina Mecânica',
+        'brand_tagline' => 'Manutenção com confiança',
+        'brand_seo_title' => 'Oficina — mecânica e diagnóstico',
+        'appearance_look' => 'copper-heat',
+        'appearance_theme' => 'cobre',
+        'appearance_font' => 'condensed',
+        'appearance_layout' => 'frame',
+        'appearance_media' => 'classic',
+        'whatsapp_message' => 'Olá! Preciso de orçamento para o veículo.',
+        'home_badge' => 'Mecânica',
+        'home_hero_title_1' => 'Seu carro,',
+        'home_hero_title_2' => 'em boas mãos.',
+        'home_hero_text' => 'Revisão, freios, suspensão e diagnóstico eletrônico.',
+        'home_feat_1_title' => 'Revisão',
+        'home_feat_1_icon' => 'wrench',
+        'home_feat_1_text' => 'Checklist completo e peças de qualidade.',
+        'home_feat_2_title' => 'Diagnóstico',
+        'home_feat_2_icon' => 'cpu',
+        'home_feat_2_text' => 'Scanner e análise precisa.',
+        'home_feat_3_title' => 'Freios',
+        'home_feat_3_icon' => 'shield',
+        'home_feat_3_text' => 'Segurança em primeiro lugar.',
+        '_services' => [
+            ['title' => 'Revisão', 'description' => 'Manutenção preventiva.', 'image_slug' => 'landing', 'category' => 'Oficina', 'active' => 1],
+            ['title' => 'Freios', 'description' => 'Pastilhas e sistema.', 'image_slug' => 'corporate', 'category' => 'Oficina', 'active' => 1],
+            ['title' => 'Suspensão', 'description' => 'Conforto e estabilidade.', 'image_slug' => 'shop', 'category' => 'Oficina', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('eletricista', [
+        'hero' => 'Oficina', 'about' => 'Equipe', 'landing' => 'Revisão', 'corporate' => 'Diagnóstico', 'shop' => 'Freios', 'maintenance' => 'Suspensão',
+    ]);
+    return $pack;
+}
+
+function preset_arquitetura(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Arquitetura & Interiores',
+        'brand_tagline' => 'Espaços com intenção',
+        'brand_seo_title' => 'Arquiteto — projetos residenciais e comerciais',
+        'appearance_look' => 'editorial',
+        'appearance_theme' => 'branco',
+        'appearance_font' => 'editorial',
+        'appearance_layout' => 'editorial',
+        'appearance_media' => 'flip',
+        'whatsapp_message' => 'Olá! Quero orçamento de projeto de arquitetura.',
+        'home_badge' => 'Arquitetura',
+        'home_hero_title_1' => 'Projetos que',
+        'home_hero_title_2' => 'contam histórias.',
+        'home_hero_text' => 'Residencial, comercial e interiores com acompanhamento de obra.',
+        'home_feat_1_title' => 'Projeto',
+        'home_feat_1_icon' => 'layout',
+        'home_feat_1_text' => 'Plantas e detalhamento técnico.',
+        'home_feat_2_title' => 'Interiores',
+        'home_feat_2_icon' => 'home',
+        'home_feat_2_text' => 'Ambientes funcionais e elegantes.',
+        'home_feat_3_title' => 'Obra',
+        'home_feat_3_icon' => 'wrench',
+        'home_feat_3_text' => 'Acompanhamento até a entrega.',
+        '_services' => [
+            ['title' => 'Projeto residencial', 'description' => 'Do briefing à planta.', 'image_slug' => 'landing', 'category' => 'Projetos', 'active' => 1],
+            ['title' => 'Interiores', 'description' => 'Ambientes sob medida.', 'image_slug' => 'corporate', 'category' => 'Projetos', 'active' => 1],
+            ['title' => 'Comercial', 'description' => 'Lojas e escritórios.', 'image_slug' => 'shop', 'category' => 'Projetos', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('xhybrid', [
+        'hero' => 'Projeto', 'about' => 'Estúdio', 'landing' => 'Residencial', 'corporate' => 'Interiores', 'shop' => 'Comercial', 'maintenance' => 'Detalhe',
+    ]);
+    return $pack;
+}
+
+function preset_consultoria(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Consultoria Empresarial',
+        'brand_tagline' => 'Estratégia com clareza',
+        'brand_seo_title' => 'Consultoria — negócios e gestão',
+        'appearance_look' => 'ash-glass',
+        'appearance_theme' => 'slate',
+        'appearance_font' => 'saas',
+        'appearance_layout' => 'compact',
+        'appearance_media' => 'stack-media',
+        'whatsapp_message' => 'Olá! Quero conversar sobre consultoria.',
+        'home_badge' => 'Consultoria',
+        'home_hero_title_1' => 'Decisões',
+        'home_hero_title_2' => 'com método.',
+        'home_hero_text' => 'Diagnóstico, processos e crescimento para empresas.',
+        'home_feat_1_title' => 'Diagnóstico',
+        'home_feat_1_icon' => 'search',
+        'home_feat_1_text' => 'Mapeamento de gargalos e oportunidades.',
+        'home_feat_2_title' => 'Processos',
+        'home_feat_2_icon' => 'layers',
+        'home_feat_2_text' => 'Organização e eficiência operacional.',
+        'home_feat_3_title' => 'Crescimento',
+        'home_feat_3_icon' => 'chart',
+        'home_feat_3_text' => 'Plano de ação mensurável.',
+        '_services' => [
+            ['title' => 'Diagnóstico', 'description' => 'Análise inicial do negócio.', 'image_slug' => 'landing', 'category' => 'Consultoria', 'active' => 1],
+            ['title' => 'Processos', 'description' => 'Otimização operacional.', 'image_slug' => 'corporate', 'category' => 'Consultoria', 'active' => 1],
+            ['title' => 'Mentoria', 'description' => 'Acompanhamento contínuo.', 'image_slug' => 'shop', 'category' => 'Consultoria', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('advocacia', [
+        'hero' => 'Reunião', 'about' => 'Equipe', 'landing' => 'Diagnóstico', 'corporate' => 'Processos', 'shop' => 'Plano', 'maintenance' => 'Resultados',
+    ]);
+    return $pack;
+}
+
+function preset_apply(PDO $pdo, string $id): string
+{
+    require_once __DIR__ . '/settings.php';
+    require_once __DIR__ . '/services.php';
+    require_once __DIR__ . '/images.php';
+
+    $map = preset_function_map();
     if (!isset($map[$id])) {
         throw new InvalidArgumentException('Preset desconhecido.');
     }
@@ -923,3 +1313,4 @@ function preset_apply(PDO $pdo, string $id): string
     }
     return $id;
 }
+

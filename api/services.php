@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/services.php';
+require_once dirname(__DIR__) . '/lib/security.php';
 
+security_send_headers();
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
 try {
-    $rows = services_list(db(), true);
+    $leadId = null;
+    if (isset($_GET['lead_id']) && (int) $_GET['lead_id'] > 0) {
+        $leadId = (int) $_GET['lead_id'];
+    }
+    $rows = services_list(db(), true, $leadId);
     $out = array_map(static function (array $row): array {
         return [
             'id' => (int) $row['id'],
@@ -22,6 +28,5 @@ try {
     }, $rows);
     echo json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_json_error('Falha ao carregar serviços', $e);
 }

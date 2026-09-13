@@ -30,11 +30,13 @@ if ($blockedByPath || $blockedByUri) {
 /**
  * Lead público: /{slug}/{leadId}{letra}[/página]
  * Ex.: /eletricista-silva/15f  ou  /eletricista-silva/15f/sobre.html
- * Inativo/ausente → 404.html; ativo → HTML com assets absolutos.
+ * Inativo → site-inactive.html; ausente → 404.html; ativo → HTML com assets absolutos.
  */
 if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, $m)) {
     require_once __DIR__ . '/lib/db.php';
     require_once __DIR__ . '/lib/published_sites.php';
+    require_once __DIR__ . '/lib/security.php';
+    security_send_headers();
 
     $slug = strtolower($m[1]);
     $leadId = (int) $m[2];
@@ -47,16 +49,31 @@ if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, 
         $row = null;
     }
 
-    if (!$row || (int) ($row['site_active'] ?? 0) !== 1) {
-        http_response_code(404);
+    $serveHtmlFile = static function (string $file, int $code = 404) use ($slug, $leadId, $letter): void {
+        http_response_code($code);
         header('Content-Type: text/html; charset=utf-8');
-        $notFound = __DIR__ . '/404.html';
-        if (is_file($notFound)) {
-            readfile($notFound);
-        } else {
+        header('Cache-Control: no-store');
+        $path = __DIR__ . '/' . $file;
+        if (!is_file($path)) {
             echo 'Not Found';
+            exit;
         }
+        $html = file_get_contents($path);
+        if ($html === false) {
+            echo 'Not Found';
+            exit;
+        }
+        $html = published_site_absolutize_html($html);
+        echo $html;
         exit;
+    };
+
+    if (!$row) {
+        $serveHtmlFile('404.html', 404);
+    }
+
+    if ((int) ($row['site_active'] ?? 0) !== 1) {
+        $serveHtmlFile('site-inactive.html', 403);
     }
 
     $page = 'index.html';
@@ -65,15 +82,7 @@ if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, 
         if (preg_match('/^[a-z0-9_-]+\.html$/i', $baseName) && is_file(__DIR__ . '/' . $baseName)) {
             $page = $baseName;
         } elseif ($rest !== '' && $rest !== 'index.html') {
-            http_response_code(404);
-            header('Content-Type: text/html; charset=utf-8');
-            $notFound = __DIR__ . '/404.html';
-            if (is_file($notFound)) {
-                readfile($notFound);
-            } else {
-                echo 'Not Found';
-            }
-            exit;
+            $serveHtmlFile('404.html', 404);
         }
     }
 

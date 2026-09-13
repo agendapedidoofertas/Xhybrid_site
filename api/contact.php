@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/mailer.php';
+require_once dirname(__DIR__) . '/lib/security.php';
+
+security_send_headers();
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
@@ -10,10 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['ok' => false, 'error' => 'Método não permitido']);
     exit;
 }
-
-require_once dirname(__DIR__) . '/lib/db.php';
-require_once dirname(__DIR__) . '/lib/settings.php';
-require_once dirname(__DIR__) . '/lib/mailer.php';
 
 $raw = file_get_contents('php://input') ?: '';
 $data = json_decode($raw, true);
@@ -98,8 +100,9 @@ $result = mailer_send([
 ]);
 
 if (!$result['ok']) {
+    error_log('[xhybrid contact] ' . ($result['error'] ?? 'send failed'));
     http_response_code(502);
-    echo json_encode(['ok' => false, 'error' => $result['error'] ?? 'Falha ao enviar.']);
+    echo json_encode(['ok' => false, 'error' => 'Não foi possível enviar a mensagem. Tente novamente.']);
     exit;
 }
 

@@ -8,11 +8,13 @@ require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/published_sites.php';
 require_once dirname(__DIR__) . '/lib/crm_bridge.php';
+require_once dirname(__DIR__) . '/lib/security.php';
 
 auth_boot_session();
 $user = require_admin();
 
 $leadId = (int) ($_GET['lead_id'] ?? $_POST['lead_id'] ?? 0);
+require_lead_access($leadId);
 $row = published_site_get_by_lead(db(), $leadId);
 if (!$row) {
     http_response_code(404);
@@ -80,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'city' => trim((string) ($_POST['city'] ?? '')),
         'state' => trim((string) ($_POST['state'] ?? '')),
         'postal_code' => trim((string) ($_POST['postal_code'] ?? '')),
-        'maps_url' => trim((string) ($_POST['maps_url'] ?? '')),
-        'instagram_url' => trim((string) ($_POST['instagram_url'] ?? '')),
-        'facebook_url' => trim((string) ($_POST['facebook_url'] ?? '')),
+        'maps_url' => url_http_only(trim((string) ($_POST['maps_url'] ?? ''))),
+        'instagram_url' => url_http_only(trim((string) ($_POST['instagram_url'] ?? ''))),
+        'facebook_url' => url_http_only(trim((string) ($_POST['facebook_url'] ?? ''))),
         'opening_hours' => trim((string) ($_POST['opening_hours'] ?? '')),
         'site_look' => $look,
         'site_theme' => $bundle['theme'],
@@ -95,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'home_hero_title_2' => trim((string) ($_POST['home_hero_title_2'] ?? '')),
             'home_hero_text' => trim((string) ($_POST['home_hero_text'] ?? '')),
             'whatsapp_message' => trim((string) ($_POST['whatsapp_message'] ?? '')),
-            'logo_url' => trim((string) ($_POST['logo_url'] ?? '')),
+            'logo_url' => url_http_only(trim((string) ($_POST['logo_url'] ?? ''))),
             'brand_seo_title' => trim((string) ($_POST['brand_seo_title'] ?? '')),
             'brand_seo_description' => trim((string) ($_POST['brand_seo_description'] ?? '')),
         ],

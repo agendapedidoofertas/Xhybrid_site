@@ -1,0 +1,11 @@
+# Negar execução de scripts em uploads (Apache)
+<IfModule mod_authz_core.c>
+  Require all granted
+</IfModule>
+<FilesMatch "\.(?i:php|phtml|php3|php4|php5|phar|cgi|pl|asp|aspx)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
+Options -ExecCGI
+RemoveHandler .php .phtml .php3 .php4 .php5 .phar

@@ -128,6 +128,7 @@ function published_site_settings_overlay(array $row): array
         'appearance_font' => (string) ($row['site_font'] ?? ''),
         'appearance_layout' => (string) ($row['site_layout'] ?? ''),
         'appearance_media' => (string) ($row['site_media'] ?? ''),
+        'site_plan' => (string) (($row['plan_tier'] ?? '') !== '' ? $row['plan_tier'] : 'basic'),
     ];
 
     $city = trim((string) ($row['city'] ?? ''));
@@ -261,7 +262,7 @@ function published_site_update_admin(PDO $pdo, int $crmLeadId, array $fields): a
         'address_street', 'address_number', 'address_complement',
         'neighborhood', 'city', 'state', 'postal_code',
         'maps_url', 'website_url', 'instagram_url', 'facebook_url',
-        'opening_hours', 'site_preset',
+        'opening_hours', 'site_preset', 'plan_tier',
         'site_look', 'site_theme', 'site_font', 'site_layout', 'site_media',
     ];
 

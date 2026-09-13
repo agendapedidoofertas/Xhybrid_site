@@ -3,32 +3,59 @@
 declare(strict_types=1);
 
 /**
- * Planos comerciais e pacotes de flags.
+ * Planos comerciais: basic | medium | pro (aliases legado essencial/profissional/personalizado).
  */
 function plan_ids(): array
 {
-    return ['essencial', 'profissional', 'personalizado'];
+    return ['basic', 'medium', 'pro'];
+}
+
+/**
+ * @return array<string, string>
+ */
+function plan_aliases(): array
+{
+    return [
+        'essencial' => 'basic',
+        'profissional' => 'medium',
+        'personalizado' => 'pro',
+        'basic' => 'basic',
+        'medium' => 'medium',
+        'pro' => 'pro',
+    ];
+}
+
+function plan_normalize(string $plan): string
+{
+    $plan = strtolower(trim($plan));
+    $aliases = plan_aliases();
+    if (isset($aliases[$plan])) {
+        return $aliases[$plan];
+    }
+    return in_array($plan, plan_ids(), true) ? $plan : 'basic';
 }
 
 function plan_labels(): array
 {
     return [
-        'essencial' => 'Essencial (R$600–700)',
-        'profissional' => 'Profissional (R$800–1.000)',
-        'personalizado' => 'Personalizado (R$1.200–1.500+)',
+        'basic' => 'Basic',
+        'medium' => 'Medium',
+        'pro' => 'Pro',
     ];
 }
 
 /**
  * Pacote padrão de cada plano (settings keys).
+ *
+ * @return array<string, string>
  */
 function plan_bundle(string $plan): array
 {
-    $plan = in_array($plan, plan_ids(), true) ? $plan : 'essencial';
+    $plan = plan_normalize($plan);
 
-    if ($plan === 'essencial') {
+    if ($plan === 'basic') {
         return [
-            'site_plan' => 'essencial',
+            'site_plan' => 'basic',
             'feature_page_sobre' => '0',
             'feature_page_galeria' => '0',
             'feature_page_contato' => '1',
@@ -53,9 +80,9 @@ function plan_bundle(string $plan): array
         ];
     }
 
-    if ($plan === 'profissional') {
+    if ($plan === 'medium') {
         return [
-            'site_plan' => 'profissional',
+            'site_plan' => 'medium',
             'feature_page_sobre' => '1',
             'feature_page_galeria' => '1',
             'feature_page_contato' => '1',
@@ -81,7 +108,7 @@ function plan_bundle(string $plan): array
     }
 
     return [
-        'site_plan' => 'personalizado',
+        'site_plan' => 'pro',
         'feature_page_sobre' => '1',
         'feature_page_galeria' => '1',
         'feature_page_contato' => '1',
@@ -115,10 +142,11 @@ function plan_apply(PDO $pdo, string $plan): void
 /** Paletas liberadas por plano (looks). */
 function plan_allowed_palettes(string $plan): array
 {
-    if ($plan === 'personalizado') {
+    $plan = plan_normalize($plan);
+    if ($plan === 'pro') {
         return ['Neutro', 'Azul', 'Ciano', 'Verde', 'Quente', 'Vermelho', 'Roxo'];
     }
-    if ($plan === 'profissional') {
+    if ($plan === 'medium') {
         return ['Neutro', 'Azul', 'Ciano', 'Verde', 'Quente'];
     }
     return ['Neutro'];

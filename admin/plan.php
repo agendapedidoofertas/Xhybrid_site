@@ -8,24 +8,49 @@ require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_role_admin();
+$user = require_page('plan');
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        http_response_code(404);
+        admin_header('Lead não encontrado', $user);
+        echo '<p class="admin-flash admin-flash--error">Lead não encontrado.</p>';
+        admin_footer();
+        exit;
+    }
+    lead_admin_set_context($leadId);
+} else {
+    $user = require_role_admin();
+}
 
 $flash = '';
 $error = '';
 $defs = settings_definitions();
-$values = settings_all(db());
+$values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
 $labels = plan_labels();
+$values['site_plan'] = plan_normalize((string) ($values['site_plan'] ?? 'medium'));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $action = (string) ($_POST['action'] ?? 'save');
     try {
         if ($action === 'apply_bundle') {
-            $plan = (string) ($_POST['site_plan'] ?? 'essencial');
-            plan_apply(db(), $plan);
-            header('Location: plan.php?ok=bundle');
+            $plan = plan_normalize((string) ($_POST['site_plan'] ?? 'basic'));
+            $bundle = plan_bundle($plan);
+            if ($leadId) {
+                lead_admin_save_settings(db(), $leadId, $bundle);
+                header('Location: plan.php?' . lead_admin_qs($leadId) . '&ok=bundle');
+            } else {
+                plan_apply(db(), $plan);
+                header('Location: plan.php?ok=bundle');
+            }
             exit;
         }
 
@@ -36,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
             if ($key === 'site_plan') {
-                $input[$key] = (string) ($_POST[$key] ?? 'essencial');
+                $input[$key] = plan_normalize((string) ($_POST[$key] ?? 'basic'));
                 continue;
             }
             if ($key === 'limit_services' || $key === 'limit_gallery') {
@@ -47,19 +72,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $input[$key] = isset($_POST[$key]) ? '1' : '0';
             }
         }
-        // Urgência acompanha o plano comercial
-        if (isset($_POST['urgency_enabled'])) {
-            $input['urgency_enabled'] = '1';
-        } else {
-            $input['urgency_enabled'] = '0';
-        }
+        $input['urgency_enabled'] = isset($_POST['urgency_enabled']) ? '1' : '0';
 
-        settings_save_many(db(), $input);
-        header('Location: plan.php?ok=1');
+        if ($leadId) {
+            lead_admin_save_settings(db(), $leadId, $input);
+            header('Location: plan.php?' . lead_admin_qs($leadId) . '&ok=1');
+        } else {
+            settings_save_many(db(), $input);
+            header('Location: plan.php?ok=1');
+        }
         exit;
     } catch (Throwable $e) {
         $error = 'Não foi possível salvar: ' . $e->getMessage();
-        $values = settings_all(db());
+        $values = $leadId
+            ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
+            : settings_all(db());
     }
 }
 
@@ -67,7 +94,10 @@ if (isset($_GET['ok'])) {
     $flash = $_GET['ok'] === 'bundle'
         ? 'Pacote do plano aplicado (páginas, seções, limites e look).'
         : 'Plano e flags salvos.';
-    $values = settings_all(db());
+    $values = $leadId
+        ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
+        : settings_all(db());
+    $values['site_plan'] = plan_normalize((string) ($values['site_plan'] ?? 'medium'));
 }
 
 $flagKeys = [
@@ -91,9 +121,9 @@ $sectionKeys = [
 admin_header('Plano', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Admin</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
         <h1 class="font-display">Plano do cliente</h1>
-        <p>Escolha o plano pago e ligue/desligue o que o site pode ter. O editor não vê esta tela.</p>
+        <p>Basic / Medium / Pro — flags e limites<?= $leadId ? ' deste lead' : '' ?>.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -101,6 +131,7 @@ admin_header('Plano', $user);
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <input type="hidden" name="action" value="apply_bundle">
         <div class="form-group">
           <label for="bundle_plan">Aplicar pacote pronto</label>
@@ -117,6 +148,7 @@ admin_header('Plano', $user);
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <input type="hidden" name="action" value="save">
 
         <div class="form-group">
@@ -128,8 +160,7 @@ admin_header('Plano', $user);
           </select>
         </div>
 
-        <h2 class="admin-appearance__label" style="margin-top:1.25rem;">Páginas do menu (ocultar / mostrar)</h2>
-        <p class="text-muted" style="margin:0 0 0.75rem;">Mesmas opções de <a href="sections.php">Seções</a>. Ex.: desmarque Projetos para tirar do menu.</p>
+        <h2 class="admin-appearance__label" style="margin-top:1.25rem;">Páginas do menu</h2>
         <?php foreach ($flagKeys as $key): ?>
           <?php if (str_starts_with($key, 'feature_page_')): ?>
           <?php $def = $defs[$key]; ?>
@@ -169,7 +200,7 @@ admin_header('Plano', $user);
           <input id="limit_services" name="limit_services" class="form-input" maxlength="3" value="<?= h($values['limit_services'] ?? '6') ?>">
         </div>
         <div class="form-group">
-          <label for="limit_gallery">Máx. imagens na galeria (além de logo/favicon/hero/about)</label>
+          <label for="limit_gallery">Máx. imagens na galeria</label>
           <input id="limit_gallery" name="limit_gallery" class="form-input" maxlength="3" value="<?= h($values['limit_gallery'] ?? '12') ?>">
         </div>
 

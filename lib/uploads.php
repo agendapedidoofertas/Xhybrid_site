@@ -38,7 +38,7 @@ function uploads_handle(array $file, string $slugHint = 'file'): array
 
     $name = (string) ($file['name'] ?? '');
     $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'mp4', 'webm'];
+    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm'];
     if (!in_array($ext, $allowed, true)) {
         return ['ok' => false, 'error' => 'Tipo não permitido. Use: ' . implode(', ', $allowed)];
     }
@@ -46,14 +46,6 @@ function uploads_handle(array $file, string $slugHint = 'file'): array
     $tmp = (string) ($file['tmp_name'] ?? '');
     if ($tmp === '' || !is_uploaded_file($tmp)) {
         return ['ok' => false, 'error' => 'Upload inválido.'];
-    }
-
-    // Bloquear SVG com script óbvio
-    if ($ext === 'svg') {
-        $raw = (string) file_get_contents($tmp);
-        if (preg_match('/<script|onload=|javascript:/i', $raw)) {
-            return ['ok' => false, 'error' => 'SVG rejeitado por segurança.'];
-        }
     }
 
     uploads_ensure_dir();

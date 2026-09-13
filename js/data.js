@@ -45,7 +45,7 @@ const SITE_DEFAULTS = {
   home_hero_text:
     "Somos a Xhybrid — criação de sites, manutenção e tecnologia para empresas que querem presença digital profissional.",
   home_btn_gallery: "Ver projetos",
-  home_btn_quote: "Pedir orçamento",
+  home_btn_quote: "Orçamento",
   home_weave_title: "O que fazemos",
   home_weave_subtitle:
     "Do site institucional à manutenção contínua — tecnologia sob medida para o seu negócio.",
@@ -68,7 +68,7 @@ const SITE_DEFAULTS = {
   home_cta_title_2: "A gente desenvolve.",
   home_cta_text:
     "Conte o que precisa — site novo, manutenção ou melhoria tecnológica — e montamos a melhor proposta.",
-  home_cta_btn: "Chamar no WhatsApp",
+  home_cta_btn: "Orçamento",
   about_eyebrow: "About us",
   about_title_1: "Tecnologia,",
   about_title_2: "com clareza.",
@@ -178,8 +178,10 @@ function applySiteSettings(data) {
 }
 
 function whatsappLink(message) {
+  const digits = String(site("whatsapp_number") || "").replace(/\D+/g, "");
+  if (!digits) return "#";
   const msg = message == null ? site("whatsapp_message") : message;
-  return `https://wa.me/${site("whatsapp_number")}?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
 }
 
 function whatsappUrl() {

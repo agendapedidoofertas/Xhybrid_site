@@ -7,14 +7,32 @@ require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_role_admin();
+$user = require_page('brand');
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        http_response_code(404);
+        admin_header('Lead não encontrado', $user);
+        echo '<p class="admin-flash admin-flash--error">Lead não encontrado.</p>';
+        admin_footer();
+        exit;
+    }
+    lead_admin_set_context($leadId);
+} else {
+    $user = require_role_admin();
+}
 
 $flash = '';
 $error = '';
 $defs = settings_definitions();
-$values = settings_all(db());
+$values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
 $groups = ['brand', 'seo', 'analytics'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,8 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     try {
-        settings_save_many(db(), $input);
-        header('Location: brand.php?ok=1');
+        if ($leadId) {
+            lead_admin_save_settings(db(), $leadId, $input);
+            header('Location: brand.php?' . lead_admin_qs($leadId) . '&ok=1');
+        } else {
+            settings_save_many(db(), $input);
+            header('Location: brand.php?ok=1');
+        }
         exit;
     } catch (Throwable $e) {
         $error = 'Não foi possível salvar: ' . $e->getMessage();
@@ -41,7 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['ok'])) {
     $flash = 'Marca, SEO e analytics salvos.';
-    $values = settings_all(db());
+    $values = $leadId
+        ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
+        : settings_all(db());
 }
 
 $sectionTitles = [
@@ -53,9 +78,9 @@ $sectionTitles = [
 admin_header('Marca', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Admin</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
         <h1 class="font-display">Marca</h1>
-        <p>Identidade, SEO por página, Analytics. Logo/favicon: slugs <code>logo</code> e <code>favicon</code> em Imagens.</p>
+        <p>Identidade, SEO por página, Analytics.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -63,6 +88,7 @@ admin_header('Marca', $user);
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <?php foreach ($groups as $group): ?>
           <h2 class="admin-appearance__label" style="margin-top:<?= $group === 'brand' ? '0' : '1.5rem' ?>;"><?= h($sectionTitles[$group]) ?></h2>
           <?php foreach ($defs as $key => $def): ?>

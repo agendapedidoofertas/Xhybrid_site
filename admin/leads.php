@@ -15,7 +15,7 @@ $rows = published_site_list(db());
 admin_header('Leads (sites)', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">CRM → Xhybrid</p>
+        <p class="eyebrow"><a href="index.php">← Painel</a> · CRM → Xhybrid</p>
         <h1 class="font-display">Sites de leads</h1>
         <p>Edite contato, aparência e textos de cada site publicado. A vitrine da agência continua em Contato / Textos / Aparência.</p>
       </header>
@@ -54,7 +54,7 @@ admin_header('Leads (sites)', $user);
                   <?php endif; ?>
                 </td>
                 <td style="padding:.5rem;">
-                  <a class="btn btn-outline" style="padding:.35rem .75rem;font-size:.8rem;" href="lead_site.php?lead_id=<?= (int) $row['crm_lead_id'] ?>">Editar</a>
+                  <a class="btn btn-outline" style="padding:.35rem .75rem;font-size:.8rem;" href="lead_hub.php?lead_id=<?= (int) $row['crm_lead_id'] ?>">Editar</a>
                 </td>
               </tr>
             <?php endforeach; ?>

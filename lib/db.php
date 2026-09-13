@@ -155,6 +155,10 @@ function db_migrate(PDO $pdo): void
     if (!in_array('promo_price', $imgColNames, true)) {
         $pdo->exec('ALTER TABLE images ADD COLUMN promo_price TEXT NOT NULL DEFAULT \'\'');
     }
+    if (!in_array('crm_lead_id', $imgColNames, true)) {
+        $pdo->exec('ALTER TABLE images ADD COLUMN crm_lead_id INTEGER NULL');
+    }
+    db_migrate_images_slug_scope($pdo);
 
     $pdo->exec(
         'CREATE TABLE IF NOT EXISTS settings (
@@ -197,8 +201,76 @@ function db_migrate(PDO $pdo): void
         )'
     );
 
+    $svcCols = $pdo->query('PRAGMA table_info(services)')->fetchAll();
+    $svcColNames = array_map(static fn ($c) => (string) ($c['name'] ?? ''), $svcCols);
+    if (!in_array('crm_lead_id', $svcColNames, true)) {
+        $pdo->exec('ALTER TABLE services ADD COLUMN crm_lead_id INTEGER NULL');
+    }
+
+    // users: crm_lead_id for client_* roles (Phase 4)
+    $userCols = $pdo->query('PRAGMA table_info(users)')->fetchAll();
+    $userColNames = array_map(static fn ($c) => (string) ($c['name'] ?? ''), $userCols);
+    if (!in_array('crm_lead_id', $userColNames, true)) {
+        $pdo->exec('ALTER TABLE users ADD COLUMN crm_lead_id INTEGER NULL');
+    }
+
     db_migrate_image_slugs($pdo);
     db_migrate_published_sites($pdo);
+}
+
+/**
+ * Remove UNIQUE global de images.slug e passa a escopar por crm_lead_id
+ * (agência = NULL → tratado como 0 no índice).
+ */
+function db_migrate_images_slug_scope(PDO $pdo): void
+{
+    $idx = $pdo->query("SELECT name, sql FROM sqlite_master WHERE type = 'index' AND tbl_name = 'images'")->fetchAll();
+    $hasScoped = false;
+    foreach ($idx as $row) {
+        if (($row['name'] ?? '') === 'idx_images_slug_lead') {
+            $hasScoped = true;
+            break;
+        }
+    }
+    if ($hasScoped) {
+        return;
+    }
+
+    // Recria tabela sem UNIQUE em slug (bancos antigos)
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS images_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            url TEXT NOT NULL,
+            title TEXT NOT NULL,
+            slug TEXT NOT NULL,
+            position INTEGER NOT NULL DEFAULT 0,
+            active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT \'\',
+            price TEXT NOT NULL DEFAULT \'\',
+            promo_price TEXT NOT NULL DEFAULT \'\',
+            crm_lead_id INTEGER NULL
+        )'
+    );
+    $cols = $pdo->query('PRAGMA table_info(images)')->fetchAll();
+    $names = array_map(static fn ($c) => (string) ($c['name'] ?? ''), $cols);
+    $selectCols = ['id', 'url', 'title', 'slug', 'position', 'active', 'created_at', 'updated_at'];
+    foreach (['description', 'price', 'promo_price', 'crm_lead_id'] as $opt) {
+        if (in_array($opt, $names, true)) {
+            $selectCols[] = $opt;
+        }
+    }
+    $pdo->exec(
+        'INSERT INTO images_new (' . implode(', ', $selectCols) . ')
+         SELECT ' . implode(', ', $selectCols) . ' FROM images'
+    );
+    $pdo->exec('DROP TABLE images');
+    $pdo->exec('ALTER TABLE images_new RENAME TO images');
+    $pdo->exec(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_images_slug_lead
+         ON images (slug, IFNULL(crm_lead_id, 0))'
+    );
 }
 
 /** Sites de leads publicados pelo CRM (cópia independente da vitrine). */
@@ -236,11 +308,18 @@ function db_migrate_published_sites(PDO $pdo): void
             site_layout TEXT NOT NULL DEFAULT \'\',
             site_media TEXT NOT NULL DEFAULT \'\',
             payload_json TEXT NOT NULL DEFAULT \'\',
+            plan_tier TEXT NOT NULL DEFAULT \'basic\',
             updated_at TEXT NOT NULL
         )'
     );
     $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_published_slug_code ON published_sites(slug, url_code)');
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_published_active ON published_sites(site_active)');
+
+    $psCols = $pdo->query('PRAGMA table_info(published_sites)')->fetchAll();
+    $psNames = array_map(static fn ($c) => (string) ($c['name'] ?? ''), $psCols);
+    if (!in_array('plan_tier', $psNames, true)) {
+        $pdo->exec('ALTER TABLE published_sites ADD COLUMN plan_tier TEXT NOT NULL DEFAULT \'basic\'');
+    }
 }
 
 /** Renomeia slugs legados → nomes Xhybrid em bancos já existentes */

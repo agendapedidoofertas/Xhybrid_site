@@ -7,9 +7,25 @@ require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_admin();
+$user = require_page('texts');
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        http_response_code(404);
+        admin_header('Lead não encontrado', $user);
+        echo '<p class="admin-flash admin-flash--error">Lead não encontrado.</p>';
+        admin_footer();
+        exit;
+    }
+    lead_admin_set_context($leadId);
+}
 
 $allowedTabs = ['menu', 'home', 'sobre', 'galeria', 'contato_page', 'footer', 'testimonials', 'faq'];
 $tab = (string) ($_GET['tab'] ?? 'menu');
@@ -21,7 +37,7 @@ $flash = '';
 $error = '';
 $defs = settings_definitions();
 $groups = settings_groups();
-$values = settings_all(db());
+$values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
@@ -38,9 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input[$key] = (string) ($_POST[$key] ?? '');
     }
     try {
-        settings_save_many(db(), $input);
-        settings_sync_page_from_text_tab(db(), $tab);
-        header('Location: texts.php?tab=' . urlencode($tab) . '&ok=1');
+        if ($leadId) {
+            lead_admin_save_settings(db(), $leadId, $input);
+            header('Location: texts.php?' . lead_admin_qs($leadId) . '&tab=' . urlencode($tab) . '&ok=1');
+        } else {
+            settings_save_many(db(), $input);
+            settings_sync_page_from_text_tab(db(), $tab);
+            header('Location: texts.php?tab=' . urlencode($tab) . '&ok=1');
+        }
         exit;
     } catch (Throwable $e) {
         $error = 'Não foi possível salvar: ' . $e->getMessage();
@@ -52,6 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['ok'])) {
     $flash = 'Textos salvos.';
+    if ($leadId) {
+        $values = lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow);
+    }
 }
 
 $tabLabels = [
@@ -66,13 +90,14 @@ $tabLabels = [
 ];
 
 $needsIconLib = $tab === 'home';
+$tabQs = ($leadId ? lead_admin_qs($leadId) . '&' : '') . 'tab=';
 
 admin_header('Textos do site', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Site</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Site' ?></p>
         <h1 class="font-display">Textos</h1>
-        <p>Edite os textos das páginas. Se apagar tudo de Galeria, Sobre ou Contato e salvar, a aba some do menu do site.</p>
+        <p>Edite os textos das páginas<?= $leadId ? ' deste lead' : '' ?>.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -80,12 +105,13 @@ admin_header('Textos do site', $user);
 
       <nav class="admin-tabs" aria-label="Seções de texto">
         <?php foreach ($tabLabels as $id => $label): ?>
-          <a class="admin-tabs__link<?= $tab === $id ? ' is-active' : '' ?>" href="texts.php?tab=<?= h($id) ?>"><?= h($label) ?></a>
+          <a class="admin-tabs__link<?= $tab === $id ? ' is-active' : '' ?>" href="texts.php?<?= h($tabQs . $id) ?>"><?= h($label) ?></a>
         <?php endforeach; ?>
       </nav>
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.25rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <input type="hidden" name="tab" value="<?= h($tab) ?>">
         <p class="text-muted" style="margin-bottom:1rem;"><?= h($groups[$tab] ?? $tab) ?></p>
         <?php foreach ($defs as $key => $def): ?>
@@ -101,12 +127,7 @@ admin_header('Textos do site', $user);
                 }
               ?>
               <input type="hidden" id="<?= h($key) ?>" name="<?= h($key) ?>" value="<?= h($current) ?>">
-              <div
-                class="icon-lib"
-                data-icon-library
-                data-for="<?= h($key) ?>"
-                data-value="<?= h($current) ?>"
-              >
+              <div class="icon-lib" data-icon-library data-for="<?= h($key) ?>" data-value="<?= h($current) ?>">
                 <div class="icon-lib__current">
                   <span class="icon-lib__preview" data-icon-preview aria-hidden="true"></span>
                   <div class="icon-lib__preview-meta">
@@ -114,13 +135,7 @@ admin_header('Textos do site', $user);
                     <span class="icon-lib__preview-label" data-icon-preview-label><?= h((string) ($choices[$current] ?? $current)) ?></span>
                   </div>
                 </div>
-                <input
-                  type="search"
-                  class="form-input icon-lib__search"
-                  data-icon-search
-                  placeholder="Buscar ícone (ex.: raio, clínica, limpeza…)"
-                  autocomplete="off"
-                >
+                <input type="search" class="form-input icon-lib__search" data-icon-search placeholder="Buscar ícone…" autocomplete="off">
                 <div class="icon-lib__chips" data-icon-chips role="group" aria-label="Categorias"></div>
                 <div class="icon-lib__grid" data-icon-grid role="listbox" aria-label="Biblioteca de ícones"></div>
               </div>

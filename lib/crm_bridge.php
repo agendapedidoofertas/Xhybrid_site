@@ -26,7 +26,16 @@ function crm_bridge_root(): string
 
 function crm_bridge_sqlite_path(): string
 {
-    return crm_bridge_root() . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'crm.sqlite';
+    $path = crm_bridge_root() . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'crm.sqlite';
+    $real = realpath($path);
+    if ($real === false) {
+        return $path;
+    }
+    $root = realpath(crm_bridge_root());
+    if ($root === false || !str_starts_with($real, $root)) {
+        throw new RuntimeException('Caminho do CRM sqlite fora do diretório esperado.');
+    }
+    return $real;
 }
 
 function crm_bridge_configured(): bool

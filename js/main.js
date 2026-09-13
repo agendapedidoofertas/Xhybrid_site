@@ -15,6 +15,8 @@ const ICONS = {
   clock: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
   send: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>',
   whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.91-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.89 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.33.16 11.89c0 2.1.55 4.14 1.59 5.94L.06 24l6.3-1.65a11.9 11.9 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.33 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41"/></svg>',
+  /** Bolsa/cifrão para CTAs de orçamento */
+  quote: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/><path d="M12 10v6"/><path d="M10 14h4"/></svg>',
   shuffle: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.245-.4"/></svg>',
 };
 
@@ -446,7 +448,7 @@ function setupHomeDestaques() {
       li.className = "product-card product-card--bordered reveal";
       li.innerHTML = `
       <div class="product-card__img-wrap">
-        <img src="${p.imagem}" alt="${escapeHtml(p.nome)}" width="1024" height="768" loading="lazy" referrerpolicy="no-referrer">
+        <img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.nome)}" width="1024" height="768" loading="lazy" referrerpolicy="no-referrer">
       </div>
       <div class="product-card__body">
         <p class="product-card__category">${escapeHtml(p.categoria)}</p>
@@ -1101,16 +1103,37 @@ async function fetchPublishedOverlay(lead) {
 function rewriteLeadInternalLinks() {
   const base = leadPublicBase();
   if (!base) return;
-  document.querySelectorAll('a[href]').forEach((a) => {
+  document.querySelectorAll("a[href]").forEach((a) => {
+    // Nunca tocar CTAs externos (WhatsApp/orçamento, mailto, etc.)
+    if (a.hasAttribute("data-site-href")) return;
+    if (a.id === "hero-whatsapp" || a.id === "cta-whatsapp") return;
+    if (a.classList.contains("fab-whatsapp")) return;
     const href = a.getAttribute("href") || "";
-    if (!href || /^(https?:|mailto:|tel:|#|\/\/)/i.test(href)) return;
+    if (!href || /^(https?:|mailto:|tel:|#|\/\/|wa\.me)/i.test(href)) return;
+    if (/wa\.me/i.test(href)) return;
     const clean = href.replace(/^\.\//, "").replace(/^\//, "");
     if (!/\.html(?:[?#].*)?$/i.test(clean) && clean !== "index.html") return;
-    // Já no path do lead
     if (href.startsWith(base)) return;
     const file = clean.split(/[?#]/)[0] || "index.html";
     a.setAttribute("href", leadPageHref(file));
   });
+}
+
+/** Garante href wa.me nos botões de orçamento (nunca path do lead / vazio). */
+function bindQuoteWhatsAppButtons() {
+  syncContactGlobals();
+  const url = site("whatsapp_number").trim() ? whatsappUrl() : "#";
+  document.querySelectorAll('[data-site-href="whatsapp"], #hero-whatsapp, #cta-whatsapp').forEach((el) => {
+    el.setAttribute("href", url);
+    if (url.startsWith("http")) {
+      el.setAttribute("target", "_blank");
+      el.setAttribute("rel", "noopener noreferrer");
+    }
+  });
+  const fab = document.querySelector(".fab-whatsapp");
+  if (fab && url.startsWith("http")) {
+    fab.setAttribute("href", url);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1130,6 +1153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     rewriteLeadInternalLinks();
     applyBrandMeta();
     applySiteTexts();
+    bindQuoteWhatsAppButtons();
     if (typeof applyFeatureIcons === "function") {
       applyFeatureIcons();
     }
@@ -1219,6 +1243,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const page = document.body.dataset.page || "index";
   setupLayout(page);
   rewriteLeadInternalLinks();
+  applySiteTexts();
+  bindQuoteWhatsAppButtons();
   document.querySelectorAll(".site-logo__img, .product-card img, .gallery__item img").forEach((img) => {
     attachImageFallback(img);
   });

@@ -5,6 +5,9 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/lib/auth.php';
 require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
+require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/published_sites.php';
+require_once dirname(__DIR__) . '/lib/plans.php';
 
 auth_boot_session();
 $user = require_role_admin();
@@ -21,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = (string) ($_POST['password'] ?? '');
         $confirm = (string) ($_POST['confirm'] ?? '');
         $role = (string) ($_POST['role'] ?? 'editor');
+        $crmLeadId = (int) ($_POST['crm_lead_id'] ?? 0);
+        $crmLeadId = $crmLeadId > 0 ? $crmLeadId : null;
 
         if ($username === '' || strlen($username) < 3) {
             $error = 'Usuário com pelo menos 3 caracteres.';
@@ -28,14 +33,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'A senha precisa ter pelo menos 8 caracteres.';
         } elseif ($password !== $confirm) {
             $error = 'A confirmação de senha não confere.';
+        } elseif (($role === 'client_medium' || $role === 'client_pro') && $crmLeadId === null) {
+            $error = 'Informe o lead_id do CRM para usuários cliente.';
         } else {
             try {
-                create_user($username, $password, $role);
-                $ok = 'Usuário criado. A senha não fica visível depois — apenas hash no servidor.';
-            } catch (PDOException $e) {
+                if ($role === 'client_medium' || $role === 'client_pro') {
+                    $site = published_site_get_by_lead(db(), (int) $crmLeadId);
+                    if (!$site) {
+                        throw new InvalidArgumentException('Lead #' . $crmLeadId . ' sem site publicado.');
+                    }
+                    $tier = plan_normalize((string) ($site['plan_tier'] ?? 'basic'));
+                    if ($tier === 'basic') {
+                        throw new InvalidArgumentException('Plano Basic não possui login de cliente.');
+                    }
+                    if ($role === 'client_pro' && $tier !== 'pro') {
+                        throw new InvalidArgumentException('client_pro exige plano Pro no lead.');
+                    }
+                }
+                create_user($username, $password, $role, $crmLeadId);
+                $ok = 'Usuário criado.';
+            } catch (Throwable $e) {
                 $error = str_contains($e->getMessage(), 'UNIQUE')
                     ? 'Este nome de usuário já existe.'
-                    : 'Erro ao criar usuário.';
+                    : $e->getMessage();
             }
         }
     } elseif ($action === 'reset') {
@@ -47,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error = admin_reset_password($targetId, $password);
             if ($error === '') {
-                $ok = 'Senha redefinida (não é possível ver a senha antiga).';
+                $ok = 'Senha redefinida.';
             }
         }
     } elseif ($action === 'delete') {
@@ -60,13 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $users = list_users();
+$leads = published_site_list(db());
 
 admin_header('Usuários', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Acesso</p>
         <h1 class="font-display">Usuários</h1>
-        <p>Só administradores gerenciam contas, marca, preset, aparência, plano e SMTP. Editores cuidam de textos, imagens (URL/Drive), canais de contato e serviços — e podem alterar a própria senha.</p>
+        <p>Staff (admin/editor) e clientes Medium/Pro vinculados a um lead. Basic não cria login de cliente.</p>
       </header>
 
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
@@ -92,8 +113,21 @@ admin_header('Usuários', $user);
           <div class="form-group">
             <label for="role">Tipo</label>
             <select id="role" name="role" class="form-input">
-              <option value="editor">Editor / dono do site (conteúdo)</option>
-              <option value="admin">Admin (marca, preset, aparência, usuários)</option>
+              <option value="editor">Editor (staff)</option>
+              <option value="admin">Admin (staff)</option>
+              <option value="client_medium">Cliente Medium</option>
+              <option value="client_pro">Cliente Pro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="crm_lead_id">Lead CRM (obrigatório para cliente)</label>
+            <select id="crm_lead_id" name="crm_lead_id" class="form-input">
+              <option value="">—</option>
+              <?php foreach ($leads as $lead): ?>
+                <option value="<?= (int) $lead['crm_lead_id'] ?>">
+                  #<?= (int) $lead['crm_lead_id'] ?> — <?= h((string) $lead['company_name']) ?> (<?= h(plan_normalize((string) ($lead['plan_tier'] ?? 'basic'))) ?>)
+                </option>
+              <?php endforeach; ?>
             </select>
           </div>
           <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Criar usuário</button>
@@ -106,6 +140,7 @@ admin_header('Usuários', $user);
             <tr>
               <th>Usuário</th>
               <th>Tipo</th>
+              <th>Lead</th>
               <th>Criado</th>
               <th>Ações</th>
             </tr>
@@ -115,6 +150,7 @@ admin_header('Usuários', $user);
             <tr>
               <td><strong><?= h($u['username']) ?></strong><?= (int) $u['id'] === (int) $user['id'] ? ' <span class="text-muted">(você)</span>' : '' ?></td>
               <td><?= h($u['role'] ?? 'admin') ?></td>
+              <td><?= !empty($u['crm_lead_id']) ? '#' . (int) $u['crm_lead_id'] : '—' ?></td>
               <td class="text-muted"><?= h((string) ($u['created_at'] ?? '')) ?></td>
               <td>
                 <div class="admin-row-actions" style="flex-direction:column;align-items:flex-start;gap:0.75rem;">

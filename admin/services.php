@@ -9,20 +9,37 @@ require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/services.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_admin();
+$user = require_page('services');
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        http_response_code(404);
+        admin_header('Lead não encontrado', $user);
+        echo '<p class="admin-flash admin-flash--error">Lead não encontrado.</p>';
+        admin_footer();
+        exit;
+    }
+    lead_admin_set_context($leadId);
+}
 
 $pdo = db();
 $flash = '';
 $error = '';
 $edit = null;
-$settings = settings_all($pdo);
+$settings = $leadRow ? lead_admin_settings($leadRow) : settings_all($pdo);
 $limitServices = plan_limit_int($settings, 'limit_services', 6);
-$activeCount = (int) $pdo->query('SELECT COUNT(*) FROM services WHERE active = 1')->fetchColumn();
+$activeCount = services_active_count($pdo, $leadId);
+$qs = $leadId ? ('?' . lead_admin_qs($leadId)) : '';
 
 if (isset($_GET['id'])) {
-    $edit = services_get($pdo, (int) $_GET['id']);
+    $edit = services_get($pdo, (int) $_GET['id'], $leadId);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? 'save');
     try {
         if ($action === 'delete') {
-            services_delete($pdo, (int) ($_POST['id'] ?? 0));
-            header('Location: services.php?ok=deleted');
+            services_delete($pdo, (int) ($_POST['id'] ?? 0), $leadId);
+            header('Location: services.php' . $qs . ($qs === '' ? '?' : '&') . 'ok=deleted');
             exit;
         }
         $id = (int) ($_POST['id'] ?? 0);
@@ -39,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($willActive) {
             $would = $activeCount;
             if ($id > 0) {
-                $cur = services_get($pdo, $id);
+                $cur = services_get($pdo, $id, $leadId);
                 if ($cur && (int) $cur['active'] === 1) {
                     $would = $activeCount;
                 } else {
@@ -59,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'category' => (string) ($_POST['category'] ?? ''),
             'position' => (int) ($_POST['position'] ?? 0),
             'active' => $willActive,
-        ], $id > 0 ? $id : null);
-        header('Location: services.php?ok=1');
+        ], $id > 0 ? $id : null, $leadId);
+        header('Location: services.php' . $qs . ($qs === '' ? '?' : '&') . 'ok=1');
         exit;
     } catch (Throwable $e) {
         $error = 'Erro: ' . $e->getMessage();
@@ -71,14 +88,18 @@ if (isset($_GET['ok'])) {
     $flash = $_GET['ok'] === 'deleted' ? 'Serviço excluído.' : 'Serviço salvo.';
 }
 
-$services = services_list($pdo, false);
+$services = services_list($pdo, false, $leadId);
+$listHref = 'services.php' . $qs;
+$editHref = static function (int $id) use ($leadId): string {
+    return 'services.php?' . ($leadId ? lead_admin_qs($leadId) . '&' : '') . 'id=' . $id;
+};
 
 admin_header('Serviços', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Site</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Site' ?></p>
         <h1 class="font-display">Serviços</h1>
-        <p>Cards de serviços/trabalhos da home e destaques. Limite do plano: <strong><?= (int) $limitServices ?></strong> ativos (agora <?= (int) $activeCount ?>).</p>
+        <p>Limite do plano: <strong><?= (int) $limitServices ?></strong> ativos (agora <?= (int) $activeCount ?>).</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -88,6 +109,7 @@ admin_header('Serviços', $user);
         <h2 style="margin:0 0 1rem;font-size:1.1rem;"><?= $edit ? 'Editar serviço' : 'Novo serviço' ?></h2>
         <form method="post">
           <?= csrf_field() ?>
+          <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
           <input type="hidden" name="action" value="save">
           <input type="hidden" name="id" value="<?= (int) ($edit['id'] ?? 0) ?>">
           <div class="form-group">
@@ -117,7 +139,7 @@ admin_header('Serviços', $user);
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
             <button type="submit" class="btn btn-primary"><?= $edit ? 'Atualizar' : 'Criar' ?></button>
             <?php if ($edit): ?>
-              <a class="btn btn-outline" href="services.php">Cancelar</a>
+              <a class="btn btn-outline" href="<?= h($listHref) ?>">Cancelar</a>
             <?php endif; ?>
           </div>
         </form>
@@ -143,9 +165,10 @@ admin_header('Serviços', $user);
                 <td><?= (int) $s['active'] === 1 ? 'sim' : 'não' ?></td>
                 <td>
                   <div class="admin-row-actions">
-                    <a class="btn btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem;" href="services.php?id=<?= (int) $s['id'] ?>">Editar</a>
+                    <a class="btn btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem;" href="<?= h($editHref((int) $s['id'])) ?>">Editar</a>
                     <form method="post" onsubmit="return confirm('Excluir este serviço?');">
                       <?= csrf_field() ?>
+                      <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="id" value="<?= (int) $s['id'] ?>">
                       <button type="submit" class="btn btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem;">Excluir</button>

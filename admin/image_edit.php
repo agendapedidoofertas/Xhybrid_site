@@ -10,25 +10,47 @@ require_once dirname(__DIR__) . '/lib/images.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
 require_once dirname(__DIR__) . '/lib/uploads.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_admin();
-$canUpload = user_is_admin($user);
+$user = require_page('index');
+$canUpload = user_is_admin($user) || user_is_client($user);
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        header('Location: leads.php');
+        exit;
+    }
+    lead_admin_set_context($leadId);
+    $canUpload = true;
+}
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $image = null;
 if ($id > 0) {
-    $stmt = db()->prepare('SELECT * FROM images WHERE id = :id');
-    $stmt->execute([':id' => $id]);
+    $sql = 'SELECT * FROM images WHERE id = :id';
+    $params = [':id' => $id];
+    if ($leadId === null) {
+        $sql .= ' AND crm_lead_id IS NULL';
+    } else {
+        $sql .= ' AND crm_lead_id = :lead';
+        $params[':lead'] = $leadId;
+    }
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
     $image = $stmt->fetch() ?: null;
     if (!$image) {
-        header('Location: index.php');
+        header('Location: images.php' . ($leadId ? '?' . lead_admin_qs($leadId) : ''));
         exit;
     }
 }
 
 $error = '';
-$settings = settings_all(db());
+$settings = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
 $limitGallery = plan_limit_int($settings, 'limit_gallery', 12);
 
 function normalize_slug(string $slug): string
@@ -89,9 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $reserved = ['favicon', 'logo', 'hero', 'about'];
         $isReserved = in_array($slug, $reserved, true) || str_starts_with($slug, 'video-');
         if ($active === 1 && !$isReserved) {
-            $countStmt = $pdo->query(
-                "SELECT COUNT(*) FROM images WHERE active = 1 AND slug NOT IN ('favicon','logo','hero','about') AND slug NOT LIKE 'video-%'"
-            );
+            if ($leadId === null) {
+                $countStmt = $pdo->query(
+                    "SELECT COUNT(*) FROM images WHERE active = 1 AND crm_lead_id IS NULL AND slug NOT IN ('favicon','logo','hero','about') AND slug NOT LIKE 'video-%'"
+                );
+            } else {
+                $countStmt = $pdo->prepare(
+                    "SELECT COUNT(*) FROM images WHERE active = 1 AND crm_lead_id = :lead AND slug NOT IN ('favicon','logo','hero','about') AND slug NOT LIKE 'video-%'"
+                );
+                $countStmt->execute([':lead' => $leadId]);
+            }
             $galleryCount = (int) $countStmt->fetchColumn();
             $wasCounted = false;
             if ($image && (int) ($image['active'] ?? 0) === 1) {
@@ -115,9 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      SET url = :url, title = :title, slug = :slug, description = :description,
                          price = :price, promo_price = :promo_price, position = :position,
                          active = :active, updated_at = :updated_at
-                     WHERE id = :id'
+                     WHERE id = :id' . ($leadId === null ? ' AND crm_lead_id IS NULL' : ' AND crm_lead_id = :lead')
                 );
-                $stmt->execute([
+                $exec = [
                     ':url' => $url,
                     ':title' => $title,
                     ':slug' => $slug,
@@ -128,11 +157,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':active' => $active,
                     ':updated_at' => $now,
                     ':id' => (int) $image['id'],
-                ]);
+                ];
+                if ($leadId !== null) {
+                    $exec[':lead'] = $leadId;
+                }
+                $stmt->execute($exec);
             } else {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO images (url, title, slug, description, price, promo_price, position, active, created_at, updated_at)
-                     VALUES (:url, :title, :slug, :description, :price, :promo_price, :position, :active, :created_at, :updated_at)'
+                    'INSERT INTO images (url, title, slug, description, price, promo_price, position, active, created_at, updated_at, crm_lead_id)
+                     VALUES (:url, :title, :slug, :description, :price, :promo_price, :position, :active, :created_at, :updated_at, :crm_lead_id)'
                 );
                 $stmt->execute([
                     ':url' => $url,
@@ -145,9 +178,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':active' => $active,
                     ':created_at' => $now,
                     ':updated_at' => $now,
+                    ':crm_lead_id' => $leadId,
                 ]);
             }
-            header('Location: index.php?ok=' . urlencode('Imagem salva.'));
+            $redir = 'images.php?' . ($leadId ? lead_admin_qs($leadId) . '&' : '') . 'ok=' . urlencode('Imagem salva.');
+            header('Location: ' . $redir);
             exit;
         } catch (PDOException $e) {
             if (str_contains($e->getMessage(), 'UNIQUE')) {
@@ -183,12 +218,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $isEdit = $image !== null && (int) ($image['id'] ?? 0) > 0;
-$defaultPosition = $isEdit ? (int) $image['position'] : (int) db()->query('SELECT COALESCE(MAX(position), -1) + 1 FROM images')->fetchColumn();
+if ($isEdit) {
+    $defaultPosition = (int) $image['position'];
+} elseif ($leadId === null) {
+    $defaultPosition = (int) db()->query('SELECT COALESCE(MAX(position), -1) + 1 FROM images WHERE crm_lead_id IS NULL')->fetchColumn();
+} else {
+    $posStmt = db()->prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM images WHERE crm_lead_id = :lead');
+    $posStmt->execute([':lead' => $leadId]);
+    $defaultPosition = (int) $posStmt->fetchColumn();
+}
 
 admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Imagens</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Imagens' ?></p>
         <h1 class="font-display"><?= $isEdit ? 'Editar imagem' : 'Nova imagem' ?></h1>
         <?php if ($canUpload): ?>
           <p>Admin: pode enviar arquivo para <code>assets/uploads/</code> ou colar URL. Slots: <code>logo</code>, <code>favicon</code>, <code>hero</code>, <code>about</code>, vídeos <code>video-home</code> / <code>video-sobre</code> / <code>video-galeria</code> / <code>video-contato</code>.</p>
@@ -201,6 +244,7 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
 
       <form method="post"<?= $canUpload ? ' enctype="multipart/form-data"' : '' ?> class="contact-form admin-form" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <div class="form-group">
           <label for="title">Título</label>
           <input id="title" name="title" class="form-input" required value="<?= h((string) ($image['title'] ?? '')) ?>">
@@ -276,7 +320,7 @@ admin_header($isEdit ? 'Editar imagem' : 'Nova imagem', $user);
         </div>
         <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;">
           <button type="submit" class="btn btn-primary">Salvar</button>
-          <a href="index.php" class="btn btn-outline">Cancelar</a>
+          <a href="<?= h('images.php' . ($leadId ? '?' . lead_admin_qs($leadId) : '')) ?>" class="btn btn-outline">Cancelar</a>
         </div>
       </form>
       <script src="admin-limits.js"></script>

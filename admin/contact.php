@@ -7,16 +7,33 @@ require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_admin();
+$user = require_page('contact');
 $isAdmin = user_is_admin($user);
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        http_response_code(404);
+        admin_header('Lead não encontrado', $user);
+        echo '<p class="admin-flash admin-flash--error">Lead não encontrado. <a href="leads.php">Voltar</a></p>';
+        admin_footer();
+        exit;
+    }
+    lead_admin_set_context($leadId);
+}
 
 $flash = '';
 $error = '';
 $defs = settings_definitions();
-$values = settings_all(db());
-$groups = $isAdmin ? ['contact', 'smtp'] : ['contact'];
+$values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
+$groups = ($isAdmin && !$leadId) ? ['contact', 'smtp'] : ['contact'];
+$redirBase = 'contact.php' . ($leadId ? '?' . lead_admin_qs($leadId) : '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
@@ -28,8 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input[$key] = (string) ($_POST[$key] ?? '');
     }
     try {
-        settings_save_many(db(), $input);
-        header('Location: contact.php?ok=1');
+        if ($leadId) {
+            lead_admin_save_settings(db(), $leadId, $input);
+            header('Location: contact.php?' . lead_admin_qs($leadId) . '&ok=1');
+        } else {
+            settings_save_many(db(), $input);
+            header('Location: contact.php?ok=1');
+        }
         exit;
     } catch (Throwable $e) {
         $error = 'Não foi possível salvar: ' . $e->getMessage();
@@ -40,18 +62,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (isset($_GET['ok'])) {
-    $flash = $isAdmin ? 'Contato e SMTP salvos.' : 'Contato salvo.';
-    $values = settings_all(db());
+    $flash = ($isAdmin && !$leadId) ? 'Contato e SMTP salvos.' : 'Contato salvo.';
+    $values = $leadRow ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow) : settings_all(db());
 }
 
 admin_header('Contato', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Site</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Site' ?></p>
         <h1 class="font-display">Contato</h1>
-        <p><?= $isAdmin
-            ? 'Canais do site (WhatsApp, e-mail, redes, endereço) e SMTP. Campo vazio esconde o bloco no site.'
-            : 'Canais do site. Campo vazio (ex.: Instagram sem URL) esconde o bloco no site. SMTP só o administrador configura.' ?></p>
+        <p><?= $leadId
+            ? 'Canais do site deste lead. SMTP da agência não se aplica aqui.'
+            : ($isAdmin
+                ? 'Canais do site (WhatsApp, e-mail, redes, endereço) e SMTP. Campo vazio esconde o bloco no site.'
+                : 'Canais do site. Campo vazio (ex.: Instagram sem URL) esconde o bloco no site. SMTP só o administrador configura.') ?></p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -59,6 +83,7 @@ admin_header('Contato', $user);
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <h2 class="admin-appearance__label">Canais</h2>
         <?php foreach ($defs as $key => $def): ?>
           <?php if (($def['group'] ?? '') !== 'contact') continue; ?>
@@ -72,9 +97,9 @@ admin_header('Contato', $user);
           </div>
         <?php endforeach; ?>
 
-        <?php if ($isAdmin): ?>
+        <?php if ($isAdmin && !$leadId): ?>
         <h2 class="admin-appearance__label" style="margin-top:1.5rem;">SMTP (formulário)</h2>
-        <p class="text-muted" style="margin:0 0 0.75rem;font-size:0.875rem;">Preencha host, usuário e senha. Destino vazio usa o e-mail do site. Deixe a senha em branco para manter a atual. A senha fica no SQLite — use conta SMTP dedicada.</p>
+        <p class="text-muted" style="margin:0 0 0.75rem;font-size:0.875rem;">Preencha host, usuário e senha. Destino vazio usa o e-mail do site. Deixe a senha em branco para manter a atual.</p>
         <?php foreach ($defs as $key => $def): ?>
           <?php if (($def['group'] ?? '') !== 'smtp') continue; ?>
           <div class="form-group">

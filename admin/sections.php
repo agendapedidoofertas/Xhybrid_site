@@ -7,14 +7,32 @@ require_once dirname(__DIR__) . '/lib/csrf.php';
 require_once dirname(__DIR__) . '/lib/admin_layout.php';
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/settings.php';
+require_once dirname(__DIR__) . '/lib/lead_admin.php';
 
 auth_boot_session();
-$user = require_role_admin();
+$user = require_page('sections');
+
+$leadId = lead_admin_request_id();
+$leadRow = null;
+if ($leadId !== null) {
+    require_lead_access($leadId);
+    $leadRow = lead_admin_resolve($leadId);
+    if (!$leadRow) {
+        http_response_code(404);
+        admin_header('Lead não encontrado', $user);
+        echo '<p class="admin-flash admin-flash--error">Lead não encontrado.</p>';
+        admin_footer();
+        exit;
+    }
+    lead_admin_set_context($leadId);
+} else {
+    $user = require_role_admin();
+}
 
 $flash = '';
 $error = '';
 $defs = settings_definitions();
-$values = settings_all(db());
+$values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
 
 $pageKeys = [
     'feature_page_sobre',
@@ -35,18 +53,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input[$key] = isset($_POST[$key]) ? '1' : '0';
     }
     try {
-        settings_save_many(db(), $input);
-        header('Location: sections.php?ok=1');
+        if ($leadId) {
+            lead_admin_save_settings(db(), $leadId, $input);
+            header('Location: sections.php?' . lead_admin_qs($leadId) . '&ok=1');
+        } else {
+            settings_save_many(db(), $input);
+            header('Location: sections.php?ok=1');
+        }
         exit;
     } catch (Throwable $e) {
         $error = 'Não foi possível salvar: ' . $e->getMessage();
-        $values = settings_all(db());
+        $values = $leadId
+            ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
+            : settings_all(db());
     }
 }
 
 if (isset($_GET['ok'])) {
     $flash = 'Visibilidade atualizada.';
-    $values = settings_all(db());
+    $values = $leadId
+        ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
+        : settings_all(db());
 }
 
 $pageLabels = [
@@ -58,9 +85,9 @@ $pageLabels = [
 admin_header('Seções', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
-        <p class="eyebrow">Admin</p>
+        <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
         <h1 class="font-display">Ocultar / mostrar</h1>
-        <p>Desmarque para esconder do site. Exemplo: desligar <strong>Projetos</strong> remove o item do menu, o botão “Ver projetos” e bloqueia a página.</p>
+        <p>Desmarque para esconder do site<?= $leadId ? ' deste lead' : '' ?>.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -68,9 +95,9 @@ admin_header('Seções', $user);
 
       <form method="post" class="contact-form admin-form admin-form--wide" style="margin-top:1.5rem;">
         <?= csrf_field() ?>
+        <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
 
         <h2 class="admin-appearance__label">Páginas do menu</h2>
-        <p class="text-muted" style="margin:0 0 0.75rem;">Início sempre permanece. Desmarque o que não quiser exibir.</p>
         <?php foreach ($pageKeys as $key): ?>
           <label class="admin-check">
             <input type="checkbox" name="<?= h($key) ?>" value="1" <?= ($values[$key] ?? '1') === '1' ? 'checked' : '' ?>>
@@ -88,7 +115,6 @@ admin_header('Seções', $user);
         <?php endforeach; ?>
 
         <button type="submit" class="btn btn-primary" style="margin-top:1.25rem;">Salvar visibilidade</button>
-        <a href="../index.html" class="btn btn-outline" style="margin-top:1.25rem;margin-left:0.5rem;" target="_blank" rel="noopener">Pré-visualizar site</a>
       </form>
 <?php
 admin_footer();

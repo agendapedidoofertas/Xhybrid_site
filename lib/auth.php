@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/security.php';
 
 function auth_boot_session(): void
 {
@@ -10,8 +11,7 @@ function auth_boot_session(): void
         return;
     }
 
-    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443);
+    $secure = request_is_https();
 
     session_name('xhybrid_admin');
     session_set_cookie_params([
@@ -40,7 +40,7 @@ function current_user(): ?array
     if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
         return null;
     }
-    $stmt = db()->prepare('SELECT id, username, role, created_at FROM users WHERE id = :id');
+    $stmt = db()->prepare('SELECT id, username, role, crm_lead_id, created_at FROM users WHERE id = :id');
     $stmt->execute([':id' => (int) $id]);
     $user = $stmt->fetch();
     return $user ?: null;
@@ -51,7 +51,105 @@ function user_is_admin(?array $user): bool
     return $user !== null && ($user['role'] ?? '') === 'admin';
 }
 
-/** Qualquer usuário logado (admin ou editor). */
+function user_is_staff(?array $user = null): bool
+{
+    $user = $user ?? current_user();
+    if ($user === null) {
+        return false;
+    }
+    $role = (string) ($user['role'] ?? '');
+    return $role === 'admin' || $role === 'editor';
+}
+
+function user_crm_lead_id(?array $user = null): ?int
+{
+    $user = $user ?? current_user();
+    if ($user === null) {
+        return null;
+    }
+    $id = $user['crm_lead_id'] ?? null;
+    if ($id === null || $id === '') {
+        return null;
+    }
+    $n = (int) $id;
+    return $n > 0 ? $n : null;
+}
+
+function user_is_client(?array $user = null): bool
+{
+    $user = $user ?? current_user();
+    if ($user === null) {
+        return false;
+    }
+    $role = (string) ($user['role'] ?? '');
+    return $role === 'client_medium' || $role === 'client_pro';
+}
+
+/**
+ * Páginas permitidas por papel (para clients e filtros de nav).
+ *
+ * @return list<string>
+ */
+function user_allowed_pages(?array $user = null): array
+{
+    $user = $user ?? current_user();
+    if ($user === null) {
+        return [];
+    }
+    $role = (string) ($user['role'] ?? '');
+    if ($role === 'admin') {
+        return [
+            'index', 'contact', 'texts', 'leads', 'lead_hub', 'lead_site', 'services',
+            'password', 'plan', 'brand', 'sections', 'backup', 'preset', 'appearance', 'users',
+        ];
+    }
+    if ($role === 'editor') {
+        return [
+            'index', 'contact', 'texts', 'leads', 'lead_hub', 'lead_site', 'services', 'password',
+        ];
+    }
+    if ($role === 'client_pro') {
+        return [
+            'index', 'contact', 'texts', 'lead_hub', 'lead_site', 'services',
+            'password', 'plan', 'brand', 'sections', 'preset', 'appearance',
+        ];
+    }
+    if ($role === 'client_medium') {
+        return [
+            'index', 'contact', 'texts', 'lead_hub', 'lead_site', 'password',
+        ];
+    }
+    return ['password'];
+}
+
+function user_can_page(?array $user, string $page): bool
+{
+    return in_array($page, user_allowed_pages($user), true);
+}
+
+/**
+ * Staff: qualquer lead. Client: só o próprio crm_lead_id.
+ */
+function require_lead_access(int $leadId): array
+{
+    $user = require_admin();
+    if ($leadId <= 0) {
+        http_response_code(404);
+        exit;
+    }
+    if (user_is_staff($user)) {
+        return $user;
+    }
+    $own = user_crm_lead_id($user);
+    if ($own !== null && $own === $leadId) {
+        return $user;
+    }
+    http_response_code(403);
+    header('Location: index.php');
+    exit;
+}
+
+/** Qualquer usuário logado. */
 function require_admin(): array
 {
     $user = current_user();
@@ -62,12 +160,28 @@ function require_admin(): array
     return $user;
 }
 
-/** Somente role admin (gestão de usuários). */
+/** Somente role admin (gestão de usuários / fábrica). */
 function require_role_admin(): array
 {
     $user = require_admin();
     if (!user_is_admin($user)) {
         header('Location: index.php');
+        exit;
+    }
+    return $user;
+}
+
+/** Exige página na allowlist do papel. */
+function require_page(string $page): array
+{
+    $user = require_admin();
+    if (!user_can_page($user, $page)) {
+        $lead = user_crm_lead_id($user);
+        if ($lead !== null && user_can_page($user, 'lead_hub')) {
+            header('Location: lead_hub.php?lead_id=' . $lead);
+        } else {
+            header('Location: index.php');
+        }
         exit;
     }
     return $user;
@@ -103,18 +217,33 @@ function logout_user(): void
     session_destroy();
 }
 
-function create_user(string $username, string $password, string $role = 'admin'): void
+/**
+ * @param string $role admin|editor|client_medium|client_pro
+ */
+function create_user(string $username, string $password, string $role = 'admin', ?int $crmLeadId = null): void
 {
-    $role = $role === 'editor' ? 'editor' : 'admin';
+    $allowed = ['admin', 'editor', 'client_medium', 'client_pro'];
+    if (!in_array($role, $allowed, true)) {
+        $role = 'editor';
+    }
+    if ($role === 'client_medium' || $role === 'client_pro') {
+        if ($crmLeadId === null || $crmLeadId <= 0) {
+            throw new InvalidArgumentException('Cliente precisa de crm_lead_id.');
+        }
+    } else {
+        $crmLeadId = null;
+    }
+
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = db()->prepare(
-        'INSERT INTO users (username, password_hash, role, created_at)
-         VALUES (:username, :password_hash, :role, :created_at)'
+        'INSERT INTO users (username, password_hash, role, crm_lead_id, created_at)
+         VALUES (:username, :password_hash, :role, :crm_lead_id, :created_at)'
     );
     $stmt->execute([
         ':username' => $username,
         ':password_hash' => $hash,
         ':role' => $role,
+        ':crm_lead_id' => $crmLeadId,
         ':created_at' => gmdate('c'),
     ]);
 }
@@ -157,7 +286,7 @@ function admin_reset_password(int $userId, string $next): string
 function list_users(): array
 {
     return db()->query(
-        'SELECT id, username, role, created_at FROM users ORDER BY id ASC'
+        'SELECT id, username, role, crm_lead_id, created_at FROM users ORDER BY id ASC'
     )->fetchAll();
 }
 
