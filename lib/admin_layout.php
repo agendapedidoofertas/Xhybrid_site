@@ -446,22 +446,29 @@ function admin_footer(): void
   </button>
   <div class="roboto-panel" id="roboto-panel" role="dialog" aria-labelledby="roboto-panel-title" hidden>
     <div class="roboto-panel__head">
-      <div class="roboto-panel__head-icon" aria-hidden="true"><?= $headSvg ?></div>
+      <div class="roboto-panel__head-icon" id="roboto-head-icon" aria-hidden="true"><?= $headSvg ?></div>
       <div>
         <p class="roboto-panel__title" id="roboto-panel-title">Roboto</p>
-        <p class="roboto-panel__sub">Ajuda rápida do painel</p>
+        <p class="roboto-panel__sub">Conversa de ajuda do painel</p>
       </div>
       <button type="button" class="roboto-panel__close" id="roboto-close" aria-label="Fechar">×</button>
     </div>
-    <div class="roboto-panel__filter">
-      <label class="visually-hidden" for="roboto-filter">Filtrar tópicos</label>
-      <input type="search" id="roboto-filter" placeholder="Filtrar tópicos…" autocomplete="off">
+    <div class="roboto-thread" id="roboto-thread" aria-live="polite"></div>
+    <div class="roboto-composer">
+      <button type="button" class="roboto-composer__btn" id="roboto-topics-open" aria-expanded="false" aria-controls="roboto-drawer">
+        Escolher tópico
+      </button>
     </div>
-    <div class="roboto-panel__body" id="roboto-groups"></div>
-    <div class="roboto-answer" id="roboto-answer" hidden>
-      <p class="roboto-answer__title" id="roboto-answer-title"></p>
-      <div class="roboto-answer__body" id="roboto-answer-body"></div>
-      <div class="roboto-answer__ctas" id="roboto-answer-ctas"></div>
+    <div class="roboto-drawer" id="roboto-drawer" hidden>
+      <div class="roboto-drawer__bar">
+        <p class="roboto-drawer__title">Tópicos</p>
+        <button type="button" class="roboto-drawer__close" id="roboto-drawer-close" aria-label="Fechar tópicos">×</button>
+      </div>
+      <div class="roboto-panel__filter">
+        <label class="visually-hidden" for="roboto-filter">Filtrar tópicos</label>
+        <input type="search" id="roboto-filter" placeholder="Filtrar tópicos…" autocomplete="off">
+      </div>
+      <div class="roboto-panel__topics" id="roboto-groups"></div>
     </div>
   </div>
   <script type="application/json" id="roboto-data"><?= $payloadJson ?></script>
