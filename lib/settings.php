@@ -721,18 +721,30 @@ function settings_all(PDO $pdo): array
 
 /**
  * Settings seguros para a API pública (sem SMTP / segredos).
+ * Só keys das definitions (grupo smtp excluído) + extras usados pelo front.
  *
  * @return array<string, string>
  */
 function settings_public(PDO $pdo): array
 {
     $all = settings_all($pdo);
-    foreach (array_keys($all) as $key) {
+    $out = [];
+    foreach (settings_definitions() as $key => $def) {
+        if (($def['group'] ?? '') === 'smtp') {
+            continue;
+        }
         if (str_starts_with($key, 'smtp_')) {
-            unset($all[$key]);
+            continue;
+        }
+        if (array_key_exists($key, $all)) {
+            $out[$key] = (string) $all[$key];
         }
     }
-    return $all;
+    // Usado no front de leads; pode existir fora das definitions.
+    if (array_key_exists('logo_url', $all)) {
+        $out['logo_url'] = (string) $all['logo_url'];
+    }
+    return $out;
 }
 
 function settings_get(PDO $pdo, string $key): string

@@ -13,11 +13,11 @@ function appearance_combinations_by_niche(): array
     $eletricista = [
         combo('eletricista-01', 'azure-blast', 'azul', 'geometric', 'frame', 'media-wide', 'none'),
         combo('eletricista-02', 'tech-glass', 'preto', 'tech', 'soft', 'classic', 'tailwind'),
-        combo('eletricista-03', 'sharp-saas', 'graphite', 'saas', 'sharp', 'media-wide', 'bootswatch', 'darkly'),
+        combo('eletricista-03', 'sharp-saas', 'graphite', 'saas', 'sharp', 'center', 'bootswatch', 'darkly'),
         combo('eletricista-04', 'ash-glass', 'slate', 'saas', 'compact', 'stack-media', 'none'),
         combo('eletricista-05', 'obsidian', 'preto', 'display', 'frame', 'copy-wide', 'tailwind'),
         combo('eletricista-06', 'azure-blast', 'indigo', 'geometric', 'bento', 'classic', 'bulma'),
-        combo('eletricista-07', 'sharp-saas', 'azul', 'tech', 'sharp', 'hero-flip', 'none'),
+        combo('eletricista-07', 'sharp-saas', 'azul', 'tech', 'sharp', 'center', 'none'),
         combo('eletricista-08', 'tech-glass', 'graphite', 'mono', 'soft', 'flip', 'none'),
         combo('eletricista-09', 'navy-depth', 'midnight', 'geometric', 'magazine', 'about-flip', 'tailwind'),
         combo('eletricista-10', 'obsidian', 'slate', 'saas', 'bento', 'stack-copy', 'bootswatch', 'flatly'),
@@ -42,7 +42,7 @@ function appearance_combinations_by_niche(): array
         combo('limpeza-03', 'azure-blast', 'azul', 'poppins', 'frame', 'media-wide', 'bulma'),
         combo('limpeza-04', 'ivory-soft', 'gelo', 'soft', 'pill', 'stack-copy', 'none'),
         combo('limpeza-05', 'ash-glass', 'slate', 'work', 'compact', 'stack-media', 'none'),
-        combo('limpeza-06', 'sharp-saas', 'graphite', 'inter', 'sharp', 'media-wide', 'bootswatch', 'cosmo'),
+        combo('limpeza-06', 'sharp-saas', 'graphite', 'inter', 'sharp', 'center', 'bootswatch', 'cosmo'),
         combo('limpeza-07', 'warm-studio', 'verde', 'slab', 'loft', 'center', 'none'),
         combo('limpeza-08', 'ocean-vivid', 'menta', 'raleway', 'soft', 'classic', 'none'),
         combo('limpeza-09', 'navy-depth', 'midnight', 'geometric', 'magazine', 'about-flip', 'none'),
@@ -59,7 +59,7 @@ function appearance_combinations_by_niche(): array
         combo('generic-07', 'obsidian', 'preto', 'figtree', 'frame', 'copy-wide', 'bootswatch', 'cyborg'),
         combo('generic-08', 'ash-glass', 'slate', 'work', 'compact', 'stack-media', 'tailwind'),
         combo('generic-09', 'azure-blast', 'azul', 'poppins', 'frame', 'media-wide', 'none'),
-        combo('generic-10', 'sharp-saas', 'graphite', 'inter', 'sharp', 'media-wide', 'tailwind'),
+        combo('generic-10', 'sharp-saas', 'graphite', 'inter', 'sharp', 'center', 'tailwind'),
     ];
 
     return [

@@ -132,6 +132,11 @@ admin_header('Plano', $user);
         <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
         <h1 class="font-display">Plano do cliente</h1>
         <p>Basic / Medium / Pro — flags e limites<?= $leadId ? ' deste lead' : '' ?>.</p>
+        <ul class="text-muted" style="margin:.75rem 0 0;padding-left:1.1rem;font-size:.88rem;line-height:1.45;">
+          <?php foreach (plan_blurbs() as $pid => $blurb): ?>
+            <li><strong><?= h($labels[$pid] ?? $pid) ?>:</strong> <?= h($blurb) ?></li>
+          <?php endforeach; ?>
+        </ul>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>

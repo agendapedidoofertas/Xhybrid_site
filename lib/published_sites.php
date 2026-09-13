@@ -184,13 +184,24 @@ function published_site_settings_overlay(array $row): array
 /**
  * @return list<array<string, mixed>>
  */
-function published_site_list(PDO $pdo, ?int $activeOnly = null): array
+function published_site_list(PDO $pdo, ?int $activeOnly = null, ?string $planTier = null): array
 {
     $sql = 'SELECT * FROM published_sites';
+    $parts = [];
     $params = [];
     if ($activeOnly !== null) {
-        $sql .= ' WHERE site_active = :a';
+        $parts[] = 'site_active = :a';
         $params[':a'] = $activeOnly;
+    }
+    if ($planTier !== null && $planTier !== '') {
+        $tier = strtolower(trim($planTier));
+        if (in_array($tier, ['basic', 'medium', 'pro'], true)) {
+            $parts[] = 'plan_tier = :plan_tier';
+            $params[':plan_tier'] = $tier;
+        }
+    }
+    if ($parts !== []) {
+        $sql .= ' WHERE ' . implode(' AND ', $parts);
     }
     $sql .= ' ORDER BY updated_at DESC, company_name ASC';
     $stmt = $pdo->prepare($sql);

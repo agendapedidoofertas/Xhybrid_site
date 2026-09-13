@@ -485,23 +485,26 @@ function setupHomeDestaques() {
   if (!grid) return;
   grid.innerHTML = "";
 
-  products
-    .filter((p) => p.imagem)
-    .slice(0, 3)
-    .forEach((p) => {
-      const li = document.createElement("li");
-      li.className = "product-card product-card--bordered reveal";
-      li.innerHTML = `
-      <div class="product-card__img-wrap">
-        <img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.nome)}" width="1024" height="768" loading="lazy" referrerpolicy="no-referrer">
+  products.slice(0, 3).forEach((p) => {
+    const hasImg = Boolean(String(p.imagem || "").trim());
+    const li = document.createElement("li");
+    li.className = "product-card product-card--bordered reveal";
+    li.innerHTML = `
+      <div class="product-card__img-wrap${hasImg ? "" : " is-media-empty"}">
+        ${
+          hasImg
+            ? `<img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.nome)}" width="1024" height="768" loading="lazy" referrerpolicy="no-referrer">`
+            : `<img alt="" width="1024" height="768" hidden class="is-media-empty" aria-hidden="true">`
+        }
       </div>
       <div class="product-card__body">
         <p class="product-card__category">${escapeHtml(p.categoria)}</p>
         <h3 class="product-card__title">${escapeHtml(p.nome)}</h3>
       </div>`;
-      grid.appendChild(li);
-      attachDriveFallback(li.querySelector("img"));
-    });
+    grid.appendChild(li);
+    const img = li.querySelector("img");
+    if (hasImg && img) attachDriveFallback(img);
+  });
 }
 
 function applyBrandMeta() {
@@ -846,17 +849,52 @@ function applySiteTexts() {
       }
     } else if (key === "email") {
       const mail = site("email").trim();
-      el.setAttribute("href", mail ? `mailto:${mail}` : "#");
+      if (mail) {
+        el.setAttribute("href", `mailto:${mail}`);
+        el.hidden = false;
+      } else {
+        el.removeAttribute("href");
+        el.hidden = true;
+      }
     } else if (key === "instagram") {
-      el.setAttribute("href", site("instagram_url").trim() || "#");
+      const url = site("instagram_url").trim();
+      if (url) {
+        el.setAttribute("href", url);
+        el.hidden = false;
+      } else {
+        el.removeAttribute("href");
+        el.hidden = true;
+      }
     } else if (key === "facebook") {
-      el.setAttribute("href", site("facebook_url").trim() || "#");
+      const url = site("facebook_url").trim();
+      if (url) {
+        el.setAttribute("href", url);
+        el.hidden = false;
+      } else {
+        el.removeAttribute("href");
+        el.hidden = true;
+      }
     } else if (key === "tiktok") {
-      el.setAttribute("href", site("tiktok_url").trim() || "#");
+      const url = site("tiktok_url").trim();
+      if (url) {
+        el.setAttribute("href", url);
+        el.hidden = false;
+      } else {
+        el.removeAttribute("href");
+        el.hidden = true;
+      }
     } else if (key === "maps") {
-      el.setAttribute("href", site("maps_url").trim() || "#");
+      const url = site("maps_url").trim();
+      if (url) {
+        el.setAttribute("href", url);
+        el.hidden = false;
+      } else {
+        el.removeAttribute("href");
+      }
     } else {
-      el.setAttribute("href", site(key) || "#");
+      const url = site(key).trim();
+      if (url) el.setAttribute("href", url);
+      else el.removeAttribute("href");
     }
   });
 
@@ -884,12 +922,16 @@ function applySiteTexts() {
       addrEl.setAttribute("target", "_blank");
       addrEl.setAttribute("rel", "noreferrer");
       addrEl.classList.remove("channel-card--static");
-    } else {
-      addrEl.setAttribute("href", "#");
+      addrEl.onclick = null;
+    } else if (address) {
+      addrEl.removeAttribute("href");
       addrEl.removeAttribute("target");
       addrEl.removeAttribute("rel");
       addrEl.classList.add("channel-card--static");
       addrEl.onclick = (e) => e.preventDefault();
+    } else {
+      addrEl.removeAttribute("href");
+      addrEl.onclick = null;
     }
   }
 
@@ -934,16 +976,15 @@ function applyImages() {
 
   document.querySelectorAll("[data-img]").forEach((el) => {
     const key = el.getAttribute("data-img");
-    // Só URLs da API — ausente → robô (depois do fetch, nunca no HTML inicial)
-    const src = (key && IMAGES[key]) || IMAGE_PLACEHOLDER;
+    // Só URLs da API — ausente → frame vazio (sem robô)
+    const src = (key && IMAGES[key]) || "";
     el.setAttribute("referrerpolicy", "no-referrer");
-    el.hidden = false;
-    el.setAttribute("src", src);
-    if (isPlaceholderSrc(src)) {
-      el.classList.add("is-placeholder");
-    } else {
-      el.classList.remove("is-placeholder");
+    if (!src || isPlaceholderSrc(src)) {
+      setMediaEmpty(el, true);
+      return;
     }
+    setMediaEmpty(el, false);
+    el.setAttribute("src", src);
     el.classList.add("is-media-ready");
     attachImageFallback(el);
   });
@@ -958,8 +999,12 @@ function applyImages() {
       "video-contato": "hero",
     };
     const imgKey = posterMap[slug] || "hero";
-    const poster = IMAGES[imgKey] || IMAGE_PLACEHOLDER;
-    video.setAttribute("poster", poster);
+    const poster = IMAGES[imgKey] || "";
+    if (poster && !isPlaceholderSrc(poster)) {
+      video.setAttribute("poster", poster);
+    } else {
+      video.removeAttribute("poster");
+    }
     video.classList.add("is-media-ready");
   });
 }
@@ -1010,12 +1055,15 @@ function applyVideos() {
     const fallback = media ? media.querySelector("img") : null;
 
     if (fallback && slug === "video-galeria") {
-      const poster = firstGallerySrc() || IMAGE_PLACEHOLDER;
-      fallback.hidden = false;
-      fallback.setAttribute("src", poster);
-      video.setAttribute("poster", poster);
-      if (isPlaceholderSrc(poster)) fallback.classList.add("is-placeholder");
-      else fallback.classList.remove("is-placeholder");
+      const poster = firstGallerySrc() || "";
+      if (poster && !isPlaceholderSrc(poster)) {
+        setMediaEmpty(fallback, false);
+        fallback.setAttribute("src", poster);
+        video.setAttribute("poster", poster);
+      } else {
+        setMediaEmpty(fallback, true);
+        video.removeAttribute("poster");
+      }
     }
 
     const showFallback = () => {
@@ -1027,8 +1075,10 @@ function applyVideos() {
       }
       video.hidden = true;
       if (fallback) {
-        // Mantém o src já definido por applyImages (ativo ou robô)
-        fallback.hidden = false;
+        // Mantém o estado já definido por applyImages (imagem real ou frame vazio)
+        if (!fallback.classList.contains("is-media-empty")) {
+          fallback.hidden = false;
+        }
       }
     };
 

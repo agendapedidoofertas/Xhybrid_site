@@ -28,7 +28,7 @@ $lookBundles = [
     'xhybrid-signature' => ['theme' => 'preto', 'font' => 'saas', 'layout' => 'soft', 'media' => 'classic'],
     'tech-glass' => ['theme' => 'preto', 'font' => 'tech', 'layout' => 'soft', 'media' => 'classic'],
     'editorial' => ['theme' => 'branco', 'font' => 'editorial', 'layout' => 'editorial', 'media' => 'flip'],
-    'sharp-saas' => ['theme' => 'graphite', 'font' => 'saas', 'layout' => 'sharp', 'media' => 'media-wide'],
+    'sharp-saas' => ['theme' => 'graphite', 'font' => 'saas', 'layout' => 'sharp', 'media' => 'center'],
     'warm-studio' => ['theme' => 'marrom-claro', 'font' => 'classic', 'layout' => 'loft', 'media' => 'center'],
     'neon-night' => ['theme' => 'neon', 'font' => 'mono', 'layout' => 'strip', 'media' => 'hero-flip'],
     'obsidian' => ['theme' => 'preto', 'font' => 'display', 'layout' => 'frame', 'media' => 'copy-wide'],

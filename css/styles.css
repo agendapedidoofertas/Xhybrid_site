@@ -1724,6 +1724,52 @@ img.is-placeholder {
   box-sizing: border-box;
 }
 
+/* Frame vazio (sem robô): mesmo contorno do empty-state da galeria, sem texto */
+.hero__figure.is-media-empty,
+.about-figure.is-media-empty,
+.product-card__img-wrap.is-media-empty,
+.gallery__item.is-media-empty {
+  border: 1px dashed color-mix(in oklch, var(--border) 80%, transparent);
+  background: color-mix(in oklch, var(--secondary) 35%, transparent);
+  box-shadow: none;
+}
+
+.hero__figure.is-media-empty,
+.about-figure.is-media-empty {
+  display: block;
+  width: 100%;
+  min-height: 14rem;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-xl);
+}
+
+.hero__figure.is-media-empty::before,
+.about-figure.is-media-empty::before {
+  content: none;
+}
+
+.product-card__img-wrap.is-media-empty {
+  min-height: 10rem;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+}
+
+.hero__figure.is-media-empty > img,
+.about-figure.is-media-empty > img,
+.product-card__img-wrap.is-media-empty > img,
+.gallery__item.is-media-empty img,
+img.is-media-empty {
+  display: none !important;
+}
+
+/* Fundo full-bleed Signature: some por completo (sem contorno no viewport) */
+.hero__media.is-media-empty,
+.page-cover__media.is-media-empty,
+html[data-look="xhybrid-signature"] .hero__media.is-media-empty,
+html[data-look="xhybrid-signature"] .page-cover__media.is-media-empty {
+  display: none !important;
+}
+
 /* Evita flash do robô/placeholder antes da API de imagens */
 img[data-img]:not(.is-media-ready),
 video[data-video]:not(.is-media-ready) {
@@ -4203,7 +4249,7 @@ html[data-look="editorial"] .gallery__btn img {
   filter: grayscale(0.12);
 }
 
-/* --- Sharp SaaS: botões compactos à direita do bloco, quadrados --- */
+/* --- Sharp SaaS: hero centralizado, botões compactos, cards densos --- */
 html[data-look="sharp-saas"] .site-header__inner {
   border-radius: var(--header-radius);
 }
@@ -4214,21 +4260,47 @@ html[data-look="sharp-saas"] .stat-card {
   box-shadow: var(--shadow-xs);
 }
 
+html[data-look="sharp-saas"] .hero {
+  text-align: center;
+}
+
+html[data-look="sharp-saas"] .hero__grid {
+  justify-items: center;
+}
+
+html[data-look="sharp-saas"] .hero__grid > div:first-child {
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+html[data-look="sharp-saas"] .hero h1 {
+  margin-inline: auto;
+  text-align: center;
+}
+
 html[data-look="sharp-saas"] .hero__text {
   max-width: 42ch;
   font-size: 0.98rem;
+  margin-inline: auto;
+  text-align: center;
 }
 
 html[data-look="sharp-saas"] .section-header {
-  text-align: left;
-  margin-inline: 0;
+  text-align: center;
+  margin-inline: auto;
 }
 
 html[data-look="sharp-saas"] .hero__actions {
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1.35rem;
+  justify-content: center;
 }
 
 html[data-look="sharp-saas"] .hero__actions .btn {
@@ -4241,11 +4313,17 @@ html[data-look="sharp-saas"] .about-content .btn {
 }
 
 html[data-look="sharp-saas"] .cta-section {
-  text-align: left;
+  text-align: center;
 }
 
 html[data-look="sharp-saas"] .cta-section .btn {
   margin-top: 1.25rem;
+  margin-inline: auto;
+}
+
+html[data-look="sharp-saas"] .hero__figure {
+  width: min(100%, 36rem);
+  margin-inline: auto;
 }
 
 html[data-look="sharp-saas"] .hero__figure::before {
@@ -4414,6 +4492,7 @@ html[data-look="neon-night"] .gallery__btn img {
     max-width: none;
     width: 100%;
     flex-wrap: wrap;
+    justify-content: center;
   }
   html[data-look="warm-studio"] .hero__actions {
     justify-content: stretch;

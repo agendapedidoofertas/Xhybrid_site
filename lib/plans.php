@@ -45,6 +45,20 @@ function plan_labels(): array
 }
 
 /**
+ * Texto curto para UI (domínio próprio Medium/Pro; Pro = mesma base + personalização total / manutenção maior).
+ *
+ * @return array<string, string>
+ */
+function plan_blurbs(): array
+{
+    return [
+        'basic' => 'Subcaminho Xhybrid · site completo · personalização mínima',
+        'medium' => 'Domínio próprio · personalização limitada · mesma base do Pro',
+        'pro' => 'Domínio próprio · personalização total · manutenção mensal maior',
+    ];
+}
+
+/**
  * Pacote padrão de cada plano (settings keys).
  *
  * @return array<string, string>
@@ -53,11 +67,12 @@ function plan_bundle(string $plan): array
 {
     $plan = plan_normalize($plan);
 
+    // Basic: mesmo esqueleto de páginas; limita quantidade/funções (não corta Sobre/Projetos).
     if ($plan === 'basic') {
         return [
             'site_plan' => 'basic',
-            'feature_page_sobre' => '0',
-            'feature_page_galeria' => '0',
+            'feature_page_sobre' => '1',
+            'feature_page_galeria' => '1',
             'feature_page_contato' => '1',
             'feature_animations' => '0',
             'feature_looks_premium' => '0',
@@ -80,6 +95,7 @@ function plan_bundle(string $plan): array
         ];
     }
 
+    // Medium: mesmo site; animação + 1 bloco extra; looks premium off (personalização limitada).
     if ($plan === 'medium') {
         return [
             'site_plan' => 'medium',
@@ -93,12 +109,12 @@ function plan_bundle(string $plan): array
             'limit_gallery' => '12',
             'section_hero' => '1',
             'section_features' => '1',
-            'section_works' => '1',
+            'section_works' => '0',
             'section_area' => '1',
-            'section_testimonials' => '1',
+            'section_testimonials' => '0',
             'section_faq' => '0',
             'section_cta' => '1',
-            'urgency_enabled' => '1',
+            'urgency_enabled' => '0',
             'appearance_look' => 'azure-blast',
             'appearance_theme' => 'azul',
             'appearance_font' => 'geometric',
@@ -107,6 +123,7 @@ function plan_bundle(string $plan): array
         ];
     }
 
+    // Pro: mesmo site do Medium; personalização total (looks premium) + FAQ/urgência; tetos finitos (Drive).
     return [
         'site_plan' => 'pro',
         'feature_page_sobre' => '1',
@@ -115,13 +132,13 @@ function plan_bundle(string $plan): array
         'feature_animations' => '1',
         'feature_looks_premium' => '1',
         'feature_preset_nicho' => '1',
-        'limit_services' => '99',
-        'limit_gallery' => '99',
+        'limit_services' => '10',
+        'limit_gallery' => '20',
         'section_hero' => '1',
         'section_features' => '1',
         'section_works' => '1',
         'section_area' => '1',
-        'section_testimonials' => '1',
+        'section_testimonials' => '0',
         'section_faq' => '1',
         'section_cta' => '1',
         'urgency_enabled' => '1',

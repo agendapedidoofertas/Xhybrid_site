@@ -686,12 +686,12 @@ const LOOK_PRESETS = [
   {
     id: "sharp-saas",
     nome: "Sharp SaaS",
-    descricao: "Bento assimétrico + overlay nos projetos",
+    descricao: "Bento assimétrico + hero centralizado",
     palette: "Neutro",
     theme: "graphite",
     font: "saas",
     layout: "sharp",
-    media: "media-wide",
+    media: "center",
     swatch: ["#171a1f", "#7aa2c8", "#e8eef5"],
   },
   {
@@ -955,8 +955,8 @@ let galleryPhotos = [];
 
 function bindProductImages() {
   products.forEach((p) => {
-    // Sem slug na API: usa robô placeholder em vez de card sem imagem
-    p.imagem = IMAGES[p.imageKey] || IMAGE_PLACEHOLDER;
+    // Sem slug/URL na API: sem imagem (card usa frame vazio, não robô)
+    p.imagem = (p.imageKey && IMAGES[p.imageKey]) || "";
   });
 }
 
