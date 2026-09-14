@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Path absoluto da pasta raiz do CRM (onde fica data/crm.sqlite).
+ *
+ * Copie para crm_bridge.php (gitignored) ou use CRM_SOFTWARE_ROOT.
+ *
+ * Local (Windows, pastas irmãs):
+ *   return 'C:\\Users\\Bosco\\Documents\\GitHub\\crm_software';
+ *
+ * Produção Hostgator (subdomínio crm.8xd.com.br → ~/crm):
+ *   return '/home/USER/crm';
+ *
+ * Fallbacks ../crm_software NÃO funcionam com layout ~/public_html + ~/crm.
+ */
+return '/home/USER/crm';

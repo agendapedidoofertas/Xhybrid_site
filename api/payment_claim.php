@@ -17,6 +17,33 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     exit;
 }
 
+// Rate limit (arquivo): 8 hits / 10 min por IP
+$ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+$rateDir = dirname(__DIR__) . '/data/rate';
+if (!is_dir($rateDir)) {
+    @mkdir($rateDir, 0755, true);
+}
+$rateFile = $rateDir . '/payment-claim-' . hash('sha256', $ip) . '.json';
+$now = time();
+$hits = [];
+if (is_file($rateFile)) {
+    $prev = json_decode((string) file_get_contents($rateFile), true);
+    if (is_array($prev)) {
+        $hits = array_values(array_filter($prev, static fn ($t) => is_int($t) && ($now - $t) < 600));
+    }
+}
+if (count($hits) >= 8) {
+    http_response_code(429);
+    echo json_encode([
+        'ok' => false,
+        'code' => 'rate_limited',
+        'message' => 'Muitas tentativas. Aguarde alguns minutos.',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+$hits[] = $now;
+@file_put_contents($rateFile, json_encode($hits));
+
 $raw = file_get_contents('php://input');
 $data = [];
 if (is_string($raw) && $raw !== '') {

@@ -12,6 +12,7 @@ data/*.sqlite
 data/*.sqlite-journal
 # Local PIX / publish secrets
 data/pix_config.php
+data/crm_bridge.php
 # Rate limit / backups
 data/rate/
 data/backups/*

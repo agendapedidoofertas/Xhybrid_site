@@ -1,0 +1,32 @@
+# Hostgator / Apache — DocumentRoot = pasta do Xhybrid (https://8xd.com.br)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTPS
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # www → apex
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # Bloquear data/, lib/, scripts/ e bancos
+  RewriteRule ^(data|lib|scripts)(/|$) - [F,L]
+  RewriteRule \.(sqlite3?|db)$ - [F,L]
+
+  # Front controller: arquivos/dirs reais passam; resto → router.php
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ router.php [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # HSTS curto no 1º deploy; subir max-age depois que o SSL estiver estável
+  Header always set Strict-Transport-Security "max-age=300; includeSubDomains"
+</IfModule>
+
+# Preferir .user.ini no Hostgator shared (php_flag costuma ser ignorado)
+<IfModule mod_php.c>
+  php_flag display_errors Off
+</IfModule>
