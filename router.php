@@ -28,19 +28,49 @@ if ($blockedByPath || $blockedByUri) {
 }
 
 /**
- * Lead público: /{slug}/{leadId}{letra}[/página]
- * Ex.: /eletricista-silva/15f  ou  /eletricista-silva/15f/sobre.html
+ * Lead público:
+ *   Novo:   /{slug}/{letra}{id}[/página]   ex.: /eletricistaton/x22
+ *   Legado: /{slug}/{id}{letra} → 301 para o novo
  * Inativo → site-inactive.html; ausente → 404.html; ativo → HTML com assets absolutos.
  */
-if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, $m)) {
+
+// Legado id+letra → redirect permanente para letra+id (slug atual no banco, se existir)
+if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/(\d+)([a-z])(?:/(.*))?$#i', $uri, $mOld)) {
+    $idOld = (int) $mOld[2];
+    $letterOld = strtolower($mOld[3]);
+    $restOld = isset($mOld[4]) ? trim($mOld[4], '/') : '';
+    $slugOld = strtolower($mOld[1]);
+    $targetSlug = $slugOld;
+    try {
+        require_once __DIR__ . '/lib/db.php';
+        require_once __DIR__ . '/lib/published_sites.php';
+        $rowOld = published_site_get_by_lead(db(), $idOld);
+        if ($rowOld && strtolower((string) ($rowOld['url_code'] ?? '')) === $letterOld) {
+            $s = trim((string) ($rowOld['slug'] ?? ''));
+            if ($s !== '') {
+                $targetSlug = strtolower($s);
+            }
+        }
+    } catch (Throwable $e) {
+        // mantém slug da URL antiga
+    }
+    $target = '/' . $targetSlug . '/' . $letterOld . $idOld;
+    if ($restOld !== '') {
+        $target .= '/' . $restOld;
+    }
+    header('Location: ' . $target, true, 301);
+    exit;
+}
+
+if (preg_match('#^/([a-z0-9]+(?:-[a-z0-9]+)*)/([a-z])(\d+)(?:/(.*))?$#i', $uri, $m)) {
     require_once __DIR__ . '/lib/db.php';
     require_once __DIR__ . '/lib/published_sites.php';
     require_once __DIR__ . '/lib/security.php';
     security_send_headers();
 
     $slug = strtolower($m[1]);
-    $leadId = (int) $m[2];
-    $letter = strtolower($m[3]);
+    $letter = strtolower($m[2]);
+    $leadId = (int) $m[3];
     $rest = isset($m[4]) ? trim($m[4], '/') : '';
 
     try {

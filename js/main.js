@@ -1220,7 +1220,7 @@ function apiUrl(file) {
   return file.replace(/^\//, "");
 }
 
-/** Path público de lead: /{slug}/{leadId}{letra}  ex.: /eletricista-silva/15f */
+/** Path público de lead: /{slug}/{letra}{id}  ex.: /eletricistaton/x22 */
 function parsePublishedLeadPath() {
   try {
     if (window.__xhybridLeadPath && typeof window.__xhybridLeadPath === "object") {
@@ -1234,7 +1234,17 @@ function parsePublishedLeadPath() {
       }
     }
     const path = window.location.pathname || "";
-    const m = path.match(/^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/(\d+)([a-z])(?:\/|$)/i);
+    // Novo: /slug/x22
+    let m = path.match(/^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z])(\d+)(?:\/|$)/i);
+    if (m) {
+      return {
+        slug: m[1].toLowerCase(),
+        code: m[2].toLowerCase(),
+        leadId: Number(m[3]) || 0,
+      };
+    }
+    // Legado: /slug/22x
+    m = path.match(/^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/(\d+)([a-z])(?:\/|$)/i);
     if (!m) return null;
     return {
       slug: m[1].toLowerCase(),

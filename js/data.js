@@ -261,12 +261,18 @@ function getNavLinks() {
   return links;
 }
 
-/** Base pública do lead: /{slug}/{leadId}{letra} — ou "" na vitrine. */
+/** Base pública do lead: /{slug}/{letra}{id} — ou "" na vitrine. */
 function leadPublicBase() {
   try {
     const p = window.__xhybridLeadPath;
     if (p && p.slug && p.code && p.leadId) {
-      return "/" + String(p.slug).toLowerCase() + "/" + String(p.leadId) + String(p.code).toLowerCase();
+      return (
+        "/" +
+        String(p.slug).toLowerCase() +
+        "/" +
+        String(p.code).toLowerCase() +
+        String(p.leadId)
+      );
     }
   } catch (_) { /* ignore */ }
   return "";

@@ -240,10 +240,11 @@ function published_site_public_path(array $row): string
     $slug = trim((string) ($row['slug'] ?? ''));
     $id = (int) ($row['crm_lead_id'] ?? 0);
     $code = trim((string) ($row['url_code'] ?? ''));
-    if ($slug === '' || $id <= 0 || $code === '') {
+    if ($slug === '' || $id <= 0 || $code === '' || !preg_match('/^[a-z]$/', $code)) {
         return '';
     }
-    return '/' . $slug . '/' . $id . $code;
+    // Formato: /{slug}/{letra}{id}  ex.: /eletricistaton/x22
+    return '/' . $slug . '/' . $code . $id;
 }
 
 /**
