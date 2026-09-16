@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout — 8xd</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <main class="container" style="padding:3rem 1.25rem;max-width:32rem;margin:0 auto;">
+    <h1 class="font-display">Checkout</h1>
+    <p id="plan-label">Escolha um plano em <a href="/planos.html">planos</a>.</p>
+    <form id="checkout-form" class="contact-form" style="margin-top:1.5rem;">
+      <div class="form-group">
+        <label for="company">Nome da empresa</label>
+        <input id="company" name="company" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label for="whatsapp">WhatsApp</label>
+        <input id="whatsapp" name="whatsapp" class="form-input" required>
+      </div>
+      <input type="hidden" name="plan" id="plan" value="basic">
+      <button class="btn btn-primary" type="submit">Continuar</button>
+    </form>
+    <p id="checkout-status" class="text-muted" style="margin-top:1rem;"></p>
+  </main>
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const plan = (params.get("plan") || "basic").toLowerCase();
+      const allowed = ["basic", "medium", "pro"];
+      const p = allowed.includes(plan) ? plan : "basic";
+      document.getElementById("plan").value = p;
+      document.getElementById("plan-label").textContent = "Plano: " + p;
+      document.getElementById("checkout-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const status = document.getElementById("checkout-status");
+        status.textContent = "Enviando…";
+        try {
+          const res = await fetch("/api/checkout_stub.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              plan: p,
+              company: document.getElementById("company").value,
+              email: document.getElementById("email").value,
+              whatsapp: document.getElementById("whatsapp").value,
+            }),
+          });
+          const data = await res.json();
+          if (!data.ok) {
+            status.textContent = data.error || "Falha";
+            return;
+          }
+          status.textContent = data.message || "Recebido. Entraremos em contato / abra o link de pagamento.";
+          if (data.checkout_url) {
+            status.innerHTML = (data.message || "Ok") + ' <a href="' + data.checkout_url + '">Pagar</a>';
+          }
+        } catch (_) {
+          status.textContent = "Falha de rede. Tente de novo.";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

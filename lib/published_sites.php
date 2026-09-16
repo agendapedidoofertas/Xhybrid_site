@@ -16,6 +16,27 @@ function published_site_find(PDO $pdo, string $slug, string $urlCode): ?array
 }
 
 /**
+ * Lookup por host público (subdomínio / domínio próprio).
+ *
+ * @return array<string, mixed>|null
+ */
+function published_site_find_by_host(PDO $pdo, string $host): ?array
+{
+    $host = strtolower(trim($host));
+    if ($host === '' || str_contains($host, '/')) {
+        return null;
+    }
+    // ignore porta
+    $host = explode(':', $host)[0];
+    $stmt = $pdo->prepare(
+        'SELECT * FROM published_sites WHERE lower(public_host) = :h LIMIT 1'
+    );
+    $stmt->execute([':h' => $host]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+/**
  * Lookup público: slug + crm_lead_id + letra (url_code).
  *
  * @return array<string, mixed>|null
@@ -40,33 +61,59 @@ function published_site_find_public(PDO $pdo, string $slug, int $crmLeadId, stri
 }
 
 /**
- * Torna href/src de assets relativos em absolutos a partir da raiz.
+ * Torna href/src de assets relativos em absolutos a partir da raiz do app.
  * Não reescreve links .html (páginas do site) — isso fica no JS do lead.
+ * Respeita data/app_base_path.php (subpasta no servidor; vazio no localhost).
  */
 function published_site_absolutize_html(string $html): string
 {
+    require_once __DIR__ . '/app_base.php';
+    $base = app_base_path();
+    $baseHref = ($base === '' ? '' : $base) . '/';
+    $prefix = $base === '' ? '' : $base;
+
     if (!str_contains($html, '<base ')) {
         $html = preg_replace(
             '/<head([^>]*)>/i',
-            '<head$1><base href="/">',
+            '<head$1><base href="' . htmlspecialchars($baseHref, ENT_QUOTES, 'UTF-8') . '">',
             $html,
             1
         ) ?? $html;
     }
 
+    if ($prefix !== '' && !str_contains($html, '__xhybridAppBase')) {
+        $boot = '<script>window.__xhybridAppBase=' . json_encode($prefix, JSON_UNESCAPED_SLASHES) . ';</script>';
+        $html = preg_replace('/<head([^>]*)>/i', '<head$1>' . $boot, $html, 1) ?? ($boot . $html);
+    }
+
     $html = preg_replace_callback(
         // Só atributos href/src reais (não data-site-href, data-img-src, etc.)
         '~(?<=\s)(href|src)=([\'"])(?!https?:|//|#|data:|mailto:|tel:|/)([^\'"]+)\2~i',
-        static function (array $m): string {
+        static function (array $m) use ($prefix): string {
             $path = ltrim(str_replace('\\', '/', $m[3]), './');
             // Páginas HTML do site: manter relativo; o JS do lead prefixa o path público
             if (preg_match('/\.html(?:[?#].*)?$/i', $path)) {
                 return $m[0];
             }
-            return $m[1] . '=' . $m[2] . '/' . $path . $m[2];
+            return $m[1] . '=' . $m[2] . $prefix . '/' . $path . $m[2];
         },
         $html
     ) ?? $html;
+
+    // Paths já absolutos na raiz (/css/...) → incluir subpasta quando configurada
+    if ($prefix !== '') {
+        $html = preg_replace_callback(
+            '~(?<=\s)(href|src)=([\'"])(/(?!/)[^\'"]*)\2~i',
+            static function (array $m) use ($prefix): string {
+                $path = $m[3];
+                if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+                    return $m[0];
+                }
+                return $m[1] . '=' . $m[2] . $prefix . $path . $m[2];
+            },
+            $html
+        ) ?? $html;
+    }
 
     return $html;
 }
@@ -243,8 +290,9 @@ function published_site_public_path(array $row): string
     if ($slug === '' || $id <= 0 || $code === '' || !preg_match('/^[a-z]$/', $code)) {
         return '';
     }
-    // Formato: /{slug}/{letra}{id}  ex.: /eletricistaton/x22
-    return '/' . $slug . '/' . $code . $id;
+    // Formato: /{slug}/{letra}{id}  ex.: /eletricistaton/x22 (com app_base se subpasta)
+    require_once __DIR__ . '/app_base.php';
+    return app_path('/' . $slug . '/' . $code . $id);
 }
 
 /**

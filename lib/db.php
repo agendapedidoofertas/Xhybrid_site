@@ -320,6 +320,10 @@ function db_migrate_published_sites(PDO $pdo): void
     if (!in_array('plan_tier', $psNames, true)) {
         $pdo->exec('ALTER TABLE published_sites ADD COLUMN plan_tier TEXT NOT NULL DEFAULT \'basic\'');
     }
+    if (!in_array('public_host', $psNames, true)) {
+        $pdo->exec('ALTER TABLE published_sites ADD COLUMN public_host TEXT NOT NULL DEFAULT \'\'');
+    }
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_published_public_host ON published_sites(public_host)');
 
     db_ensure_published_sites_block_delete_trigger($pdo);
 }

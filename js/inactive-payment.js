@@ -57,6 +57,30 @@
 
   applyState(ctx.state || "can_claim");
 
+  const checkoutBtn = document.getElementById("inactive-checkout");
+  if (checkoutBtn && ctx.checkout_url) {
+    checkoutBtn.href = ctx.checkout_url;
+    checkoutBtn.hidden = false;
+  }
+  if (ctx.allow_claim === false && claimBtn) {
+    claimBtn.hidden = true;
+  }
+  if (ctx.payment_mode && ctx.payment_mode !== "manual") {
+    const pixBox = document.getElementById("inactive-pix-block");
+    if (pixBox) {
+      const frame = pixBox.querySelector(".inactive-pix__frame");
+      const hint = pixBox.querySelector(".inactive-pix__hint");
+      const label = pixBox.querySelector(".inactive-pix__copy-label");
+      const ta = document.getElementById("inactive-pix-payload");
+      const copy = document.getElementById("inactive-copy-pix");
+      if (frame) frame.hidden = true;
+      if (hint) hint.hidden = true;
+      if (label) label.hidden = true;
+      if (ta) ta.hidden = true;
+      if (copy) copy.hidden = true;
+    }
+  }
+
   const qrImg = document.getElementById("inactive-qr");
   if (qrImg && ctx.pix_qr_url) {
     qrImg.src = ctx.pix_qr_url;

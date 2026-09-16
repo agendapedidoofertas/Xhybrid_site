@@ -5,14 +5,14 @@ declare(strict_types=1);
 /**
  * Path absoluto da pasta raiz do CRM (onde fica data/crm.sqlite).
  *
- * Copie para crm_bridge.php (gitignored) ou use CRM_SOFTWARE_ROOT.
+ * Copie para crm_bridge.php (gitignored) no SERVIDOR. No localhost
+ * o fallback ../crm_software costuma bastar.
  *
- * Local (Windows, pastas irmãs):
- *   return 'C:\\Users\\Bosco\\Documents\\GitHub\\crm_software';
+ * Produção Hostgator (subdomínio crm.8xd.com.br → pasta do CRM):
+ *   return '/home2/sonawe03/crm';
  *
- * Produção Hostgator (subdomínio crm.8xd.com.br → ~/crm):
- *   return '/home/USER/crm';
+ * Ajuste USER/pasta pelo File Manager se o path real for outro.
  *
- * Fallbacks ../crm_software NÃO funcionam com layout ~/public_html + ~/crm.
+ * Fallbacks ../crm_software NÃO funcionam com layout apex + ~/crm.
  */
-return '/home/USER/crm';
+return '/home2/sonawe03/crm';

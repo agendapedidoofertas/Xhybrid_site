@@ -67,16 +67,16 @@ function plan_labels(): array
 }
 
 /**
- * Texto curto para UI (todos os planos neste deploy usam subcaminho 8xd.com.br).
+ * Texto curto para UI (Basic=subdomínio; Medium/Pro=domínio próprio).
  *
  * @return array<string, string>
  */
 function plan_blurbs(): array
 {
     return [
-        'basic' => 'Subcaminho 8xd.com.br · site completo · personalização mínima',
-        'medium' => 'Subcaminho 8xd.com.br · personalização limitada · sem edição de Marca pelo cliente',
-        'pro' => 'Subcaminho 8xd.com.br · personalização total · Marca e looks premium · manutenção mensal maior',
+        'basic' => 'Subdomínio *.8xd.com.br · site completo · personalização mínima',
+        'medium' => 'Domínio próprio · personalização limitada · sem edição de Marca pelo cliente',
+        'pro' => 'Domínio próprio · personalização total · Marca e looks premium · manutenção mensal maior',
     ];
 }
 

@@ -1,97 +1,108 @@
-# Deploy Hostgator — 8xd.com.br
+# Deploy Hostgator — 8xd.com.br (layout final)
 
-Publicação Apache/cPanel dos projetos **xhybrid_site** (apex) e **crm_software** (subdomínio CRM).
+Site na **raiz do domínio**; CRM no **subdomínio**.
 
-## Layout de pastas (mesmo cPanel)
+## Layout
 
-| Host | Pasta | Conteúdo |
-|------|-------|----------|
-| `https://8xd.com.br` | `~/public_html/` | árvore de `xhybrid_site` |
-| `https://crm.8xd.com.br` | `~/crm/` | árvore de `crm_software` |
+| Host | Document Root (exemplo) | Conteúdo |
+|------|-------------------------|----------|
+| `https://8xd.com.br` | `/home2/sonawe03/8xd.com.br/xhybrid_site` | árvore do `xhybrid_site` |
+| `https://crm.8xd.com.br` | `/home2/sonawe03/crm` | árvore do `crm_software` |
 
-Não coloque o CRM em `8xd.com.br/admin` nem em `/crm` no apex (conflito com o admin do site).
+**URLs finais**
+
+| Uso | URL |
+|-----|-----|
+| Vitrine | `https://8xd.com.br/` |
+| Admin site | `https://8xd.com.br/admin/` |
+| Lead | `https://8xd.com.br/{slug}/{letra}{id}` ex. `/eletricistaton/x22` |
+| CRM | `https://crm.8xd.com.br/admin/` |
+
+Não coloque o CRM em `8xd.com.br/admin` (conflito com o painel do site).
+
+Kit espelhado: pasta irmã `deploy_hostgator/` (checklist + copies dos examples).
 
 ## Pré-requisitos
 
-- PHP 8+ com `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl` (`curl` recomendado para Places)
-- SSL Let’s Encrypt em `8xd.com.br`, `www.8xd.com.br` e `crm.8xd.com.br`
-- Canônico: HTTPS; `www` → apex (`8xd.com.br`)
+- PHP 8+ com `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl` (`curl` para Places)
+- SSL em `8xd.com.br`, `www.8xd.com.br` e `crm.8xd.com.br`
+- HTTPS; `www` → apex
 
-## Upload
+## cPanel (ordem sugerida)
 
-1. Envie o conteúdo de `xhybrid_site` para `public_html` (incluindo `.htaccess` e `.user.ini`).
-2. Envie o conteúdo de `crm_software` para `~/crm` e aponte o Document Root do subdomain `crm` para essa pasta.
-3. Permissões: pastas `data/` (e `assets/uploads/` no site) graváveis (`775` típico); configs `640` quando possível.
+1. **Domínios** → `8xd.com.br` → Document Root = pasta do Xhybrid (a que tem `index.html`, `router.php`, `.htaccess`).
+2. **Subdomínios** → criar `crm` → Document Root = pasta do CRM (fora do Document Root do site, se possível).
+3. **SSL** Let’s Encrypt nos dois hosts.
+4. Upload/atualize o código (incluindo `.htaccess` e `.user.ini`).
+5. Permissões: `data/` (e `assets/uploads/` no site) graváveis (`775`).
 
-## Configs (gitignored — criar no servidor)
+## Configs no servidor (gitignored)
 
-### CRM (`~/crm/data/`)
+### Site (`…/xhybrid_site/data/` ou Document Root/`data/`)
+
+```sh
+# NÃO crie app_base_path.php — ou:
+# return '';
+
+cp data/crm_bridge.php.example data/crm_bridge.php
+# return '/home2/sonawe03/crm';   # path REAL da pasta do CRM no File Manager
+```
+
+### CRM (`…/crm/data/`)
 
 ```sh
 cp data/xhybrid_public_base.php.example data/xhybrid_public_base.php
 # return 'https://8xd.com.br';
 
 cp data/xhybrid_publish.php.example data/xhybrid_publish.php
-# return '/home/USER/public_html/data/site.sqlite';
+# return '/home2/sonawe03/8xd.com.br/xhybrid_site/data/site.sqlite';
 
 # Opcional Places:
 cp data/places_api_key.php.example data/places_api_key.php
 ```
 
-Fallbacks `../xhybrid_site` **não** funcionam com `~/public_html` + `~/crm` — use path absoluto.
+Localhost: **não** crie `app_base_path.php` nem os bridges Linux.
 
-### Xhybrid (`~/public_html/data/`)
+## Migração a partir de `/xhybrid_site` e `/crm_software`
 
-```sh
-cp data/crm_bridge.php.example data/crm_bridge.php
-# return '/home/USER/crm';
-```
+1. Ajuste Document Roots (acima).
+2. Remova `app_base_path.php` se existir com `'/xhybrid_site'`.
+3. Atualize `xhybrid_public_base.php` no CRM para `https://8xd.com.br`.
+4. Reative/sync um lead e teste `https://8xd.com.br/{slug}/…`.
+5. Opcional: redirect 301 de `/xhybrid_site/...` → `/...` no `.htaccess` do apex.
+6. Atualize bookmarks e `xhybrid_qa` (já aponta para as URLs novas).
 
 ## Primeiro acesso
 
-1. Site admin: `https://8xd.com.br/admin/setup.php` (só com zero usuários)
-2. CRM admin: `https://crm.8xd.com.br/admin/setup.php`
-3. Ative um lead no CRM e abra `https://8xd.com.br/{slug}/{letra}{id}`
-
-Se houver leads com slug reservado (`admin`, `api`, …):
-
-```sh
-cd ~/crm && php scripts/fix_reserved_slugs.php
-php scripts/resync_plan_flags.php   # se flags de plano estiverem defasadas
-```
+1. Site: `https://8xd.com.br/admin/setup.php` (só com zero usuários)
+2. CRM: `https://crm.8xd.com.br/admin/setup.php`
+3. Ative um lead e abra `https://8xd.com.br/{slug}/{letra}{id}`
 
 ## Segurança
 
-- `.htaccess` raiz: HTTPS, bloqueio de `/data` `/lib` `/scripts`, rewrite → `router.php`, HSTS curto (`max-age=300`)
+- `.htaccess`: HTTPS, bloqueio `/data` `/lib` `/scripts`, rewrite → `router.php`
 - `.user.ini`: `display_errors=Off`
 - `data/.htaccess`: Deny
-- Cookies de sessão usam `Secure` quando HTTPS / `X-Forwarded-Proto` está presente
-- APIs same-origin; `api/payment_claim.php` tem rate limit (8 / 10 min)
 
 ## Checklist QA
 
-**Infra**
-
-- [ ] `https://8xd.com.br/` abre a vitrine
-- [ ] HTTP → HTTPS; `www` → apex
+- [ ] `https://8xd.com.br/` abre a vitrine Xhybrid
+- [ ] `https://8xd.com.br/admin/login.php`
+- [ ] Lead na raiz (sem `/xhybrid_site`)
 - [ ] `/data/site.sqlite` → 403
 - [ ] `https://crm.8xd.com.br/admin/login.php`
+- [ ] Ativar lead no CRM → URL com base `https://8xd.com.br`
 
-**Lifecycle**
+## Testes locais (pasta `xhybrid_qa`)
 
-- [ ] Ativar lead → URL com base `https://8xd.com.br` (formato `/{slug}/{letra}{id}`)
-- [ ] Site do lead sem flash da vitrine (textos/aparência corretos)
-- [ ] Planos basic / medium / pro (limites, seções, brand_edit)
-- [ ] Editar no admin Xhybrid → reflete no CRM
-- [ ] Inactive + claim; redirect legado `{id}{letra}` → `{letra}{id}`
-
-**Frontend / segurança**
-
-- [ ] CSS/JS/imagens e páginas `/sobre` `/galeria` `/contato` no path do lead
-- [ ] Setup bloqueado após 1º user; cookie Secure; upload sem execução PHP
+```powershell
+cd C:\Users\Bosco\Documents\GitHub\xhybrid_qa
+php php/smoke_http.php
+cd playwright
+npm.cmd run test:headed
+```
 
 ## Notas
 
-- Deploy em **subpasta** do apex (ex. `/xhybrid_site`) quebra `<base href="/">` — este guia assume DocumentRoot na raiz.
-- Domínio próprio por cliente (medium/pro) fica fora deste deploy; blurbs da UI falam em subcaminho 8xd.
-- Nginx: ver [deploy-nginx.md](deploy-nginx.md).
+- Domínio próprio por cliente (medium/pro) continua via `public_host` / DNS addon.
+- Nginx: [deploy-nginx.md](deploy-nginx.md).

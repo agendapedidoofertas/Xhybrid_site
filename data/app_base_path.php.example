@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Prefixo de URL do Xhybrid no domínio (sem barra no final).
+ *
+ * Copie para app_base_path.php (gitignored) SÓ se o site NÃO estiver na raiz.
+ * No localhost NÃO crie este arquivo.
+ *
+ * Produção alvo (DocumentRoot = pasta do Xhybrid em 8xd.com.br):
+ *   return '';
+ *   ou delete app_base_path.php
+ *
+ * Legado (subpasta /xhybrid_site — evitar):
+ *   return '/xhybrid_site';
+ *
+ * Ou defina XHYBRID_APP_BASE no ambiente.
+ */
+return '';

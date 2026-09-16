@@ -87,6 +87,7 @@ function admin_agency_hub_links(array $user): array
         ['href' => 'services.php', 'icon' => 'services', 'label' => 'Serviços', 'desc' => 'Catálogo de serviços', 'show' => user_can_page($user, 'services')],
         ['href' => 'texts.php', 'icon' => 'texts', 'label' => 'Textos', 'desc' => 'Editar textos da vitrine', 'show' => user_can_page($user, 'texts')],
         ['href' => 'users.php', 'icon' => 'users', 'label' => 'Usuários', 'desc' => 'Contas e permissões', 'show' => user_is_admin($user)],
+        ['href' => 'account.php', 'icon' => 'password', 'label' => 'Minha assinatura', 'desc' => 'Plano e pagamento', 'show' => user_is_client($user)],
         ['href' => 'sections.php', 'icon' => 'sections', 'label' => 'Visibilidade', 'desc' => 'Seções do site', 'show' => user_can_page($user, 'sections')],
     ];
     return admin_sort_by_label($items);

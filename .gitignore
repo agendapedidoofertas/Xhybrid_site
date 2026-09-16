@@ -10,9 +10,10 @@ Thumbs.db
 # SQLite
 data/*.sqlite
 data/*.sqlite-journal
-# Local PIX / publish secrets
+# Local PIX / publish secrets / server path layout
 data/pix_config.php
 data/crm_bridge.php
+data/app_base_path.php
 # Rate limit / backups
 data/rate/
 data/backups/*

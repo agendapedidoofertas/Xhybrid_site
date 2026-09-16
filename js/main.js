@@ -1233,7 +1233,11 @@ function parsePublishedLeadPath() {
         };
       }
     }
-    const path = window.location.pathname || "";
+    let path = window.location.pathname || "";
+    const base = String(window.__xhybridAppBase || "").replace(/\/$/, "");
+    if (base && (path === base || path.startsWith(base + "/"))) {
+      path = path.slice(base.length) || "/";
+    }
     // Novo: /slug/x22
     let m = path.match(/^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z])(\d+)(?:\/|$)/i);
     if (m) {

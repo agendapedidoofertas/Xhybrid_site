@@ -260,6 +260,22 @@ function payment_inactive_context(PDO $xhybrid, array $publishedRow): array
 
     $waMsg = 'Olá! Sou o lead #' . $leadId . ' (' . $company . '). Precisei regularizar o pagamento do site e gostaria que liberassem o acesso.';
 
+    $paymentMode = getenv('PAYMENT_MODE');
+    $paymentMode = is_string($paymentMode) && trim($paymentMode) !== '' ? strtolower(trim($paymentMode)) : 'manual';
+    $checkoutUrl = '';
+    if ($paymentMode !== 'manual' && crm_bridge_configured()) {
+        try {
+            $crm = crm_bridge_pdo();
+            $ch = $crm->prepare(
+                "SELECT checkout_url FROM payment_charges WHERE lead_id = :id AND status = 'pending' ORDER BY id DESC LIMIT 1"
+            );
+            $ch->execute([':id' => $leadId]);
+            $checkoutUrl = (string) ($ch->fetchColumn() ?: '');
+        } catch (Throwable $e) {
+            // ignore
+        }
+    }
+
     return [
         'lead_id' => $leadId,
         'slug' => $slug,
@@ -269,9 +285,12 @@ function payment_inactive_context(PDO $xhybrid, array $publishedRow): array
         'payment_status' => $payStatus,
         'claims' => $claims,
         'grace_until' => $graceUntil,
-        'pix_payload' => $payload,
-        'pix_qr_url' => pix_qr_image_url($payload, 240),
-        'pix_key' => $cfg['key'],
+        'pix_payload' => $paymentMode === 'manual' ? $payload : '',
+        'pix_qr_url' => $paymentMode === 'manual' ? pix_qr_image_url($payload, 240) : '',
+        'pix_key' => $paymentMode === 'manual' ? $cfg['key'] : '',
+        'payment_mode' => $paymentMode,
+        'checkout_url' => $checkoutUrl,
+        'allow_claim' => $paymentMode === 'manual',
         'support_whatsapp' => $cfg['support_whatsapp'],
         'whatsapp_url' => $cfg['support_whatsapp'] !== ''
             ? 'https://wa.me/' . preg_replace('/\D+/', '', $cfg['support_whatsapp']) . '?text=' . rawurlencode($waMsg)

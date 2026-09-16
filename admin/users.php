@@ -65,6 +65,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     : $e->getMessage();
             }
         }
+    } elseif ($action === 'invite') {
+        require_once dirname(__DIR__) . '/lib/invite.php';
+        $crmLeadId = (int) ($_POST['crm_lead_id'] ?? 0);
+        $role = (string) ($_POST['role'] ?? 'client_medium');
+        try {
+            if ($crmLeadId <= 0) {
+                throw new InvalidArgumentException('Informe o lead_id.');
+            }
+            $site = published_site_get_by_lead(db(), $crmLeadId);
+            if (!$site) {
+                throw new InvalidArgumentException('Lead sem site publicado.');
+            }
+            $inv = invite_create(db(), $crmLeadId, $role, (int) $user['id']);
+            $ok = 'Convite: ' . $inv['url'];
+        } catch (Throwable $e) {
+            $error = $e->getMessage();
+        }
     } elseif ($action === 'reset') {
         $targetId = (int) ($_POST['id'] ?? 0);
         $password = (string) ($_POST['password'] ?? '');
@@ -99,6 +116,26 @@ admin_header('Usuários', $user);
 
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
       <?php if ($ok): ?><p class="admin-flash"><?= h($ok) ?></p><?php endif; ?>
+
+      <section class="contact-form admin-form" style="margin-top:1.5rem;">
+        <h2 class="font-display" style="font-size:1.5rem;">Convite cliente</h2>
+        <form method="post" style="margin-top:1rem;">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="invite">
+          <div class="form-group">
+            <label for="invite_lead">Lead CRM (publicado)</label>
+            <input id="invite_lead" name="crm_lead_id" type="number" min="1" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="invite_role">Tipo</label>
+            <select id="invite_role" name="role" class="form-input">
+              <option value="client_medium">Cliente Medium</option>
+              <option value="client_pro">Cliente Pro</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-outline">Gerar link de convite</button>
+        </form>
+      </section>
 
       <section class="contact-form admin-form" style="margin-top:1.5rem;">
         <h2 class="font-display" style="font-size:1.5rem;">Novo usuário</h2>

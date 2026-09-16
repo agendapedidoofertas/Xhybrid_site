@@ -1,4 +1,6 @@
-# Hostgator / Apache — DocumentRoot = pasta do Xhybrid (https://8xd.com.br)
+# Hostgator / Apache — DocumentRoot = pasta do Xhybrid
+# Se o site estiver em subpasta (ex. /xhybrid_site), descomente:
+# RewriteBase /xhybrid_site/
 <IfModule mod_rewrite.c>
   RewriteEngine On
 

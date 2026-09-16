@@ -66,6 +66,18 @@ if ($slug === '' || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug) || !preg_
     exit;
 }
 
+$paymentMode = getenv('PAYMENT_MODE');
+$paymentMode = is_string($paymentMode) && trim($paymentMode) !== '' ? strtolower(trim($paymentMode)) : 'manual';
+if ($paymentMode !== 'manual') {
+    http_response_code(403);
+    echo json_encode([
+        'ok' => false,
+        'code' => 'use_checkout',
+        'message' => 'Reativação por PIX manual desligada. Use o link de pagamento do gateway.',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 try {
     $result = payment_claim_self(db(), $leadId, $slug, $code);
     $http = $result['ok'] ? 200 : (($result['code'] ?? '') === 'need_whatsapp' ? 403 : 400);

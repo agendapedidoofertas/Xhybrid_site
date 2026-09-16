@@ -266,7 +266,9 @@ function leadPublicBase() {
   try {
     const p = window.__xhybridLeadPath;
     if (p && p.slug && p.code && p.leadId) {
+      const appBase = String(window.__xhybridAppBase || "").replace(/\/$/, "");
       return (
+        appBase +
         "/" +
         String(p.slug).toLowerCase() +
         "/" +

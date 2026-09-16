@@ -59,6 +59,10 @@ Evite multi-tenant em um único SQLite (vários clientes no mesmo arquivo): cres
 
 Hospede em servidor com **PHP + SQLite**. Garanta escrita em `data/` e `assets/uploads/`. Bloqueie acesso HTTP a `data/`.
 
-**Produção Hostgator (8xd.com.br):** veja [docs/deploy-hostgator.md](docs/deploy-hostgator.md) — DocumentRoot = este projeto; CRM em `crm.8xd.com.br`.
+**Produção Hostgator (8xd.com.br):** [docs/deploy-hostgator.md](docs/deploy-hostgator.md) + kit irmão `deploy_hostgator/` (checklist cPanel + configs prontas). DocumentRoot = este projeto; CRM em `crm.8xd.com.br`.
 
-URLs públicas de lead: `https://8xd.com.br/{slug}/{letra}{id}` (ex. `/eletricistaton/x22`).
+URLs públicas de lead: path `/{slug}/{letra}{id}` (legado) e host `{slug}.8xd.com.br` / domínio próprio (quando provisionado).
+
+- Fluxo PIX/publish: [docs/fluxo-pagamento-publish.md](docs/fluxo-pagamento-publish.md)
+- Runbook: [docs/runbook-producao.md](docs/runbook-producao.md)
+- Planos / checkout: `/planos.html`, `/checkout.html`
