@@ -20,10 +20,10 @@ php /home2/sonawe03/crm/scripts/sync_subscriptions.php
 
 ## PAYMENT_MODE
 1. `manual` (padrão): PIX + “Já paguei” + confirm humano no CRM.
-2. `stub`: sem chave Asaas — gerar cobrança no lead → `payment_stub.php` simula pago/overdue.
-3. `live`: preencher `crm/data/payment_gateway.php` (api_key + webhook_token) e apontar webhook Asaas para `https://crm.8xd.com.br/api/webhook_payment.php`.
+2. `stub`: sem credenciais Inter — gerar cobrança no lead → `payment_stub.php` simula pago/overdue.
+3. `live`: preencher `crm/data/payment_gateway.php` (`client_id`, `client_secret`, `pix_chave`, `webhook_token`, cert mTLS se exigido) e apontar webhook Inter para `https://crm.8xd.com.br/api/webhook_payment.php` (header `X-Inter-Webhook-Token`).
 
-Copiar: `data/payment_gateway.php.example` → `payment_gateway.php`.
+Copiar: `data/payment_gateway.php.example` → `payment_gateway.php`. Asaas não é mais usado em live.
 
 ## Hosts
 - Basic: `{slug}.8xd.com.br` — wildcard DNS + subdomain no cPanel → mesmo `public_html`.

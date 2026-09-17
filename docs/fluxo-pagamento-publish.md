@@ -32,7 +32,7 @@ Fallbacks `../xhybrid_site` / `../crm_software` **não** funcionam no layout Hos
 
 ## Próximo (código)
 
-- `PAYMENT_MODE=manual|stub|live` + Asaas (ver `lib/payment/`).
+- `PAYMENT_MODE=manual|stub|live` + Banco Inter (ver `crm_software/lib/payment/`).
 - Hosts: Basic `{slug}.8xd.com.br`; Medium/Pro domínio próprio (`HTTP_HOST`).
 
 ## Runbook mínimo
