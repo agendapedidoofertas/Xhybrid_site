@@ -784,6 +784,206 @@ function preset_limpeza(): array
         'corporate' => 'Banheiro higienizado',
         'shop' => 'Escritório limpo',
         'maintenance' => 'Kit profissional',
+        'integrations' => 'Ambiente comercial',
+        'branding' => 'Acabamento e detalhes',
+    ]);
+    return $pack;
+}
+
+/**
+ * Extintores / combate a incêndio (inspeção e recarga).
+ */
+function preset_extintores(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Extintores Seguros',
+        'brand_tagline' => 'Inspeção, recarga e laudos',
+        'brand_city' => 'Sua cidade',
+        'brand_seo_title' => 'Extintores — inspeção, recarga e combate a incêndio',
+        'brand_seo_description' => 'Extintores, sinalização e inspeção para empresas e condomínios. Orçamento pelo WhatsApp.',
+        'area_text' => 'Atendemos empresas, condomínios e comércios na região.',
+        'urgency_enabled' => '1',
+        'urgency_label' => 'Laudo',
+        'appearance_look' => 'crimson-volt',
+        'appearance_theme' => 'vermelho',
+        'appearance_font' => 'condensed',
+        'appearance_layout' => 'frame',
+        'appearance_media' => 'classic',
+        'whatsapp_message' => 'Olá! Preciso de orçamento de extintores/inspeção. Vim pelo site.',
+        'nav_galeria' => 'Serviços',
+        'footer_tagline' => 'Proteção contra incêndio com inspeção, recarga e documentação em dia.',
+        'home_badge' => '✦ Combate a incêndio · inspeção',
+        'home_hero_title_1' => 'Extintores em dia,',
+        'home_hero_title_2' => 'sem dor de cabeça.',
+        'home_hero_text' => 'Inspeção, recarga, sinalização e laudos para sua empresa ou condomínio ficarem regulares.',
+        'home_btn_gallery' => 'Ver serviços',
+        'home_weave_title' => 'O que fazemos',
+        'home_weave_subtitle' => 'Da inspeção periódica à recarga e substituição de equipamentos.',
+        'home_feat_1_title' => 'Inspeção',
+        'home_feat_1_icon' => 'shield',
+        'home_feat_1_text' => 'Checklist e validade dos equipamentos no prazo.',
+        'home_feat_2_title' => 'Recarga',
+        'home_feat_2_icon' => 'droplets',
+        'home_feat_2_text' => 'Recarga e manutenção conforme tipo de agente.',
+        'home_feat_3_title' => 'Sinalização',
+        'home_feat_3_icon' => 'sparkles',
+        'home_feat_3_text' => 'Placas, rotas e adequação visual de segurança.',
+        'home_cta_title_1' => 'Precisa de laudo?',
+        'home_cta_title_2' => 'Chame no WhatsApp.',
+        'home_cta_text' => 'Informe tipo de imóvel e quantidade de pontos.',
+        'about_eyebrow' => 'Quem somos',
+        'about_title_1' => 'Segurança',
+        'about_title_2' => 'com responsabilidade.',
+        'about_p1' => 'Ajudamos empresas e síndicos a manterem o sistema de combate a incêndio em conformidade.',
+        'about_p2' => 'Trabalhamos com inspeção, recarga e orientação clara do que precisa ser feito.',
+        'contact_subtitle' => 'Peça orçamento com quantidade de extintores e tipo de estabelecimento.',
+        '_services' => [
+            ['title' => 'Inspeção periódica', 'description' => 'Verificação e registro de validade.', 'image_slug' => 'landing', 'category' => 'Inspeção', 'active' => 1],
+            ['title' => 'Recarga', 'description' => 'Recarga de extintores por tipo de agente.', 'image_slug' => 'corporate', 'category' => 'Manutenção', 'active' => 1],
+            ['title' => 'Sinalização', 'description' => 'Placas e rotas de fuga.', 'image_slug' => 'shop', 'category' => 'Adequação', 'active' => 1],
+            ['title' => 'Laudos', 'description' => 'Documentação para fiscalização e seguros.', 'image_slug' => 'maintenance', 'category' => 'Documentos', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('extintores', [
+        'hero' => 'Extintores e segurança',
+        'about' => 'Equipe de inspeção',
+        'landing' => 'Inspeção de equipamentos',
+        'corporate' => 'Recarga',
+        'shop' => 'Sinalização',
+        'maintenance' => 'Laudo e checklist',
+        'integrations' => 'Empresa protegida',
+        'branding' => 'Combate a incêndio',
+    ]);
+    return $pack;
+}
+
+/**
+ * Mobilidade elétrica / scooter e bikes (B2B e consumidor).
+ * Escolha documentada: nicho "mobilidade elétrica" (scooter/bike), não acessibilidade hospitalar.
+ */
+function preset_mobilidade(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Mobilidade Elétrica',
+        'brand_tagline' => 'Scooters, bikes e assistência',
+        'brand_city' => 'Sua cidade',
+        'brand_seo_title' => 'Mobilidade elétrica — scooters, bikes e assistência',
+        'brand_seo_description' => 'Venda, aluguel e assistência de scooters e bicicletas elétricas. Fale no WhatsApp.',
+        'area_text' => 'Atendemos quem busca mobilidade urbana elétrica na região.',
+        'urgency_enabled' => '0',
+        'urgency_label' => 'Test-ride',
+        'appearance_look' => 'volt-lime',
+        'appearance_theme' => 'lima',
+        'appearance_font' => 'tech',
+        'appearance_layout' => 'soft',
+        'appearance_media' => 'classic',
+        'whatsapp_message' => 'Olá! Quero saber sobre mobilidade elétrica. Vim pelo site.',
+        'nav_galeria' => 'Modelos',
+        'footer_tagline' => 'Mobilidade urbana elétrica com assistência e orientação de uso.',
+        'home_badge' => '✦ Mobilidade elétrica',
+        'home_hero_title_1' => 'Seu deslocamento,',
+        'home_hero_title_2' => 'mais leve e elétrico.',
+        'home_hero_text' => 'Scooters e bikes elétricas com orientação de escolha, assistência e suporte no WhatsApp.',
+        'home_btn_gallery' => 'Ver modelos',
+        'home_weave_title' => 'Como ajudamos',
+        'home_weave_subtitle' => 'Da escolha do modelo à assistência e manutenção.',
+        'home_feat_1_title' => 'Modelos',
+        'home_feat_1_icon' => 'zap',
+        'home_feat_1_text' => 'Scooters e bikes para o dia a dia na cidade.',
+        'home_feat_2_title' => 'Assistência',
+        'home_feat_2_icon' => 'wrench',
+        'home_feat_2_text' => 'Manutenção, baterias e revisão.',
+        'home_feat_3_title' => 'Orientação',
+        'home_feat_3_icon' => 'sparkles',
+        'home_feat_3_text' => 'Ajuda para escolher autonomia e uso.',
+        'home_cta_title_1' => 'Quer um orçamento?',
+        'home_cta_title_2' => 'Chame no WhatsApp.',
+        'home_cta_text' => 'Diga se busca compra, aluguel ou assistência.',
+        'about_title_1' => 'Mobilidade',
+        'about_title_2' => 'para o dia a dia.',
+        'about_p1' => 'Ajudamos pessoas e empresas a adotarem mobilidade elétrica com suporte próximo.',
+        'contact_subtitle' => 'Fale sobre modelo, autonomia ou assistência.',
+        '_services' => [
+            ['title' => 'Scooters elétricas', 'description' => 'Modelos urbanos com boa autonomia.', 'image_slug' => 'landing', 'category' => 'Venda', 'active' => 1],
+            ['title' => 'Bikes elétricas', 'description' => 'Para trabalho e lazer na cidade.', 'image_slug' => 'corporate', 'category' => 'Venda', 'active' => 1],
+            ['title' => 'Assistência técnica', 'description' => 'Revisão, baterias e manutenção.', 'image_slug' => 'shop', 'category' => 'Serviço', 'active' => 1],
+            ['title' => 'Orientação de compra', 'description' => 'Escolha de autonomia e uso.', 'image_slug' => 'maintenance', 'category' => 'Consultoria', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('mobilidade', [
+        'hero' => 'Mobilidade elétrica urbana',
+        'about' => 'Equipe e showroom',
+        'landing' => 'Scooter elétrica',
+        'corporate' => 'Bike elétrica',
+        'shop' => 'Assistência',
+        'maintenance' => 'Bateria e revisão',
+        'integrations' => 'Uso na cidade',
+        'branding' => 'Marca mobilidade',
+    ]);
+    return $pack;
+}
+
+/**
+ * Esquadrias de alumínio (janelas e portas).
+ */
+function preset_esquadrias(): array
+{
+    $pack = preset_niche_base([
+        'brand_name' => 'Esquadrias Alumínio',
+        'brand_tagline' => 'Janelas e portas sob medida',
+        'brand_city' => 'Sua cidade',
+        'brand_seo_title' => 'Esquadrias de alumínio — janelas e portas',
+        'brand_seo_description' => 'Fabricação e instalação de esquadrias de alumínio. Orçamento pelo WhatsApp.',
+        'area_text' => 'Atendemos residências e obras comerciais na região.',
+        'urgency_enabled' => '0',
+        'urgency_label' => 'Obra',
+        'appearance_look' => 'ash-glass',
+        'appearance_theme' => 'cinza',
+        'appearance_font' => 'geometric',
+        'appearance_layout' => 'soft',
+        'appearance_media' => 'classic',
+        'whatsapp_message' => 'Olá! Quero orçamento de esquadrias. Vim pelo site.',
+        'nav_galeria' => 'Projetos',
+        'footer_tagline' => 'Esquadrias de alumínio com medida certa, instalação e acabamento.',
+        'home_badge' => '✦ Esquadrias de alumínio',
+        'home_hero_title_1' => 'Janelas e portas',
+        'home_hero_title_2' => 'sob medida.',
+        'home_hero_text' => 'Projeto, fabricação e instalação de esquadrias de alumínio para casa e obra.',
+        'home_btn_gallery' => 'Ver projetos',
+        'home_weave_title' => 'O que entregamos',
+        'home_weave_subtitle' => 'Do levantamento à instalação com acabamento limpo.',
+        'home_feat_1_title' => 'Janelas',
+        'home_feat_1_icon' => 'sparkles',
+        'home_feat_1_text' => 'Linhas modernas com vedação e durabilidade.',
+        'home_feat_2_title' => 'Portas',
+        'home_feat_2_icon' => 'building',
+        'home_feat_2_text' => 'Portas de alumínio para entrada e áreas internas.',
+        'home_feat_3_title' => 'Instalação',
+        'home_feat_3_icon' => 'wrench',
+        'home_feat_3_text' => 'Equipe própria e prazo combinado.',
+        'home_cta_title_1' => 'Tem um projeto?',
+        'home_cta_title_2' => 'Peça orçamento.',
+        'home_cta_text' => 'Envie medidas ou fotos pelo WhatsApp.',
+        'about_title_1' => 'Alumínio',
+        'about_title_2' => 'com precisão.',
+        'about_p1' => 'Fabricamos e instalamos esquadrias sob medida para residências e obras.',
+        'contact_subtitle' => 'Informe medidas, tipo de abertura e cidade da obra.',
+        '_services' => [
+            ['title' => 'Janelas de alumínio', 'description' => 'Linhas residenciais e comerciais.', 'image_slug' => 'landing', 'category' => 'Produto', 'active' => 1],
+            ['title' => 'Portas', 'description' => 'Portas de entrada e internas.', 'image_slug' => 'corporate', 'category' => 'Produto', 'active' => 1],
+            ['title' => 'Box e áreas especiais', 'description' => 'Soluções sob medida.', 'image_slug' => 'shop', 'category' => 'Produto', 'active' => 1],
+            ['title' => 'Instalação', 'description' => 'Montagem e acabamento no local.', 'image_slug' => 'maintenance', 'category' => 'Serviço', 'active' => 1],
+        ],
+    ]);
+    $pack['images'] = preset_media_pack('esquadrias', [
+        'hero' => 'Esquadrias de alumínio',
+        'about' => 'Oficina e equipe',
+        'landing' => 'Janelas',
+        'corporate' => 'Portas',
+        'shop' => 'Detalhe de perfil',
+        'maintenance' => 'Instalação',
+        'integrations' => 'Fachada',
+        'branding' => 'Acabamento',
     ]);
     return $pack;
 }
@@ -897,6 +1097,9 @@ function preset_function_map(): array
         'restaurante' => 'preset_restaurante',
         'advocacia' => 'preset_advocacia',
         'limpeza' => 'preset_limpeza',
+        'extintores' => 'preset_extintores',
+        'mobilidade' => 'preset_mobilidade',
+        'esquadrias' => 'preset_esquadrias',
         'locacao' => 'preset_locacao',
         'dentista' => 'preset_dentista',
         'estetica' => 'preset_estetica',

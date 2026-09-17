@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" fill="none" role="img" aria-label="x hybrid">
+  <title>x hybrid</title>
+  <g transform="translate(16,16)">
+    <defs>
+      <linearGradient id="xhLogoBodyL" x1="20%" y1="0%" x2="80%" y2="100%">
+        <stop offset="0%" stop-color="#2a2a2a"/>
+        <stop offset="100%" stop-color="#111111"/>
+      </linearGradient>
+    </defs>
+    <line x1="62" y1="28" x2="62" y2="10" stroke="#111111" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="62" cy="7" r="5" fill="#8a8a8a"/>
+    <circle cx="62" cy="7" r="2" fill="#fff" opacity=".9"/>
+    <rect x="12" y="28" width="100" height="72" rx="18" fill="url(#xhLogoBodyL)" stroke="#111111" stroke-opacity=".35" stroke-width="2"/>
+    <rect x="28" y="48" width="68" height="32" rx="10" fill="#050505" stroke="#ffffff" stroke-opacity=".12" stroke-width="1.5"/>
+    <rect x="38" y="56" width="14" height="14" rx="4" fill="#e8e8e8"/>
+    <rect x="41" y="59" width="5" height="5" rx="1.5" fill="#fff" opacity=".95"/>
+    <rect x="72" y="56" width="14" height="14" rx="4" fill="#e8e8e8"/>
+    <rect x="75" y="59" width="5" height="5" rx="1.5" fill="#fff" opacity=".95"/>
+    <line x1="48" y1="86" x2="76" y2="86" stroke="#ffffff" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="160" y="88" fill="#111111" font-family="Manrope, Figtree, 'Segoe UI', system-ui, sans-serif" font-size="52" font-weight="600" letter-spacing="0.04em">x hybrid</text>
+</svg>

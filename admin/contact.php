@@ -32,7 +32,8 @@ $flash = '';
 $error = '';
 $defs = settings_definitions();
 $values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
-$groups = ($isAdmin && !$leadId) ? ['contact', 'smtp'] : ['contact'];
+// SMTP permanece no backend (settings/api); UI oculta — contato via WhatsApp.
+$groups = ['contact'];
 $redirBase = 'contact.php' . ($leadId ? '?' . lead_admin_qs($leadId) : '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (isset($_GET['ok'])) {
-    $flash = ($isAdmin && !$leadId) ? 'Contato e SMTP salvos.' : 'Contato salvo.';
+    $flash = 'Contato salvo.';
     $values = $leadRow ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow) : settings_all(db());
 }
 
@@ -72,10 +73,8 @@ admin_header('Contato', $user);
         <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Site' ?></p>
         <h1 class="font-display">Contato</h1>
         <p><?= $leadId
-            ? 'Canais do site deste lead. SMTP da agência não se aplica aqui.'
-            : ($isAdmin
-                ? 'Canais do site (WhatsApp, e-mail, redes, endereço) e SMTP. Campo vazio esconde o bloco no site.'
-                : 'Canais do site. Campo vazio (ex.: Instagram sem URL) esconde o bloco no site. SMTP só o administrador configura.') ?></p>
+            ? 'Canais do site deste lead. Campo vazio esconde o bloco no site. Formulário público usa WhatsApp.'
+            : 'Canais do site (WhatsApp, e-mail, redes, endereço). Campo vazio esconde o bloco no site. O formulário público prioriza WhatsApp.' ?></p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -96,25 +95,6 @@ admin_header('Contato', $user);
             <?php endif; ?>
           </div>
         <?php endforeach; ?>
-
-        <?php if ($isAdmin && !$leadId): ?>
-        <h2 class="admin-appearance__label" style="margin-top:1.5rem;">SMTP (formulário)</h2>
-        <p class="text-muted" style="margin:0 0 0.75rem;font-size:0.875rem;">Preencha host, usuário e senha. Destino vazio usa o e-mail do site. Deixe a senha em branco para manter a atual.</p>
-        <?php foreach ($defs as $key => $def): ?>
-          <?php if (($def['group'] ?? '') !== 'smtp') continue; ?>
-          <div class="form-group">
-            <label for="<?= h($key) ?>"><?= h($def['label']) ?></label>
-            <input
-              id="<?= h($key) ?>"
-              name="<?= h($key) ?>"
-              class="form-input"
-              maxlength="<?= (int) $def['max'] ?>"
-              value="<?= $key === 'smtp_pass' ? '' : h($values[$key] ?? '') ?>"
-              <?= $key === 'smtp_pass' ? 'type="password" autocomplete="new-password" placeholder="•••••••• (deixe vazio para não alterar)"' : 'type="text"' ?>
-            >
-          </div>
-        <?php endforeach; ?>
-        <?php endif; ?>
 
         <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Salvar contato</button>
       </form>
