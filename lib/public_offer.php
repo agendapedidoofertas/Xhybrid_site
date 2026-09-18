@@ -32,8 +32,7 @@ function public_offer_defaults(): array
             . "Bases principais: execução de contrato e legítimo interesse operacional. Não vendemos listas.\n\n"
             . "Pagamentos são processados por Asaas e/ou Stripe. Dados ficam em servidor (pastas data/ não públicas).\n\n"
             . "Para acesso, correção ou exclusão (LGPD), fale pelos canais WhatsApp/e-mail da agência.",
-        'privacy_full' => public_offer_privacy_full_default(),
-        'privacy_url' => '/privacidade.php',
+        'privacy_url' => '/privacidade.html',
         'plans' => [
             'basic' => [
                 'id' => 'basic',
