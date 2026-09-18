@@ -93,9 +93,31 @@ admin_header('Login');
         </div>
         <div class="form-group">
           <label for="password">Senha</label>
-          <input id="password" name="password" type="password" class="form-input" required autocomplete="current-password">
+          <span class="pw-field">
+            <input id="password" name="password" type="password" class="form-input" required autocomplete="current-password">
+            <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Mostrar senha" title="Mostrar senha">
+              <svg class="pw-toggle__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </span>
         </div>
         <button type="submit" class="btn btn-primary" style="margin-top:1.5rem;">Entrar</button>
       </form>
+      <script>
+      (function () {
+        var input = document.getElementById('password');
+        var btn = document.getElementById('pw-toggle');
+        if (!input || !btn) return;
+        btn.addEventListener('click', function () {
+          var show = input.type === 'password';
+          input.type = show ? 'text' : 'password';
+          btn.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+          btn.setAttribute('title', show ? 'Ocultar senha' : 'Mostrar senha');
+          btn.classList.toggle('is-on', show);
+        });
+      })();
+      </script>
 <?php
 admin_footer();

@@ -57,7 +57,7 @@ body[data-page="admin"]::after {
 
 body[data-page="admin"] .site-header {
   background: rgba(10, 10, 10, 0.94);
-  border-bottom: 1px solid #2a2a2a;
+  border-bottom: none;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 0.35rem 0.75rem;
@@ -427,6 +427,8 @@ body[data-page="admin"] .site-nav a {
   padding: 0.25rem 0.4rem;
   white-space: nowrap;
   border-radius: 0.3rem;
+  border: 1px solid transparent;
+  transition: color 0.12s ease, background 0.12s ease;
 }
 
 body[data-page="admin"] .site-nav .admin-nav-icon {
@@ -438,7 +440,8 @@ body[data-page="admin"] .admin-main {
   padding-top: 1.25rem;
 }
 
-body[data-page="admin"] .site-nav a:hover {
+body[data-page="admin"] .site-nav a:hover,
+body[data-page="admin"] .site-nav a.is-active {
   color: #f5f5f5;
   background: rgba(255, 255, 255, 0.06);
 }
@@ -558,6 +561,44 @@ body[data-page="admin"] .admin-row-actions {
 
 body[data-page="admin"] .admin-row-actions form {
   margin: 0;
+}
+
+body[data-page="admin"] .pw-field {
+  position: relative;
+  display: block;
+}
+
+body[data-page="admin"] .pw-field .form-input {
+  width: 100%;
+  padding-right: 2.75rem;
+}
+
+body[data-page="admin"] .pw-toggle {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+body[data-page="admin"] .pw-toggle:hover,
+body[data-page="admin"] .pw-toggle.is-on {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body[data-page="admin"] .pw-toggle__icon {
+  display: block;
 }
 
 body[data-page="admin"] .admin-form {

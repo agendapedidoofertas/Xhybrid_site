@@ -388,8 +388,11 @@ function admin_header(string $title, ?array $user = null): void
         <?php if ($user): ?>
         <p class="admin-user"><?= h($user['username']) ?> · <?= h((string) ($user['role'] ?? '')) ?></p>
         <nav class="site-nav" aria-label="Admin">
-          <?php foreach (admin_nav_items($user, $leadId) as $navItem): ?>
-          <a href="<?= h($navItem['href']) ?>"><?= admin_nav_icon($navItem['icon']) ?><span><?= h($navItem['label']) ?></span></a>
+          <?php foreach (admin_nav_items($user, $leadId) as $navItem):
+              $hrefPath = parse_url($navItem['href'], PHP_URL_PATH) ?: $navItem['href'];
+              $active = $script === basename((string) $hrefPath);
+              ?>
+          <a href="<?= h($navItem['href']) ?>"<?= $active ? ' class="is-active"' : '' ?>><?= admin_nav_icon($navItem['icon']) ?><span><?= h($navItem['label']) ?></span></a>
           <?php endforeach; ?>
         </nav>
         <?php endif; ?>
