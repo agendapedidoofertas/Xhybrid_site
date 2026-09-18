@@ -254,7 +254,7 @@ function published_site_list(PDO $pdo, ?int $activeOnly = null, ?string $planTie
     }
     if ($planTier !== null && $planTier !== '') {
         $tier = strtolower(trim($planTier));
-        if (in_array($tier, ['basic', 'medium', 'pro'], true)) {
+        if (in_array($tier, ['basic', 'pleno', 'plus', 'medium', 'pro'], true)) {
             $parts[] = 'plan_tier = :plan_tier';
             $params[':plan_tier'] = $tier;
         }

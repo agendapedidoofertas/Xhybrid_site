@@ -3,16 +3,153 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Privacidade — 8xd</title>
+  <title>Política de Privacidade (LGPD) — Xhybrid / 8xd</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
+<body data-page="privacidade">
   <main class="container" style="padding:3rem 1.25rem;max-width:40rem;margin:0 auto;">
-    <h1>Privacidade (LGPD — mínimo)</h1>
-    <p>Tratamos dados de leads e clientes (nome, contato, endereço comercial) para criar e manter o site e a cobrança.</p>
-    <p>Bases: execução de contrato e legítimo interesse operacional. Não vendemos listas. Solicitações de acesso/exclusão: canal comercial WhatsApp/e-mail da agência.</p>
-    <p>SQLite e configs ficam no servidor; pastas <code>data/</code> não são públicas.</p>
-    <p><a href="/termos.html">Termos</a></p>
+    <p class="eyebrow">8xd.com.br · Xhybrid</p>
+    <h1 class="font-display">Política de Privacidade (LGPD)</h1>
+    <p><strong>Última atualização:</strong> [DATA DO DEPLOY]</p>
+    <p>
+      Esta Política descreve como a <strong>Xhybrid / 8xd</strong> (&quot;Empresa&quot;),
+      <strong>[RAZÃO SOCIAL]</strong>, CNPJ <strong>[CNPJ]</strong>, com endereço em <strong>[ENDEREÇO]</strong>,
+      trata dados pessoais no site institucional, na contratação dos planos Basic / Pleno / Plus,
+      no checkout, nos painéis administrativos, no CRM e nos sites publicados para clientes.
+    </p>
+    <p>
+      Ao usar nossos serviços, você declara ciência desta Política e dos
+      <a href="/termos.html">Termos de Serviço</a>. Em caso de conflito sobre privacidade, prevalece o disposto aqui
+      e a Lei nº 13.709/2018 (LGPD).
+    </p>
+    <p><a href="/planos.html">Planos</a> · <a href="/termos.html">Termos</a></p>
+
+    <article style="margin-top:2.5rem;display:grid;gap:1.75rem;">
+
+      <section id="p1">
+        <h2>1. Controlador e canais</h2>
+        <p>
+          A Empresa é, em regra, a <strong>controladora</strong> dos dados coletados para venda, cobrança,
+          suporte e operação da plataforma 8xd. Em sites de clientes, a Empresa pode atuar também como
+          <strong>operadora</strong> quando trata dados sob instrução do cliente (titular do site).
+        </p>
+        <p>
+          Pedidos de titular (acesso, correção, exclusão, portabilidade, oposição, revogação de consentimento)
+          podem ser feitos pelo WhatsApp/e-mail comerciais da agência, informados no site e no painel Contato.
+        </p>
+      </section>
+
+      <section id="p2">
+        <h2>2. Quais dados coletamos</h2>
+        <p>Conforme o fluxo, podemos tratar:</p>
+        <ul>
+          <li><strong>Cadastro e checkout:</strong> nome da empresa, e-mail, WhatsApp/telefone, plano escolhido (Basic, Pleno ou Plus), provedor de pagamento (Asaas ou Stripe) e aceite dos Termos/Privacidade.</li>
+          <li><strong>Cobrança:</strong> identificadores de cobrança/assinatura, status de pagamento e dados necessários ao gateway (Asaas/Stripe). Dados sensíveis de cartão são tratados pelo provedor, não armazenados em texto claro no nosso SQLite.</li>
+          <li><strong>Conteúdo do site:</strong> textos, imagens, marca, contatos e demais campos editados no painel (vitrine da agência ou site do lead).</li>
+          <li><strong>Conta de acesso:</strong> login, papel (admin/editor/cliente) e vínculo ao lead/CRM quando houver.</li>
+          <li><strong>Operação técnica:</strong> logs mínimos de erro/acesso, IP e metadados de segurança quando necessários à disponibilidade e prevenção a abuso.</li>
+          <li><strong>Comunicação:</strong> mensagens enviadas por formulários, WhatsApp (bot/humano) e indicação comercial (créditos de indicação).</li>
+        </ul>
+        <p>Não pedimos dados sensíveis (saúde, biometria, etc.) como requisito padrão dos planos.</p>
+      </section>
+
+      <section id="p3">
+        <h2>3. Para que usamos (finalidades)</h2>
+        <ul>
+          <li>criar, publicar e manter o site contratado (subdomínio *.8xd.com.br ou domínio próprio);</li>
+          <li>cobrar plano e manutenção via Asaas/Stripe e liberar o serviço após pagamento;</li>
+          <li>prestar suporte, operação do CRM e do painel (incluindo o assistente Roboto, só com respostas pré-escritas);</li>
+          <li>cumprir obrigações legais, prevenção a fraude e segurança da plataforma;</li>
+          <li>comunicar sobre o contrato, inadimplência, indicação e melhorias do serviço.</li>
+        </ul>
+        <p>
+          Conteúdo gerado ou sugerido por automação/IA deve ser revisado pelo cliente antes do uso comercial;
+          a Empresa trata esses textos como dados do serviço contratado.
+        </p>
+      </section>
+
+      <section id="p4">
+        <h2>4. Bases legais (LGPD)</h2>
+        <ul>
+          <li><strong>Execução de contrato</strong> — contratação, publicação do site, painel, cobrança e suporte.</li>
+          <li><strong>Cumprimento de obrigação legal/regulatória</strong> — quando aplicável (ex.: registros fiscais/contábeis).</li>
+          <li><strong>Legítimo interesse</strong> — segurança, prevenção a abuso, melhoria operacional e comunicações estritamente relacionadas ao serviço, com respeito aos direitos do titular.</li>
+          <li><strong>Consentimento</strong> — quando exigido (ex.: marketing opcional além do contrato). Pode ser revogado pelos canais da agência.</li>
+        </ul>
+      </section>
+
+      <section id="p5">
+        <h2>5. Compartilhamento e operadores</h2>
+        <p>Podemos compartilhar dados com:</p>
+        <ul>
+          <li><strong>Asaas e/ou Stripe</strong> — processamento de pagamentos;</li>
+          <li><strong>hospedagem/infraestrutura</strong> — servidores onde rodam site, CRM e bancos;</li>
+          <li><strong>ferramentas de comunicação</strong> — WhatsApp/e-mail usados no atendimento;</li>
+          <li><strong>autoridades</strong> — quando houver obrigação legal.</li>
+        </ul>
+        <p>Não vendemos listas de contatos. Operadores devem tratar dados conforme contrato e a LGPD.</p>
+      </section>
+
+      <section id="p6">
+        <h2>6. Armazenamento e segurança</h2>
+        <p>
+          Dados de configuração e operação ficam em bases no servidor (incluindo SQLite em pastas
+          <code>data/</code> não públicas). Aplicamos medidas razoáveis de controle de acesso, HTTPS quando
+          disponível e segregação de arquivos sensíveis. Nenhum sistema é 100% imune a incidentes;
+          em caso de incidente relevante, adotaremos as medidas cabíveis, inclusive comunicação quando a lei exigir.
+        </p>
+      </section>
+
+      <section id="p7">
+        <h2>7. Retenção</h2>
+        <p>
+          Mantemos dados pelo tempo necessário ao contrato, cobrança, suporte e obrigações legais.
+          Após encerramento, podemos reter o mínimo necessário para defesa de direitos ou cumprimento legal,
+          e eliminar ou anonimizar o restante quando viável.
+        </p>
+      </section>
+
+      <section id="p8">
+        <h2>8. Direitos do titular</h2>
+        <p>
+          Nos termos da LGPD, você pode solicitar confirmação de tratamento, acesso, correção, anonimização,
+          bloqueio, eliminação de dados desnecessários, portabilidade (quando aplicável), informação sobre
+          compartilhamentos e oposição a tratamentos indevidos. Responderemos pelos canais da agência em prazo razoável.
+        </p>
+        <p>Também é possível registrar reclamação junto à Autoridade Nacional de Proteção de Dados (ANPD).</p>
+      </section>
+
+      <section id="p9">
+        <h2>9. Sites de clientes e visitantes</h2>
+        <p>
+          Nos sites publicados para clientes, o cliente pode ser controlador dos dados que coleta de seus próprios
+          visitantes (formulários, WhatsApp do negócio etc.). A Empresa orienta boas práticas, mas o cliente é
+          responsável pelo conteúdo e pelas bases legais do site dele, salvo quando a Empresa tratar dados sob
+          sua própria operação de plataforma.
+        </p>
+      </section>
+
+      <section id="p10">
+        <h2>10. Cookies e métricas</h2>
+        <p>
+          Podemos usar cookies ou armazenamento local estritamente necessários ao funcionamento do site e do painel
+          (sessão, preferências). Ferramentas de métricas, se ativadas, serão informadas no site quando aplicável.
+        </p>
+      </section>
+
+      <section id="p11">
+        <h2>11. Atualizações</h2>
+        <p>
+          Esta Política pode ser atualizada para refletir mudanças nos planos, no checkout, nos gateways ou na lei.
+          A versão vigente será publicada nesta página, com data de atualização.
+        </p>
+      </section>
+
+    </article>
+
+    <p style="margin-top:2.5rem;">
+      <a href="/termos.html">Termos de Serviço</a> · <a href="/planos.html">Planos</a>
+    </p>
   </main>
 </body>
 </html>

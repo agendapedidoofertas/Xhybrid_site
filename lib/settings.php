@@ -10,7 +10,7 @@ require_once __DIR__ . '/feat_icons.php';
  */
 function settings_definitions(): array
 {
-    return [
+    $base = [
         // Contato / canais
         'whatsapp_number' => [
             'group' => 'contact', 'label' => 'WhatsApp (DDI+DDD+número, só dígitos)', 'max' => 15, 'type' => 'whatsapp',
@@ -634,6 +634,9 @@ function settings_definitions(): array
             'default' => '12',
         ],
     ];
+
+    require_once __DIR__ . '/public_offer.php';
+    return $base + public_offer_settings_definitions();
 }
 
 function settings_groups(): array
@@ -645,6 +648,7 @@ function settings_groups(): array
         'appearance' => 'Aparência',
         'brand' => 'Marca e região',
         'plan' => 'Plano e limites',
+        'offer' => 'Oferta pública (Planos)',
         'sections' => 'Seções do site',
         'home' => 'Home',
         'sobre' => 'Sobre',

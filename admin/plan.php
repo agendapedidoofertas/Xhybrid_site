@@ -10,6 +10,7 @@ require_once dirname(__DIR__) . '/lib/settings.php';
 require_once dirname(__DIR__) . '/lib/plans.php';
 require_once dirname(__DIR__) . '/lib/lead_admin.php';
 require_once dirname(__DIR__) . '/lib/permissions.php';
+require_once dirname(__DIR__) . '/lib/public_offer.php';
 
 auth_boot_session();
 $user = require_page('plan');
@@ -51,6 +52,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $action = (string) ($_POST['action'] ?? 'save');
     try {
+        if ($action === 'save_offer') {
+            if (!$isAgencyAdmin) {
+                throw new RuntimeException('Só o Admin da agência edita a oferta pública.');
+            }
+            $input = [
+                'offer_intro' => (string) ($_POST['offer_intro'] ?? ''),
+                'offer_eyebrow' => (string) ($_POST['offer_eyebrow'] ?? ''),
+                'offer_title' => (string) ($_POST['offer_title'] ?? ''),
+                'offer_highlight' => plan_normalize((string) ($_POST['offer_highlight'] ?? 'pleno')),
+                'offer_referral_note' => (string) ($_POST['offer_referral_note'] ?? ''),
+                'offer_terms_summary' => (string) ($_POST['offer_terms_summary'] ?? ''),
+                'offer_terms_url' => (string) ($_POST['offer_terms_url'] ?? '/termos.html'),
+                'offer_privacy_summary' => (string) ($_POST['offer_privacy_summary'] ?? ''),
+                'offer_privacy_url' => (string) ($_POST['offer_privacy_url'] ?? '/privacidade.html'),
+            ];
+            foreach (plan_ids() as $pid) {
+                $input["offer_{$pid}_label"] = (string) ($_POST["offer_{$pid}_label"] ?? '');
+                $centsPlan = public_offer_brl_to_cents_string((string) ($_POST["offer_{$pid}_plan_brl"] ?? ''));
+                $centsMaint = public_offer_brl_to_cents_string((string) ($_POST["offer_{$pid}_maint_brl"] ?? ''));
+                $input["offer_{$pid}_plan_cents"] = $centsPlan !== '' ? $centsPlan : (string) ($_POST["offer_{$pid}_plan_cents"] ?? '');
+                $input["offer_{$pid}_maint_cents"] = $centsMaint !== '' ? $centsMaint : (string) ($_POST["offer_{$pid}_maint_cents"] ?? '');
+                $input["offer_{$pid}_bullets"] = (string) ($_POST["offer_{$pid}_bullets"] ?? '');
+            }
+            public_offer_save(db(), $input);
+            header('Location: plan.php?ok=offer');
+            exit;
+        }
+
         if ($action === 'save_permissions') {
             if (!$isAgencyAdmin) {
                 throw new RuntimeException('Só o Admin da agência edita a matriz de permissões.');
@@ -136,6 +165,7 @@ if (isset($_GET['ok'])) {
         'bundle' => 'Pacote do plano aplicado (páginas, seções, limites e look).',
         'perms' => 'Matriz de permissões salva.',
         'perms_reset' => 'Permissões restauradas para o padrão.',
+        'offer' => 'Oferta pública (planos e termos) salva.',
         default => 'Plano e flags salvos.',
     };
     $values = $leadId
@@ -178,12 +208,17 @@ $roleLabels = [
     'client_pro' => 'Cliente Pro',
 ];
 
+$offer = $isAgencyAdmin ? public_offer_get(db()) : null;
+$fmtOfferBrl = static function (int $cents): string {
+    return number_format($cents / 100, 2, ',', '.');
+};
+
 admin_header('Plano', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
         <h1 class="font-display">Plano do cliente</h1>
-        <p>Basic / Medium / Pro — flags e limites<?= $leadId ? ' deste lead' : '' ?>.</p>
+        <p>Basic / Pleno / Plus — flags e limites<?= $leadId ? ' deste lead' : '' ?>.</p>
         <ul class="text-muted" style="margin:.75rem 0 0;padding-left:1.1rem;font-size:.88rem;line-height:1.45;">
           <?php foreach (plan_blurbs() as $pid => $blurb): ?>
             <li><strong><?= h($labels[$pid] ?? $pid) ?>:</strong> <?= h($blurb) ?></li>
@@ -193,6 +228,92 @@ admin_header('Plano', $user);
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
+
+      <?php if ($isAgencyAdmin && is_array($offer)): ?>
+      <section class="admin-perm" style="margin-top:1.75rem;">
+        <h2 class="font-display" style="font-size:1.35rem;margin:0 0 .35rem;">Oferta pública (Planos + Termos)</h2>
+        <p class="text-muted" style="margin:0 0 1rem;font-size:.875rem;">
+          Edita a página <a href="/planos.html" target="_blank" rel="noopener">/planos.html</a>,
+          preços/bullets e o resumo dos Termos no modal. Cobrança no CRM continua separada.
+        </p>
+        <form method="post" class="contact-form admin-form admin-form--wide">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="save_offer">
+
+          <div class="form-group">
+            <label for="offer_eyebrow">Eyebrow (acima do título)</label>
+            <input id="offer_eyebrow" name="offer_eyebrow" class="form-input" maxlength="40" value="<?= h((string) ($offer['eyebrow'] ?? 'Oferta')) ?>">
+          </div>
+          <div class="form-group">
+            <label for="offer_title">Título</label>
+            <input id="offer_title" name="offer_title" class="form-input" maxlength="60" value="<?= h((string) ($offer['title'] ?? 'Planos')) ?>">
+          </div>
+          <div class="form-group">
+            <label for="offer_intro">Introdução</label>
+            <textarea id="offer_intro" name="offer_intro" class="form-input" rows="2" maxlength="320"><?= h((string) $offer['intro']) ?></textarea>
+          </div>
+          <div class="form-group">
+            <label for="offer_highlight">Plano destacado (“Mais escolhido”)</label>
+            <select id="offer_highlight" name="offer_highlight" class="form-input">
+              <?php foreach (plan_ids() as $pid): ?>
+                <option value="<?= h($pid) ?>" <?= ($offer['highlight'] ?? '') === $pid ? 'selected' : '' ?>><?= h($labels[$pid] ?? $pid) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="offer_referral_note">Nota de indicação / rodapé</label>
+            <textarea id="offer_referral_note" name="offer_referral_note" class="form-input" rows="2" maxlength="280"><?= h((string) $offer['referral_note']) ?></textarea>
+          </div>
+
+          <?php foreach (plan_ids() as $pid):
+              $op = $offer['plans'][$pid] ?? null;
+              if (!is_array($op)) {
+                  continue;
+              }
+          ?>
+          <h2 class="admin-appearance__label" style="margin-top:1.25rem;"><?= h((string) $op['label']) ?></h2>
+          <div class="form-group">
+            <label for="offer_<?= h($pid) ?>_label">Rótulo</label>
+            <input id="offer_<?= h($pid) ?>_label" name="offer_<?= h($pid) ?>_label" class="form-input" maxlength="24" value="<?= h((string) $op['label']) ?>">
+          </div>
+          <div class="form-group">
+            <label for="offer_<?= h($pid) ?>_plan_brl">Preço do plano (R$ / mês)</label>
+            <input id="offer_<?= h($pid) ?>_plan_brl" name="offer_<?= h($pid) ?>_plan_brl" class="form-input" inputmode="decimal" value="<?= h($fmtOfferBrl((int) $op['planCents'])) ?>">
+          </div>
+          <div class="form-group">
+            <label for="offer_<?= h($pid) ?>_maint_brl">Manutenção (R$ / mês)</label>
+            <input id="offer_<?= h($pid) ?>_maint_brl" name="offer_<?= h($pid) ?>_maint_brl" class="form-input" inputmode="decimal" value="<?= h($fmtOfferBrl((int) $op['maintenanceCents'])) ?>">
+          </div>
+          <div class="form-group">
+            <label for="offer_<?= h($pid) ?>_bullets">Bullets (1 por linha)</label>
+            <textarea id="offer_<?= h($pid) ?>_bullets" name="offer_<?= h($pid) ?>_bullets" class="form-input" rows="4" maxlength="1200"><?= h(implode("\n", $op['bullets'] ?? [])) ?></textarea>
+          </div>
+          <?php endforeach; ?>
+
+          <h2 class="admin-appearance__label" style="margin-top:1.25rem;">Termos de Serviço</h2>
+          <div class="form-group">
+            <label for="offer_terms_summary">Resumo no modal (parágrafos separados por linha em branco)</label>
+            <textarea id="offer_terms_summary" name="offer_terms_summary" class="form-input" rows="8" maxlength="6000"><?= h((string) $offer['terms_summary']) ?></textarea>
+          </div>
+          <div class="form-group">
+            <label for="offer_terms_url">URL da página completa</label>
+            <input id="offer_terms_url" name="offer_terms_url" class="form-input" maxlength="160" value="<?= h((string) $offer['terms_url']) ?>">
+          </div>
+
+          <h2 class="admin-appearance__label" style="margin-top:1.25rem;">Privacidade (LGPD)</h2>
+          <div class="form-group">
+            <label for="offer_privacy_summary">Resumo no modal (parágrafos separados por linha em branco)</label>
+            <textarea id="offer_privacy_summary" name="offer_privacy_summary" class="form-input" rows="8" maxlength="6000"><?= h((string) $offer['privacy_summary']) ?></textarea>
+          </div>
+          <div class="form-group">
+            <label for="offer_privacy_url">URL da página completa</label>
+            <input id="offer_privacy_url" name="offer_privacy_url" class="form-input" maxlength="160" value="<?= h((string) $offer['privacy_url']) ?>">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;">Salvar oferta pública</button>
+        </form>
+      </section>
+      <?php endif; ?>
 
       <?php if ($isAgencyAdmin): ?>
       <section class="admin-perm" style="margin-top:1.75rem;">

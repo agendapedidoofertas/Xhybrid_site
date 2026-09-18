@@ -1757,12 +1757,18 @@ body[data-page="admin"] .roboto-group {
 }
 
 body[data-page="admin"] .roboto-group__title {
-  margin: 0 0 0.35rem;
-  font-size: 0.68rem;
-  font-weight: 700;
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #777;
+  letter-spacing: 0.05em;
+  color: #8a8a8a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  font-synthesis: none;
+  /* Evita “fantasma” em zoom <110% com acentos (Ç/Ã) + letter-spacing */
+  transform: translateZ(0);
 }
 
 body[data-page="admin"] .roboto-chips {

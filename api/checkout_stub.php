@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/security.php';
 require_once dirname(__DIR__) . '/lib/crm_bridge.php';
+require_once dirname(__DIR__) . '/lib/plans.php';
 
 security_send_headers();
 header('Content-Type: application/json; charset=utf-8');
@@ -26,10 +27,24 @@ if (!is_array($data)) {
     $data = $_POST;
 }
 
-$plan = strtolower(trim((string) ($data['plan'] ?? 'basic')));
-if (!in_array($plan, ['basic', 'medium', 'pro'], true)) {
-    $plan = 'basic';
+$termsAccepted = !empty($data['terms_accepted']) && (
+    $data['terms_accepted'] === true
+    || $data['terms_accepted'] === 1
+    || $data['terms_accepted'] === '1'
+    || $data['terms_accepted'] === 'true'
+);
+if (!$termsAccepted) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Aceite os Termos de Serviço para continuar.']);
+    exit;
 }
+
+$plan = plan_normalize((string) ($data['plan'] ?? 'basic'));
+$provider = strtolower(trim((string) ($data['provider'] ?? 'asaas')));
+if (!in_array($provider, ['asaas', 'stripe'], true)) {
+    $provider = 'asaas';
+}
+
 $company = trim(str_replace(['<', '>'], '', (string) ($data['company'] ?? '')));
 $email = trim((string) ($data['email'] ?? ''));
 $whatsapp = preg_replace('/\D+/', '', (string) ($data['whatsapp'] ?? '')) ?? '';
@@ -66,11 +81,15 @@ try {
     $checkout = '';
     $msg = 'Lead #' . $id . ' criado. Em modo manual a equipe confirma o pagamento.';
     if (payment_mode() !== 'manual') {
-        $created = payment_create_charge_for_lead($pdo, $id, $plan);
+        $created = payment_create_charge_for_lead($pdo, $id, $plan, $provider);
         $checkout = $created['checkout_url'];
-        $msg = 'Lead criado. Conclua o pagamento no link.';
+        $msg = 'Lead criado. Conclua o pagamento no link (' . $provider . ').';
     }
-    crm_ops_log($id, 'checkout_public', 'Checkout público', ['plan' => $plan]);
+    crm_ops_log($id, 'checkout_public', 'Checkout público', [
+        'plan' => $plan,
+        'provider' => $provider,
+        'terms_accepted' => true,
+    ]);
 
     echo json_encode([
         'ok' => true,

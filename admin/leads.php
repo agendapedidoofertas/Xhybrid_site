@@ -18,7 +18,7 @@ if (user_is_client($user)) {
 }
 
 $planFilter = strtolower(trim((string) ($_GET['plan_tier'] ?? '')));
-if (!in_array($planFilter, ['basic', 'medium', 'pro', ''], true)) {
+if (!in_array($planFilter, ['basic', 'pleno', 'plus', 'medium', 'pro', ''], true)) {
     $planFilter = '';
 }
 $activeFilter = $_GET['site_active'] ?? '';
@@ -60,8 +60,8 @@ admin_header('Leads (sites)', $user);
         <button type="submit" class="btn btn-primary" style="margin:0;">Filtrar</button>
         <p class="text-muted" style="margin:0;font-size:.85rem;">
           <a href="leads.php?plan_tier=basic">Basic</a> ·
-          <a href="leads.php?plan_tier=medium">Medium</a> ·
-          <a href="leads.php?plan_tier=pro">Pro</a>
+          <a href="leads.php?plan_tier=pleno">Pleno</a> ·
+          <a href="leads.php?plan_tier=plus">Plus</a>
         </p>
       </form>
 

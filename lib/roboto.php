@@ -448,3 +448,124 @@ function roboto_payload(?array $user, ?int $leadId = null): array
         'chips' => roboto_chips_for($ctx, $user),
     ];
 }
+
+/**
+ * Roboto enxuto na página pública /planos.html (sem login).
+ *
+ * @return array{context: array<string,mixed>, chips: list<array<string,mixed>>}
+ */
+function roboto_planos_public_payload(?PDO $pdo = null): array
+{
+    require_once __DIR__ . '/public_offer.php';
+    require_once __DIR__ . '/settings.php';
+    require_once __DIR__ . '/db.php';
+
+    $pdo = $pdo ?? db();
+    $offer = public_offer_get($pdo);
+    $wa = preg_replace('/\D+/', '', settings_get($pdo, 'whatsapp_number')) ?? '';
+
+    $planLines = [];
+    foreach ($offer['plans'] as $p) {
+        $price = number_format(((int) $p['planCents']) / 100, 2, ',', '.');
+        $maint = number_format(((int) $p['maintenanceCents']) / 100, 2, ',', '.');
+        $bits = implode('; ', array_slice($p['bullets'], 0, 3));
+        $planLines[] = "{$p['label']} — R$ {$price}/mês + manutenção R$ {$maint}. {$bits}.";
+    }
+    $summaryBody = "Resumo da oferta atual:\n" . implode("\n", $planLines)
+        . "\n\nO plano Pleno costuma ser o mais escolhido. No checkout você escolhe Asaas ou Stripe.";
+
+    $howBody =
+        "1) Escolha Basic, Pleno ou Plus na página.\n"
+        . "2) Selecione Asaas (Brasil) ou Stripe.\n"
+        . "3) Aceite os Termos (abra o resumo na caixinha) e continue para o checkout.\n"
+        . "4) Após o pagamento, o site é liberado conforme a oferta.\n\n"
+        . "Basic: subdomínio e personalização mínima.\n"
+        . "Pleno: domínio próprio e personalização limitada.\n"
+        . "Plus: personalização ampliada, marca e looks premium.";
+
+    $maintBody =
+        "A manutenção mensal cobre hospedagem/SSL, monitoramento básico e suporte do pacote.\n"
+        . "O valor aparece em cada card sob o preço do plano.\n"
+        . "Atrasos podem suspender o site até a regularização (veja os Termos).";
+
+    $payBody =
+        "Asaas: comum para cobrança no Brasil (PIX/boleto/cartão conforme configuração).\n"
+        . "Stripe: cartão internacional e fluxo do provedor Stripe.\n"
+        . "O link de cobrança usa o provedor que você marcar nesta página.";
+
+    $lateBody =
+        "Inadimplência pode suspender o site e o acesso ao painel até o pagamento.\n"
+        . "Detalhes estão nos Termos de Serviço (botão Termos nesta página).\n"
+        . "Se precisar negociar, fale com a agência pelo WhatsApp.";
+
+    $refBody =
+        "Indicação elegível: R$ 50 por indicação paga, até R$ 150 no acumulado da regra vigente.\n"
+        . "Condições completas nos Termos (seção de indicação).";
+
+    $waCta = [];
+    $waHref = roboto_wa_href($wa, 'Olá! Vim pela página de Planos e quero tirar uma dúvida.');
+    if ($waHref !== '') {
+        $waCta[] = ['label' => 'Falar no WhatsApp', 'href' => $waHref];
+    }
+
+    $chips = [
+        [
+            'id' => 'planos_how',
+            'group' => 'Planos',
+            'title' => 'Como funciona cada plano?',
+            'body' => $howBody,
+            'image' => '',
+            'ctas' => $waCta,
+        ],
+        [
+            'id' => 'planos_summary',
+            'group' => 'Planos',
+            'title' => 'Resuma os planos',
+            'body' => $summaryBody,
+            'image' => '',
+            'ctas' => [],
+        ],
+        [
+            'id' => 'planos_maint',
+            'group' => 'Planos',
+            'title' => 'O que é a manutenção mensal?',
+            'body' => $maintBody,
+            'image' => '',
+            'ctas' => [],
+        ],
+        [
+            'id' => 'planos_pay',
+            'group' => 'Pagamento',
+            'title' => 'Asaas ou Stripe?',
+            'body' => $payBody,
+            'image' => '',
+            'ctas' => [],
+        ],
+        [
+            'id' => 'planos_late',
+            'group' => 'Pagamento',
+            'title' => 'E se atrasar o pagamento?',
+            'body' => $lateBody,
+            'image' => '',
+            'ctas' => $waCta,
+        ],
+        [
+            'id' => 'planos_ref',
+            'group' => 'Indicacao',
+            'title' => 'Como funciona a indicação?',
+            'body' => $refBody,
+            'image' => '',
+            'ctas' => [],
+        ],
+    ];
+
+    return [
+        'context' => [
+            'page' => 'planos',
+            'role' => 'guest',
+            'plan' => 'public',
+            'has_wa' => $wa !== '',
+        ],
+        'chips' => $chips,
+    ];
+}

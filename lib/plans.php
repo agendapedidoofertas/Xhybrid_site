@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 /**
- * Planos comerciais: basic | medium | pro (aliases legado essencial/profissional/personalizado).
+ * Planos comerciais: basic | pleno | plus
+ * Aliases legado: medium→pleno, pro→plus, essencial/profissional/personalizado.
  */
 function plan_ids(): array
 {
-    return ['basic', 'medium', 'pro'];
+    return ['basic', 'pleno', 'plus'];
 }
 
 /**
@@ -17,11 +18,13 @@ function plan_aliases(): array
 {
     return [
         'essencial' => 'basic',
-        'profissional' => 'medium',
-        'personalizado' => 'pro',
+        'profissional' => 'pleno',
+        'personalizado' => 'plus',
         'basic' => 'basic',
-        'medium' => 'medium',
-        'pro' => 'pro',
+        'medium' => 'pleno',
+        'pleno' => 'pleno',
+        'pro' => 'plus',
+        'plus' => 'plus',
     ];
 }
 
@@ -35,7 +38,7 @@ function plan_normalize(string $plan): string
     return in_array($plan, plan_ids(), true) ? $plan : 'basic';
 }
 
-/** Edição de Marca (nome da empresa / identidade) — matriz do plano (default: só Pro). */
+/** Edição de Marca — default: só Plus. */
 function plan_allows_brand_edit(string $plan): bool
 {
     $plan = plan_normalize($plan);
@@ -54,42 +57,40 @@ function plan_allows_brand_edit(string $plan): bool
     } catch (Throwable $e) {
         // fallback
     }
-    return $plan === 'pro';
+    return $plan === 'plus';
 }
 
 function plan_labels(): array
 {
     return [
         'basic' => 'Basic',
-        'medium' => 'Medium',
-        'pro' => 'Pro',
+        'pleno' => 'Pleno',
+        'plus' => 'Plus',
+        // legado (labels se algum código ainda passar medium/pro cru)
+        'medium' => 'Pleno',
+        'pro' => 'Plus',
     ];
 }
 
 /**
- * Texto curto para UI (Basic=subdomínio; Medium/Pro=domínio próprio).
- *
  * @return array<string, string>
  */
 function plan_blurbs(): array
 {
     return [
-        'basic' => 'Subdomínio *.8xd.com.br · site completo · personalização mínima',
-        'medium' => 'Domínio próprio · personalização limitada · sem edição de Marca pelo cliente',
-        'pro' => 'Domínio próprio · personalização total · Marca e looks premium · manutenção mensal maior',
+        'basic' => 'Subdomínio *.8xd.com.br · site completo · personalização mínima · manutenção R$ 59,90',
+        'pleno' => 'Domínio próprio · personalização limitada · manutenção R$ 79,99',
+        'plus' => 'Domínio próprio · personalização total · Marca e looks premium · manutenção R$ 79,99',
     ];
 }
 
 /**
- * Pacote padrão de cada plano (settings keys).
- *
  * @return array<string, string>
  */
 function plan_bundle(string $plan): array
 {
     $plan = plan_normalize($plan);
 
-    // Basic: mesmo esqueleto de páginas; limita quantidade/funções (não corta Sobre/Projetos).
     if ($plan === 'basic') {
         return [
             'site_plan' => 'basic',
@@ -117,10 +118,9 @@ function plan_bundle(string $plan): array
         ];
     }
 
-    // Medium: mesmo site; animação + 1 bloco extra; looks premium off (personalização limitada).
-    if ($plan === 'medium') {
+    if ($plan === 'pleno') {
         return [
-            'site_plan' => 'medium',
+            'site_plan' => 'pleno',
             'feature_page_sobre' => '1',
             'feature_page_galeria' => '1',
             'feature_page_contato' => '1',
@@ -145,9 +145,8 @@ function plan_bundle(string $plan): array
         ];
     }
 
-    // Pro: mesmo site do Medium; personalização total (looks premium) + FAQ/urgência; tetos finitos (Drive).
     return [
-        'site_plan' => 'pro',
+        'site_plan' => 'plus',
         'feature_page_sobre' => '1',
         'feature_page_galeria' => '1',
         'feature_page_contato' => '1',
@@ -182,10 +181,10 @@ function plan_apply(PDO $pdo, string $plan): void
 function plan_allowed_palettes(string $plan): array
 {
     $plan = plan_normalize($plan);
-    if ($plan === 'pro') {
+    if ($plan === 'plus') {
         return ['Neutro', 'Azul', 'Ciano', 'Verde', 'Quente', 'Vermelho', 'Roxo'];
     }
-    if ($plan === 'medium') {
+    if ($plan === 'pleno') {
         return ['Neutro', 'Azul', 'Ciano', 'Verde', 'Quente'];
     }
     return ['Neutro'];

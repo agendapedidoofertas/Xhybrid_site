@@ -107,7 +107,29 @@ function permissions_plan_feature_defaults(): array
             'looks_premium' => false,
             'animations' => true,
         ]),
+        'pleno' => array_merge($empty, [
+            'login' => true,
+            'brand_edit' => false,
+            'appearance' => false,
+            'preset' => false,
+            'sections' => false,
+            'services' => false,
+            'images' => true,
+            'looks_premium' => false,
+            'animations' => true,
+        ]),
         'pro' => array_merge($empty, [
+            'login' => true,
+            'brand_edit' => true,
+            'appearance' => true,
+            'preset' => true,
+            'sections' => true,
+            'services' => true,
+            'images' => true,
+            'looks_premium' => true,
+            'animations' => true,
+        ]),
+        'plus' => array_merge($empty, [
             'login' => true,
             'brand_edit' => true,
             'appearance' => true,
@@ -334,7 +356,8 @@ function permissions_reset_defaults(PDO $pdo): void
         $defaults = permissions_role_defaults()[$role] ?? ['password'];
         permissions_save_role_pages($pdo, $role, $defaults);
     }
-    foreach (['basic', 'medium', 'pro'] as $plan) {
-        permissions_save_plan_features($pdo, $plan, permissions_plan_feature_defaults()[$plan]);
+    foreach (['basic', 'pleno', 'plus'] as $plan) {
+        $defs = permissions_plan_feature_defaults();
+        permissions_save_plan_features($pdo, $plan, $defs[$plan] ?? $defs['basic']);
     }
 }

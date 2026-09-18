@@ -4,31 +4,404 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Planos — 8xd / Xhybrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/admin/admin.css">
+  <style>
+    body[data-page="admin"].planos-page .admin-main.planos-shell {
+      max-width: min(72rem, 100%);
+      margin-inline: auto;
+      padding-top: 1.75rem;
+      padding-bottom: 3.5rem;
+    }
+    body[data-page="admin"].planos-page .planos-header {
+      text-align: center;
+      margin: 0 auto 0.75rem;
+      max-width: none;
+      width: 100%;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    body[data-page="admin"].planos-page .planos-header .eyebrow {
+      display: block;
+      text-align: center;
+      margin: 0;
+      width: 100%;
+      letter-spacing: 0.1em;
+      color: #a3a3a3;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+    body[data-page="admin"].planos-page .planos-header h1 {
+      font-size: clamp(1.85rem, 4vw, 2.65rem);
+      margin: 0.35rem 0 0.55rem;
+      text-align: center;
+      width: 100%;
+    }
+    body[data-page="admin"].planos-page .planos-header p#planos-intro {
+      font-size: 1.02rem;
+      line-height: 1.45;
+      margin: 0 auto;
+      max-width: 36rem;
+      width: 100%;
+      text-align: center;
+      color: #a3a3a3;
+      -webkit-font-smoothing: antialiased;
+    }
+    body[data-page="admin"].planos-page .planos-legal a,
+    body[data-page="admin"].planos-page .planos-legal a:hover,
+    body[data-page="admin"].planos-page .planos-legal a:visited {
+      color: #6cb2ff !important;
+      text-decoration: underline !important;
+      text-underline-offset: 0.15em;
+      text-decoration-thickness: 1px;
+    }
+    body[data-page="admin"].planos-page .planos-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.15rem;
+      margin-top: 2rem;
+      width: 100%;
+    }
+    @media (min-width: 720px) {
+      body[data-page="admin"].planos-page .planos-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+        align-items: stretch;
+      }
+    }
+    body[data-page="admin"].planos-page .planos-actions {
+      width: 100%;
+      max-width: none;
+      margin: 1.85rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    body[data-page="admin"] .plan-pick {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      width: 100%;
+      height: 100%;
+      min-height: 18rem;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 0.75rem;
+      padding: 1.45rem 1.3rem 1.4rem;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      position: relative;
+    }
+    body[data-page="admin"] .plan-pick:hover {
+      background: #1a1a1a;
+      border-color: #3f3f3f;
+      transform: translateY(-2px);
+    }
+    body[data-page="admin"] .plan-pick.is-selected {
+      border-color: #d4d4d4;
+      box-shadow: 0 0 0 1px #d4d4d4;
+      background: #1a1a1a;
+    }
+    body[data-page="admin"] .plan-pick.is-highlight {
+      border-color: #525252;
+    }
+    body[data-page="admin"] .plan-pick__badge {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #0a0a0a;
+      background: #e8e8e8;
+      padding: 0.2rem 0.45rem;
+      border-radius: 0.25rem;
+    }
+    body[data-page="admin"] .plan-pick__title {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+    }
+    body[data-page="admin"] .plan-pick.is-highlight .plan-pick__title {
+      padding-right: 5.5rem;
+    }
+    body[data-page="admin"] .plan-pick__price {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0;
+      line-height: 1.1;
+    }
+    body[data-page="admin"] .plan-pick__price span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+    }
+    body[data-page="admin"] .plan-pick__maint {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--muted-foreground);
+    }
+    body[data-page="admin"] .plan-pick__total {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #737373;
+    }
+    body[data-page="admin"] .plan-pick ul {
+      margin: 0.2rem 0 0;
+      padding-left: 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: #c4c4c4;
+      flex: 1;
+    }
+    body[data-page="admin"] .plan-pick li { margin: 0.28rem 0; }
+    body[data-page="admin"].planos-page .planos-section {
+      margin-top: 0;
+      width: 100%;
+      max-width: none;
+      padding: 1.25rem 1.2rem 1.3rem;
+      border-radius: var(--radius-lg);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-sizing: border-box;
+    }
+    body[data-page="admin"] .planos-section h2 {
+      font-size: 1.1rem;
+      margin: 0 0 0.35rem;
+    }
+    body[data-page="admin"] .pay-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 0.9rem;
+    }
+    body[data-page="admin"] .pay-option {
+      min-width: 7.5rem;
+      min-height: 2.6rem;
+      padding: 0.65rem 1rem;
+      border-radius: 0.45rem;
+      border: 1px solid #2a2a2a;
+      background: #141414;
+      color: #f5f5f5;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.95rem;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    body[data-page="admin"] .pay-option:hover {
+      background: #1a1a1a;
+      border-color: #3f3f3f;
+    }
+    body[data-page="admin"] .pay-option.is-selected {
+      border-color: #d4d4d4;
+      box-shadow: 0 0 0 1px #d4d4d4;
+    }
+    body[data-page="admin"] .planos-hint {
+      min-height: 1.25em;
+      margin: 0.5rem 0 0;
+      font-size: 0.875rem;
+      color: #f87171;
+    }
+    body[data-page="admin"] .planos-foot {
+      margin: 0.5rem 0 0;
+      font-size: 0.82rem;
+      text-align: left;
+      max-width: none;
+      line-height: 1.45;
+    }
+    body[data-page="admin"] .planos-modal[hidden] { display: none !important; }
+    body[data-page="admin"] .planos-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+    }
+    body[data-page="admin"] .planos-modal__box {
+      width: min(42rem, 100%);
+      max-height: min(82vh, 40rem);
+      display: flex;
+      flex-direction: column;
+      background: #141414;
+      color: #f5f5f5;
+      border: 1px solid #2a2a2a;
+      border-radius: 0.75rem;
+      padding: 0;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+    body[data-page="admin"] .planos-modal__head {
+      padding: 1.15rem 1.25rem 0.75rem;
+      border-bottom: 1px solid #2a2a2a;
+      flex-shrink: 0;
+    }
+    body[data-page="admin"] .planos-modal__head h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    body[data-page="admin"] .planos-modal__body {
+      padding: 1rem 1.25rem;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #d4d4d4;
+      flex: 1;
+      min-height: 0;
+    }
+    body[data-page="admin"] .planos-modal__body h2,
+    body[data-page="admin"] .planos-modal__body h3 {
+      color: #f5f5f5;
+      font-size: 1rem;
+      margin: 1.1rem 0 0.4rem;
+    }
+    body[data-page="admin"] .planos-modal__body p { margin: 0.55rem 0; }
+    body[data-page="admin"] .planos-modal__body ul { margin: 0.4rem 0; padding-left: 1.15rem; }
+    body[data-page="admin"] .planos-modal__body a { color: #e5e5e5; }
+    body[data-page="admin"] .planos-modal__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin: 0;
+      padding: 0.85rem 1.25rem 1.1rem;
+      border-top: 1px solid #2a2a2a;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    body[data-page="admin"] .planos-modal__actions .btn { min-height: 2.5rem; }
+    @media (max-width: 719px) {
+      body[data-page="admin"] .plan-pick { min-height: 0; }
+      body[data-page="admin"] .planos-modal { padding: 0.65rem; align-items: end; }
+      body[data-page="admin"] .planos-modal__box {
+        width: 100%;
+        max-height: min(90vh, 100%);
+        border-radius: 0.75rem 0.75rem 0.35rem 0.35rem;
+      }
+    }
+    body[data-page="admin"].planos-page .roboto-fab img,
+    body[data-page="admin"].planos-page .roboto-panel__head-icon img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    body[data-page="admin"].planos-page .roboto-fab[hidden] {
+      display: none !important;
+    }
+  </style>
 </head>
-<body data-page="planos">
-  <main class="container" style="padding:3rem 1.25rem;max-width:56rem;margin:0 auto;">
-    <p class="eyebrow">8xd.com.br</p>
-    <h1 class="font-display">Planos de site</h1>
-    <p>Basic em subdomínio. Medium e Pro com domínio próprio. Pagamento automático quando o gateway estiver em live.</p>
-    <div style="display:grid;gap:1.5rem;margin-top:2rem;">
-      <section>
-        <h2>Basic</h2>
-        <p>Subdomínio <code>*.8xd.com.br</code> · personalização mínima.</p>
-        <a class="btn btn-primary" href="/checkout.html?plan=basic">Quero Basic</a>
-      </section>
-      <section>
-        <h2>Medium</h2>
-        <p>Domínio próprio · personalização limitada · sem edição de Marca pelo cliente.</p>
-        <a class="btn btn-primary" href="/checkout.html?plan=medium">Quero Medium</a>
-      </section>
-      <section>
-        <h2>Pro</h2>
-        <p>Domínio próprio · personalização total · Marca e looks premium.</p>
-        <a class="btn btn-primary" href="/checkout.html?plan=pro">Quero Pro</a>
-      </section>
+<body data-page="admin" class="planos-page">
+  <div class="page">
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <div class="admin-brand">
+          <a class="admin-back" href="/" title="Voltar ao site" aria-label="Voltar ao site">←</a>
+        </div>
+        <p class="admin-user">8xd · Planos</p>
+      </div>
+    </header>
+
+    <main class="container admin-main planos-shell">
+      <header class="page-header planos-header" style="padding-top:0;">
+        <p class="eyebrow" id="planos-eyebrow">Oferta</p>
+        <h1 class="font-display" id="planos-title">Planos</h1>
+        <p id="planos-intro">Site pronto, WhatsApp e manutenção no pacote. Escolha o plano e como pagar.</p>
+      </header>
+
+      <div class="planos-grid" id="planos-grid" aria-label="Planos disponíveis"></div>
+
+      <div class="planos-actions">
+        <section class="planos-section" aria-labelledby="pay-title">
+          <h2 id="pay-title" class="font-display">Como prefere pagar?</h2>
+          <p class="text-muted" style="margin:0;font-size:0.9rem;">Escolha Asaas ou Stripe. O link de cobrança usa o provedor selecionado.</p>
+          <div class="pay-options" role="group" aria-label="Provedor de pagamento">
+            <button type="button" class="pay-option" data-provider="asaas">Asaas</button>
+            <button type="button" class="pay-option" data-provider="stripe">Stripe</button>
+          </div>
+        </section>
+
+        <section class="planos-section">
+          <label class="admin-check" style="align-items:flex-start;margin-top:0;cursor:pointer;">
+            <input type="checkbox" id="terms-accept" style="margin-top:0.2rem;">
+            <span class="planos-legal" style="font-size:0.95rem;line-height:1.45;">
+              Li e concordo com os
+              <a href="/termos.html" id="open-termos-modal">Termos de Serviço</a>
+              e a <a href="/privacidade.html" id="open-privacy-modal">Política de Privacidade</a>.
+            </span>
+          </label>
+          <p class="planos-hint" id="planos-hint" role="status" aria-live="polite"></p>
+          <p style="margin:1.15rem 0 0;">
+            <button type="button" class="btn btn-primary" id="planos-continue" disabled style="min-height:2.75rem;padding-inline:1.35rem;font-size:1rem;">Continuar para o checkout</button>
+          </p>
+        </section>
+
+        <p class="text-muted planos-foot" id="planos-referral">
+          Indicação: R$&nbsp;50 por indicação aceita, até R$&nbsp;150.
+          Preços da oferta vigente; impostos/taxas conforme a contratação.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <div class="planos-modal" id="legal-modal" hidden role="dialog" aria-modal="true" aria-labelledby="legal-modal-title">
+    <div class="planos-modal__box">
+      <div class="planos-modal__head">
+        <h2 id="legal-modal-title" class="font-display">Documento</h2>
+      </div>
+      <div class="planos-modal__body" id="legal-modal-body"></div>
+      <div class="planos-modal__actions">
+        <button type="button" class="btn btn-primary" id="legal-modal-close">Fechar</button>
+        <button type="button" class="btn btn-outline" id="legal-modal-full">Ver texto completo</button>
+      </div>
     </div>
-    <p style="margin-top:2rem;"><a href="/termos.html">Termos</a> · <a href="/privacidade.html">Privacidade</a></p>
-  </main>
+  </div>
+
+  <button type="button" class="roboto-fab" id="roboto-fab" aria-expanded="false" aria-controls="roboto-panel" title="Roboto — ajuda" aria-label="Abrir Roboto, ajuda sobre planos" hidden>
+    <img src="/assets/roboto-head.svg" alt="" width="40" height="35" decoding="async">
+  </button>
+  <div class="roboto-panel" id="roboto-panel" role="dialog" aria-labelledby="roboto-panel-title" hidden>
+    <div class="roboto-panel__head">
+      <div class="roboto-panel__head-icon" id="roboto-head-icon" aria-hidden="true">
+        <img src="/assets/roboto-head.svg" alt="" width="36" height="31" decoding="async">
+      </div>
+      <div>
+        <p class="roboto-panel__title" id="roboto-panel-title">Roboto</p>
+        <p class="roboto-panel__sub">Dúvidas rápidas sobre planos</p>
+      </div>
+      <button type="button" class="roboto-panel__close" id="roboto-close" aria-label="Fechar">×</button>
+    </div>
+    <div class="roboto-thread" id="roboto-thread" aria-live="polite"></div>
+    <div class="roboto-composer">
+      <button type="button" class="roboto-composer__btn" id="roboto-topics-open" aria-expanded="false" aria-controls="roboto-drawer">
+        Escolher tópico
+      </button>
+    </div>
+    <div class="roboto-drawer" id="roboto-drawer" hidden>
+      <div class="roboto-drawer__bar">
+        <p class="roboto-drawer__title">Tópicos</p>
+        <button type="button" class="roboto-drawer__close" id="roboto-drawer-close" aria-label="Fechar tópicos">×</button>
+      </div>
+      <div class="roboto-panel__filter">
+        <label class="visually-hidden" for="roboto-filter">Filtrar tópicos</label>
+        <input type="search" id="roboto-filter" placeholder="Filtrar tópicos…" autocomplete="off">
+      </div>
+      <div class="roboto-panel__topics" id="roboto-groups"></div>
+    </div>
+  </div>
+  <script type="application/json" id="roboto-data">{"context":{},"chips":[]}</script>
+
+  <script src="/js/planos-config.js"></script>
+  <script src="/js/planos.js"></script>
 </body>
 </html>
