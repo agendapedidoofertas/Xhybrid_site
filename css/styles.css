@@ -842,6 +842,32 @@ button, input, textarea { font: inherit; color: inherit; }
   box-shadow: 0 8px 24px color-mix(in oklch, #000 18%, transparent);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  transform: translate3d(0, 0, 0);
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* Cinema: faixa preta sobe/desce (só transform — sem salto de padding) */
+.site-header.is-faded-out,
+html.is-hero-cinema .site-header {
+  transform: translate3d(0, -110%, 0);
+  pointer-events: none !important;
+}
+
+/* Full screen: hero sobe por baixo do header, padding da page fica igual */
+html.is-hero-cinema .hero[data-hero-preview="1"] {
+  margin-top: calc(-1 * var(--header-offset));
+  min-height: calc(100vh + var(--header-offset));
+  min-height: calc(100dvh + var(--header-offset));
+  transition: margin-top 1.4s cubic-bezier(0.22, 1, 0.36, 1), min-height 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero[data-hero-preview="1"] {
+  transition: margin-top 1.4s cubic-bezier(0.22, 1, 0.36, 1), min-height 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.is-hero-cinema .hero[data-hero-preview="1"] .hero__preview-controls {
+  top: 1rem;
 }
 @media (min-width: 640px) {
   .site-header { padding-left: 1.25rem; padding-right: 1.25rem; }
@@ -1405,6 +1431,42 @@ html.no-motion *::after {
   transition: none !important;
 }
 
+/* Gate + FAB: anéis ping sempre ativos (mesmo com animações gerais off) */
+html.no-motion .hero__preview-ping,
+html.no-motion .fab-whatsapp__ping {
+  animation: ping 1.55s cubic-bezier(0, 0, 0.2, 1) infinite !important;
+}
+
+html.no-motion .hero[data-hero-preview="1"] .hero__copy,
+html.no-motion .hero[data-hero-preview="1"] .hero__copy.is-faded-out {
+  transition: opacity 1.4s ease, transform 1.4s ease !important;
+}
+
+html.no-motion .hero[data-hero-preview="1"] .hero__copy {
+  opacity: 1 !important;
+}
+
+html.no-motion .hero[data-hero-preview="1"] .hero__copy.is-faded-out {
+  opacity: 0 !important;
+  transform: translateY(10px) !important;
+}
+
+html.no-motion .site-header,
+html.no-motion .site-header.is-faded-out,
+html.no-motion.is-hero-cinema .site-header {
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+html.no-motion .site-header.is-faded-out,
+html.no-motion.is-hero-cinema .site-header {
+  transform: translate3d(0, -110%, 0) !important;
+  pointer-events: none !important;
+}
+
+html.no-motion .hero[data-hero-preview="1"] .hero__preview-video {
+  transition: opacity 0.5s ease !important;
+}
+
 /* Mantém rolagem suave do menu mesmo com animações desligadas */
 html.no-motion {
   scroll-behavior: smooth;
@@ -1451,6 +1513,219 @@ html.no-motion .reveal {
   position: relative;
   overflow: hidden;
   padding-top: 1.25rem;
+}
+
+/* Preview playlist + gate — fundo nítido + caixa desde o idle */
+.hero__preview,
+.hero__preview-controls {
+  display: none;
+}
+
+.hero[data-hero-preview="1"] {
+  min-height: min(100vh, 56rem);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  isolation: isolate;
+  overflow: visible; /* anéis ping não podem ser cortados */
+}
+
+/* Idle: hero media full-bleed e nítido (sem fumo) */
+.hero[data-hero-preview="1"] .hero__media {
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero[data-hero-preview="1"] .hero__media video,
+.hero[data-hero-preview="1"] .hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero[data-hero-preview="1"] .hero__media::after {
+  content: none !important;
+  background: none !important;
+}
+
+.hero[data-hero-preview="1"] .hero__figure {
+  display: none !important;
+}
+
+.hero[data-hero-preview="1"] .hero__grid {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: 1fr;
+  max-width: 44rem;
+  margin-inline: 0;
+  margin-right: auto;
+  width: 100%;
+  padding-top: 5rem;
+  padding-bottom: 2.5rem;
+  padding-inline: 1.25rem;
+}
+
+.hero[data-hero-preview="1"] .hero__copy {
+  width: min(100%, 28rem);
+  padding: 1.35rem 1.5rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1rem;
+  background: rgba(8, 8, 10, 0.82);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  filter: none !important;
+  transition: opacity 1.4s ease, transform 1.4s ease !important;
+  will-change: opacity, transform;
+}
+
+.hero[data-hero-preview="1"] .hero__copy.is-faded-out {
+  opacity: 0 !important;
+  pointer-events: none;
+  transform: translateY(10px) !important;
+}
+
+.hero[data-hero-preview="1"] .hero h1,
+.hero[data-hero-preview="1"] .hero__text,
+.hero[data-hero-preview="1"] .badge {
+  color: #f4f4f5;
+  text-shadow: none;
+}
+
+.hero[data-hero-preview="1"] .hero__text {
+  color: rgba(244, 244, 245, 0.9);
+}
+
+.hero[data-hero-preview="1"] .hero__copy .btn-outline {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #f4f4f5;
+}
+
+.hero[data-hero-preview="1"] .hero__preview-controls {
+  position: absolute;
+  top: calc(var(--header-offset, 5rem) + 0.5rem);
+  right: 1rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  overflow: visible;
+}
+
+.hero[data-hero-preview="1"] .hero__preview-sound,
+.hero[data-hero-preview="1"] .hero__preview-play,
+.hero[data-hero-preview="1"] .hero__preview-menu {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 9999px;
+  background: rgba(8, 8, 10, 0.78);
+  color: #fff;
+  cursor: pointer;
+  overflow: visible;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero[data-hero-preview="1"] .hero__preview-play[hidden],
+.hero[data-hero-preview="1"] .hero__preview-menu[hidden] {
+  display: none !important;
+}
+
+.hero[data-hero-preview="1"] .hero__preview-sound:hover,
+.hero[data-hero-preview="1"] .hero__preview-play:hover,
+.hero[data-hero-preview="1"] .hero__preview-menu:hover {
+  background: rgba(8, 8, 10, 0.92);
+}
+
+.hero[data-hero-preview="1"] .hero__preview-sound > svg,
+.hero[data-hero-preview="1"] .hero__preview-play > svg,
+.hero[data-hero-preview="1"] .hero__preview-menu > svg {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__preview-sound-icon {
+  display: none;
+}
+
+.hero__preview-sound[aria-pressed="true"] .hero__preview-sound-icon--on,
+.hero__preview-sound[aria-pressed="false"] .hero__preview-sound-icon--off {
+  display: block;
+}
+
+/* Ping estilo WhatsApp — anel explodindo */
+.hero__preview-ping {
+  display: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.65);
+  pointer-events: none;
+  z-index: 0;
+  transform-origin: center;
+}
+
+.hero[data-hero-preview="1"] .hero__preview-sound[data-pulse="1"] .hero__preview-ping,
+.hero[data-hero-preview="1"] .hero__preview-play[data-pulse="1"] .hero__preview-ping {
+  display: block;
+  animation: ping 1.55s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.hero[data-hero-preview="1"] .hero__preview-sound[data-pulse="1"],
+.hero[data-hero-preview="1"] .hero__preview-play[data-pulse="1"] {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.28),
+    0 10px 26px rgba(0, 0, 0, 0.4);
+}
+
+/* Após play: vídeo nítido no lugar da imagem */
+.hero[data-hero-preview="1"][data-hero-playing="1"] .hero__preview {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero[data-hero-preview="1"][data-hero-playing="1"] .hero__preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.hero[data-hero-preview="1"][data-hero-playing="1"] .hero__preview-video.is-crossfading {
+  opacity: 0;
+}
+
+.hero[data-hero-preview="1"][data-hero-playing="1"] .hero__media {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .hero[data-hero-preview="1"] .hero__grid {
+    padding-inline: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  .hero[data-hero-preview="1"] .hero__copy {
+    width: min(100%, 32rem);
+    padding: 1.6rem 1.75rem 1.75rem;
+  }
 }
 
 .hero__grid {
@@ -2224,7 +2499,7 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
   position: absolute;
   inset: 0;
   border-radius: var(--radius-full);
-  background: color-mix(in oklch, var(--primary) 35%, transparent);
+  background: color-mix(in oklch, #25d366 45%, transparent);
   animation: ping 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -2235,19 +2510,20 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
   width: 3.5rem;
   height: 3.5rem;
   border-radius: var(--radius-full);
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: #128c7e;
+  color: #fff;
   box-shadow:
     0 0 0 2px color-mix(in oklch, var(--background) 80%, transparent),
-    0 16px 30px color-mix(in oklch, var(--primary) 32%, transparent);
-  transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+    0 16px 30px color-mix(in oklch, #075e54 45%, transparent);
+  transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), background var(--duration) var(--ease);
   animation: fabFloat 4.2s ease-in-out infinite;
 }
 .fab-whatsapp:hover .fab-whatsapp__btn {
   transform: translateY(-3px) scale(1.04);
+  background: #075e54;
   box-shadow:
     0 0 0 2px color-mix(in oklch, var(--background) 80%, transparent),
-    0 22px 40px color-mix(in oklch, var(--primary) 40%, transparent);
+    0 22px 40px color-mix(in oklch, #075e54 55%, transparent);
 }
 .fab-whatsapp__btn svg { width: 1.7rem; height: 1.7rem; transition: transform var(--duration) var(--ease); }
 .fab-whatsapp:hover .fab-whatsapp__btn svg { transform: rotate(8deg); }
@@ -2479,7 +2755,8 @@ textarea.form-input { resize: vertical; min-height: 8.5rem; }
   to { opacity: 1; transform: translateX(0); }
 }
 @keyframes ping {
-  75%, 100% { transform: scale(2); opacity: 0; }
+  0% { transform: scale(1); opacity: 0.75; }
+  75%, 100% { transform: scale(2.35); opacity: 0; }
 }
 @keyframes skeleton {
   0% { background-position: 100% 0; }
@@ -3741,6 +4018,12 @@ html[data-look="xhybrid-signature"] .hero__media::after {
     radial-gradient(80% 60% at 70% 40%, transparent 0%, rgba(5, 5, 5, 0.55) 100%);
 }
 
+/* Vitrine preview: fundo nítido (sem overlay do Signature) */
+html[data-look="xhybrid-signature"] .hero[data-hero-preview="1"] .hero__media::after {
+  content: none !important;
+  background: none !important;
+}
+
 .page-cover__content,
 html[data-look="xhybrid-signature"] .hero__grid {
   position: relative;
@@ -4372,9 +4655,9 @@ html[data-look="tech-glass"] .site-footer {
   background: #000;
 }
 html[data-look="tech-glass"] .fab-whatsapp__btn {
-  background: #fff;
-  color: #000;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 12px 32px rgba(0, 0, 0, 0.5);
+  background: #128c7e;
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 12px 32px color-mix(in oklch, #075e54 50%, transparent);
 }
 
 html[data-look="tech-glass"] .reveal {
@@ -6210,7 +6493,6 @@ html[data-look="neon-night"] .gallery__btn img {
     transition: none;
   }
   .fab-whatsapp__btn,
-  .fab-whatsapp__ping,
   .fab-whatsapp__label,
   .skeleton,
   .xh-robot__svg,
@@ -6224,6 +6506,11 @@ html[data-look="neon-night"] .gallery__btn img {
   .pix-bot__arm--r,
   .spark-1, .spark-2, .spark-3, .spark-4 {
     animation: none !important;
+  }
+  /* Mantém anéis ping do FAB e do gate do hero */
+  .fab-whatsapp__ping,
+  .hero__preview-ping {
+    animation: ping 1.55s cubic-bezier(0, 0, 0.2, 1) infinite !important;
   }
   .xh-robot__svg animateTransform,
   .pix-bot animateTransform {

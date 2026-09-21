@@ -1001,6 +1001,10 @@ function initRevealAnimations() {
     ".hero__grid > div, .hero__figure, .feature-card, .product-card, .stat-card, .channel-card, .contact-form, .about-figure, .about-content, .cta-section, .section-header, .section-header-row, .page-header, .info-box"
   );
   targets.forEach((el) => {
+    // Preview vitrine: fade do título é controlado por is-faded-out (não pelo reveal)
+    if (el.classList.contains("hero__copy") && el.closest('.hero[data-hero-preview="1"]')) {
+      return;
+    }
     if (!el.classList.contains("reveal")) el.classList.add("reveal");
   });
 
@@ -1236,6 +1240,230 @@ function motionAllowsMedia() {
     !document.documentElement.classList.contains("no-motion") &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
+}
+
+/** Preview playlist no hero — só na vitrine (não em sites de lead) */
+function initHeroPreview() {
+  const hero = document.querySelector('.hero[data-hero-preview="1"]');
+  if (!hero) return;
+
+  // Leads: hero padrão, sem som/play/menu/playlist
+  if (isLeadSite()) {
+    hero.setAttribute("data-hero-preview", "0");
+    hero.removeAttribute("data-hero-playing");
+    document.documentElement.classList.remove("is-hero-cinema");
+    const controls = hero.querySelector(".hero__preview-controls");
+    if (controls) controls.hidden = true;
+    const preview = hero.querySelector(".hero__preview");
+    if (preview) {
+      preview.setAttribute("aria-hidden", "true");
+      const vid = preview.querySelector("video");
+      if (vid) {
+        vid.pause();
+        vid.removeAttribute("src");
+        try {
+          vid.load();
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    }
+    return;
+  }
+
+  const video = hero.querySelector(".hero__preview-video");
+  const soundBtn = hero.querySelector(".hero__preview-sound");
+  const playBtn = hero.querySelector(".hero__preview-play");
+  const menuBtn = hero.querySelector(".hero__preview-menu");
+  const copy = hero.querySelector(".hero__copy");
+  if (!video || !playBtn) return;
+
+  // Evita conflito com .reveal { opacity: 1 !important } em no-motion
+  if (copy) {
+    copy.classList.remove("reveal", "is-visible");
+  }
+
+  const playlist = [
+    "assets/hero-preview-2.mp4",
+    "assets/hero-preview-3.mp4",
+    "assets/hero-preview-4.mp4",
+    "assets/hero-preview-1.mp4",
+  ];
+
+  let trackIndex = 0;
+  let soundArmed = false;
+  let isPlaying = false;
+  let restoreTimer = 0;
+
+  const setPulse = (el, on) => {
+    if (!el) return;
+    if (on) el.setAttribute("data-pulse", "1");
+    else el.removeAttribute("data-pulse");
+  };
+
+  const setHeaderVisible = (visible) => {
+    document.documentElement.classList.toggle("is-hero-cinema", !visible);
+    const header = document.querySelector(".site-header");
+    if (header) {
+      header.classList.toggle("is-faded-out", !visible);
+      header.setAttribute("aria-hidden", visible ? "false" : "true");
+    }
+    if (menuBtn && !menuBtn.hidden) {
+      menuBtn.setAttribute("aria-expanded", visible ? "true" : "false");
+      menuBtn.setAttribute("aria-label", visible ? "Ocultar menu" : "Mostrar menu");
+      menuBtn.title = visible ? "Ocultar menu" : "Menu";
+    }
+  };
+
+  const setTitleVisible = (visible) => {
+    if (copy) {
+      copy.classList.toggle("is-faded-out", !visible);
+      copy.setAttribute("aria-hidden", visible ? "false" : "true");
+    }
+    // Hamburger só some quando o título reaparece
+    if (menuBtn) menuBtn.hidden = visible;
+    if (visible && restoreTimer) {
+      window.clearTimeout(restoreTimer);
+      restoreTimer = 0;
+    }
+  };
+
+  const enterCinema = () => {
+    setTitleVisible(false);
+    setHeaderVisible(false);
+  };
+
+  const restoreTitleAndMenu = () => {
+    setHeaderVisible(true);
+    setTitleVisible(true);
+  };
+
+  const syncSoundBtn = () => {
+    if (!soundBtn) return;
+    const muted = !soundArmed || !!video.muted;
+    soundBtn.setAttribute("aria-pressed", muted ? "false" : "true");
+    soundBtn.setAttribute("aria-label", muted ? "Ativar som" : "Mutar");
+    soundBtn.title = muted ? "Ativar som" : "Mutar";
+  };
+
+  const loadTrack = (index) => {
+    trackIndex = ((index % playlist.length) + playlist.length) % playlist.length;
+    video.src = playlist[trackIndex];
+    try {
+      video.load();
+    } catch (_) {
+      /* ignore */
+    }
+  };
+
+  const playCurrent = () => {
+    video.muted = !soundArmed;
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      return playPromise.catch(() => {
+        video.muted = true;
+        soundArmed = false;
+        setPulse(soundBtn, true);
+        syncSoundBtn();
+        return video.play().catch(() => {});
+      });
+    }
+    return Promise.resolve();
+  };
+
+  const crossfadeToNext = () => {
+    video.classList.add("is-crossfading");
+    window.setTimeout(() => {
+      loadTrack(trackIndex + 1);
+      const reveal = () => {
+        video.removeEventListener("playing", reveal);
+        video.classList.remove("is-crossfading");
+      };
+      video.addEventListener("playing", reveal);
+      playCurrent().finally(() => {
+        // Fallback se "playing" não disparar
+        window.setTimeout(reveal, 400);
+      });
+    }, 500);
+  };
+
+  const startPlayback = () => {
+    if (isPlaying) return;
+    isPlaying = true;
+    hero.setAttribute("data-hero-playing", "1");
+    hero.querySelector(".hero__preview")?.removeAttribute("aria-hidden");
+    playBtn.hidden = true;
+    setPulse(playBtn, false);
+    setPulse(soundBtn, !soundArmed);
+    enterCinema();
+
+    video.classList.remove("is-crossfading");
+    loadTrack(0);
+    playCurrent();
+    syncSoundBtn();
+  };
+
+  // Idle: fundo nítido + caixa + pulse no som
+  video.removeAttribute("src");
+  video.pause();
+  restoreTitleAndMenu();
+  setPulse(soundBtn, true);
+  setPulse(playBtn, false);
+  syncSoundBtn();
+
+  if (soundBtn) {
+    soundBtn.addEventListener("click", () => {
+      if (!isPlaying) {
+        soundArmed = !soundArmed;
+        video.muted = !soundArmed;
+        setPulse(soundBtn, !soundArmed);
+        setPulse(playBtn, soundArmed);
+        syncSoundBtn();
+        return;
+      }
+
+      const wantSound = video.muted;
+      video.muted = !wantSound;
+      soundArmed = !video.muted;
+      if (!video.muted) {
+        setPulse(soundBtn, false);
+        video.play().catch(() => {
+          video.muted = true;
+          soundArmed = false;
+          setPulse(soundBtn, true);
+          syncSoundBtn();
+        });
+      } else {
+        setPulse(soundBtn, true);
+      }
+      syncSoundBtn();
+    });
+  }
+
+  playBtn.addEventListener("click", () => {
+    startPlayback();
+  });
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", () => {
+      // Toggle: abre/fecha o menu do site; ☰ só some quando o título volta
+      const headerOpen = !document.documentElement.classList.contains("is-hero-cinema");
+      setHeaderVisible(!headerOpen);
+    });
+  }
+
+  video.addEventListener("ended", () => {
+    if (!isPlaying) return;
+    // Após o arquivo 4 (3º da sequência 2→3→4→1), título volta com 1s de atraso
+    const finishedFour = /hero-preview-4\.mp4(?:$|\?)/.test(playlist[trackIndex] || "");
+    if (finishedFour) {
+      restoreTimer = window.setTimeout(() => {
+        restoreTimer = 0;
+        restoreTitleAndMenu();
+      }, 1000);
+    }
+    crossfadeToNext();
+  });
 }
 
 /** Vídeo de capa — só no look Xhybrid Signature */
@@ -1677,6 +1905,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     attachImageFallback(img);
   });
   applyVideos();
+  initHeroPreview();
   applyImages();
   applySiteTexts();
   bindQuoteWhatsAppButtons();
