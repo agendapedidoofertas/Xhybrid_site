@@ -280,10 +280,23 @@ function leadPublicBase() {
   return "";
 }
 
-/** Link de página preservando o path do lead quando ativo. */
+/** Âncoras da página única (index) — páginas antigas viram hash. */
+const PAGE_SECTION_HASH = {
+  "index.html": "#inicio",
+  "sobre.html": "#sobre",
+  "galeria.html": "#projetos",
+  "contato.html": "#contato",
+};
+
+/** Link de página preservando o path do lead quando ativo (âncoras no index). */
 function leadPageHref(file) {
-  const name = String(file || "index.html").replace(/^\//, "");
+  const name = String(file || "index.html").replace(/^\//, "").split(/[?#]/)[0] || "index.html";
   const base = leadPublicBase();
+  const hash = PAGE_SECTION_HASH[name];
+  if (hash) {
+    if (!base) return "index.html" + hash;
+    return base + hash;
+  }
   if (!base) return name;
   if (name === "index.html" || name === "") return base;
   return base + "/" + name;

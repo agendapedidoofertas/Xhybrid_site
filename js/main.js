@@ -672,8 +672,173 @@ function enforcePlanPages() {
   const page = document.body.dataset.page || "index";
   if (page === "sobre" || page === "galeria" || page === "contato") {
     if (!pageIsEnabled(page)) {
-      window.location.replace("index.html");
+      window.location.replace(leadPageHref("index.html"));
     }
+  }
+}
+
+/** Mapa hash ↔ página do menu (página única). */
+function spaHashToPage(hash) {
+  const id = String(hash || "").replace(/^#/, "").toLowerCase();
+  return { inicio: "index", sobre: "sobre", projetos: "galeria", contato: "contato" }[id] || "index";
+}
+
+function setSpaNavActive(page) {
+  document.querySelectorAll(".site-nav a, .mobile-nav a").forEach((a) => {
+    const href = a.getAttribute("href") || "";
+    let linkPage = "index";
+    const hashMatch = href.match(/#(inicio|sobre|projetos|contato)\b/i);
+    if (hashMatch) {
+      linkPage = spaHashToPage(hashMatch[0]);
+    } else if (/sobre\.html/i.test(href)) linkPage = "sobre";
+    else if (/galeria\.html/i.test(href)) linkPage = "galeria";
+    else if (/contato\.html/i.test(href)) linkPage = "contato";
+    a.classList.toggle("is-active", linkPage === page);
+  });
+}
+
+let spaNavBusy = false;
+let spaScrollRaf = 0;
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+/** Rolagem com easing (mais perceptível que o smooth nativo). */
+function animateSpaScroll(toY, durationMs) {
+  return new Promise((resolve) => {
+    const fromY = window.pageYOffset;
+    const dist = toY - fromY;
+    if (Math.abs(dist) < 2) {
+      resolve();
+      return;
+    }
+    if (spaScrollRaf) {
+      cancelAnimationFrame(spaScrollRaf);
+      spaScrollRaf = 0;
+    }
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      window.scrollTo(0, fromY + dist * easeInOutCubic(t));
+      if (t < 1) {
+        spaScrollRaf = requestAnimationFrame(step);
+      } else {
+        spaScrollRaf = 0;
+        resolve();
+      }
+    };
+    spaScrollRaf = requestAnimationFrame(step);
+  });
+}
+
+function pulseSpaSection(el) {
+  if (!el) return;
+  el.classList.remove("is-spa-arrive");
+  // reflow para reiniciar a animação
+  void el.offsetWidth;
+  el.classList.add("is-spa-arrive");
+  const clear = () => el.classList.remove("is-spa-arrive");
+  el.addEventListener("animationend", clear, { once: true });
+  window.setTimeout(clear, 1100);
+}
+
+function scrollToSpaSection(hash, { updateHistory = true } = {}) {
+  const id = String(hash || "").replace(/^#/, "");
+  if (!id) return false;
+  const el = document.getElementById(id);
+  if (!el || el.hidden) return false;
+  if (spaNavBusy) return false;
+
+  spaNavBusy = true;
+
+  const anchor =
+    el.querySelector(".page-header, .page-cover__content, .about-grid, .contact-grid") || el;
+  const header = document.querySelector(".site-header");
+  const offset = (header ? header.getBoundingClientRect().height : 0) + 6;
+  const top = Math.max(0, anchor.getBoundingClientRect().top + window.pageYOffset - offset);
+  const distance = Math.abs(top - window.pageYOffset);
+  const duration = Math.min(1100, Math.max(520, distance * 0.55));
+
+  if (updateHistory) {
+    const next = "#" + id;
+    if (location.hash !== next) {
+      history.replaceState(null, "", next);
+    }
+  }
+  setSpaNavActive(spaHashToPage("#" + id));
+
+  animateSpaScroll(top, duration).then(() => {
+    pulseSpaSection(el);
+    spaNavBusy = false;
+  });
+
+  return true;
+}
+
+function initOnePageNav() {
+  if ((document.body.dataset.page || "") !== "index") return;
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      const link = event.target.closest("a[href]");
+      if (!link) return;
+      if (event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (link.target && link.target !== "_self") return;
+      if (link.hasAttribute("download")) return;
+
+      let url;
+      try {
+        url = new URL(link.href, window.location.href);
+      } catch (_) {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+      const hash = url.hash || "";
+      if (!/^#(inicio|sobre|projetos|contato)$/i.test(hash)) return;
+
+      // Página única: âncoras do menu com rolagem com efeito
+      event.preventDefault();
+      event.stopPropagation();
+      scrollToSpaSection(hash);
+    },
+    true,
+  );
+
+  const sections = ["inicio", "sobre", "projetos", "contato"]
+    .map((id) => document.getElementById(id))
+    .filter((el) => el && !el.hidden);
+
+  if (sections.length && "IntersectionObserver" in window) {
+    const observed = new Map();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          observed.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0);
+        });
+        let bestId = "inicio";
+        let bestRatio = 0;
+        observed.forEach((ratio, id) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        });
+        if (bestRatio > 0) setSpaNavActive(spaHashToPage("#" + bestId));
+      },
+      { rootMargin: "-20% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+    sections.forEach((el) => io.observe(el));
+  }
+
+  if (location.hash && /^#(inicio|sobre|projetos|contato)$/i.test(location.hash)) {
+    requestAnimationFrame(() => {
+      scrollToSpaSection(location.hash, { updateHistory: false });
+    });
+  } else {
+    setSpaNavActive("index");
   }
 }
 
@@ -1183,6 +1348,8 @@ function setupPageTransitions() {
       }
       if (url.origin !== window.location.origin) return;
       if (url.protocol === "https:" && /wa\.me/i.test(url.hostname)) return;
+      // Âncoras da página única: não dispara transição de saída
+      if (/^#(inicio|sobre|projetos|contato)$/i.test(url.hash || "")) return;
       if (!/\.html?$/i.test(url.pathname) && !/\/$/.test(url.pathname)) return;
       if (
         url.pathname === window.location.pathname &&
@@ -1281,23 +1448,40 @@ async function fetchPublishedOverlay(lead) {
   return data.settings;
 }
 
-/** Reescreve links .html do HTML estático para permanecer no path do lead. */
+/** Reescreve links .html do HTML estático para âncoras da página única (e path do lead). */
 function rewriteLeadInternalLinks() {
-  const base = leadPublicBase();
-  if (!base) return;
+  const hashToFile = {
+    inicio: "index.html",
+    sobre: "sobre.html",
+    projetos: "galeria.html",
+    contato: "contato.html",
+  };
+
   document.querySelectorAll("a[href]").forEach((a) => {
     // Nunca tocar CTAs externos (WhatsApp/orçamento, mailto, etc.)
     if (a.hasAttribute("data-site-href")) return;
     if (a.id === "hero-whatsapp" || a.id === "cta-whatsapp") return;
     if (a.classList.contains("fab-whatsapp")) return;
     const href = a.getAttribute("href") || "";
-    if (!href || /^(https?:|mailto:|tel:|#|\/\/|wa\.me)/i.test(href)) return;
+    if (!href || /^(https?:|mailto:|tel:|\/\/)/i.test(href)) return;
     if (/wa\.me/i.test(href)) return;
-    const clean = href.replace(/^\.\//, "").replace(/^\//, "");
-    if (!/\.html(?:[?#].*)?$/i.test(clean) && clean !== "index.html") return;
-    if (href.startsWith(base)) return;
-    const file = clean.split(/[?#]/)[0] || "index.html";
-    a.setAttribute("href", leadPageHref(file));
+
+    let file = "";
+    const spaHash = href.match(/#(inicio|sobre|projetos|contato)\b/i);
+    if (spaHash) {
+      // Já tem âncora SPA — preservar a seção (não cair em index.html → #inicio)
+      file = hashToFile[spaHash[1].toLowerCase()] || "index.html";
+    } else {
+      const clean = href.replace(/^\.\//, "").replace(/^\//, "");
+      if (!/\.html(?:[?#].*)?$/i.test(clean)) return;
+      file = clean.split(/[?#]/)[0] || "index.html";
+      if (!PAGE_SECTION_HASH[file]) return;
+    }
+
+    const next = leadPageHref(file);
+    if (next && a.getAttribute("href") !== next) {
+      a.setAttribute("href", next);
+    }
   });
 }
 
@@ -1507,6 +1691,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupContactForm();
   initRevealAnimations();
   setupPageTransitions();
+  initOnePageNav();
   bindQuoteWhatsAppButtons();
   revealLeadPage();
 });

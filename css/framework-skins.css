@@ -328,11 +328,19 @@ html[data-framework-skin="tailwind"] .container {
 }
 
 /* Linear / Vercel: header mais preciso, hero centrado em respiração */
+html[data-framework-skin="tailwind"] .site-header {
+  background: var(--background) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 html[data-framework-skin="tailwind"] .site-header__inner {
   border-radius: 9999px;
   border-color: color-mix(in oklch, var(--border) 70%, transparent);
-  background: color-mix(in oklch, var(--card) 72%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in oklch, #fff 4%, transparent), 0 10px 40px color-mix(in oklch, #000 22%, transparent);
+  background: var(--card) !important;
+  box-shadow: 0 0 0 1px color-mix(in oklch, #fff 4%, transparent);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html[data-framework-skin="tailwind"] .hero h1 {
