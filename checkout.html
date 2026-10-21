@@ -7,15 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/admin/admin.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="admin/admin.css">
 </head>
 <body data-page="admin">
   <div class="page">
     <header class="site-header">
       <div class="container site-header__inner">
         <div class="admin-brand">
-          <a class="admin-back" href="/planos.html" title="Voltar aos planos" aria-label="Voltar aos planos">←</a>
+          <a class="admin-back" href="planos.html" title="Voltar aos planos" aria-label="Voltar aos planos">←</a>
         </div>
         <p class="admin-user">8xd · Checkout</p>
       </div>
@@ -25,7 +25,7 @@
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow">Contratação</p>
         <h1 class="font-display">Checkout</h1>
-        <p id="plan-label" class="text-muted">Escolha um plano em <a href="/planos.html">planos</a>.</p>
+        <p id="plan-label" class="text-muted">Escolha um plano em <a href="planos.html">planos</a>.</p>
       </header>
 
       <form id="checkout-form" class="contact-form admin-form" style="margin-top:1.5rem;">
@@ -39,7 +39,11 @@
         </div>
         <div class="form-group">
           <label for="whatsapp">WhatsApp</label>
-          <input id="whatsapp" name="whatsapp" class="form-input" required>
+          <input id="whatsapp" name="whatsapp" class="form-input" placeholder="(11) 98765-4321" required>
+        </div>
+        <div class="form-group">
+          <label for="cpf_cnpj">CPF ou CNPJ</label>
+          <input id="cpf_cnpj" name="cpf_cnpj" class="form-input" placeholder="000.000.000-00 ou 00.000.000/0001-00" required>
         </div>
         <input type="hidden" name="plan" id="plan" value="basic">
         <input type="hidden" name="provider" id="provider" value="asaas">
@@ -47,8 +51,8 @@
           <input type="checkbox" id="terms_accepted" required style="margin-top:0.2rem;">
           <span class="planos-legal" style="font-size:0.9rem;line-height:1.4;">
             Confirmo que li e concordo com os
-            <a href="/termos.html" id="checkout-open-termos">Termos de Serviço</a>
-            e a <a href="/privacidade.html" id="checkout-open-privacy">Privacidade</a>.
+            <a href="termos.html" id="checkout-open-termos">Termos de Serviço</a>
+            e a <a href="privacidade.html" id="checkout-open-privacy">Privacidade</a>.
           </span>
         </label>
         <p style="margin-top:1.25rem;">
@@ -113,7 +117,12 @@
       const fullCache = { terms: '', privacy: '' };
 
       function escapeHtml(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return String(s || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
       function summaryHtml(text) {
         return String(text || '')
@@ -132,14 +141,14 @@
             titleS: 'Privacidade / LGPD (resumo)',
             titleF: 'Política de Privacidade (LGPD)',
             summary: d.privacy_summary || '',
-            url: d.privacy_url || '/privacidade.html',
+            url: d.privacy_url || 'privacidade.html',
           };
         }
         return {
           titleS: 'Termos de Serviço (resumo)',
           titleF: 'Termos de Serviço',
           summary: d.terms_summary || '',
-          url: d.terms_url || '/termos.html',
+          url: d.terms_url || 'termos.html',
         };
       }
       function showSummary() {
@@ -164,7 +173,17 @@
           .then(function (html) {
             var doc = new DOMParser().parseFromString(html, 'text/html');
             var main = doc.querySelector('main') || doc.body;
-            fullCache[kind] = main.innerHTML;
+            var clone = main.cloneNode(true);
+            clone.querySelectorAll('script, style, link, nav, header, footer, iframe, object, embed').forEach(function (n) { n.remove(); });
+            clone.querySelectorAll('*').forEach(function (el) {
+              for (var i = el.attributes.length - 1; i >= 0; i--) {
+                var attr = el.attributes[i].name.toLowerCase();
+                if (attr.startsWith('on') || (attr === 'href' && el.attributes[i].value.trim().toLowerCase().startsWith('javascript:'))) {
+                  el.removeAttribute(el.attributes[i].name);
+                }
+              }
+            });
+            fullCache[kind] = clone.innerHTML;
             modalBody.innerHTML = fullCache[kind];
           })
           .catch(function () {
@@ -180,7 +199,7 @@
         modalBody.innerHTML = '<p>Carregando…</p>';
         var ready = offerCache
           ? Promise.resolve(offerCache)
-          : fetch('/api/planos_offer.php').then(function (r) { return r.ok ? r.json() : {}; });
+          : fetch('api/planos_offer.php').then(function (r) { return r.ok ? r.json() : {}; });
         ready
           .then(function (data) {
             offerCache = data || {};
@@ -222,27 +241,36 @@
         }
         status.textContent = 'Enviando…';
         try {
-          const res = await fetch('/api/checkout_stub.php', {
+          const res = await fetch('api/checkout_stub.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               plan: p,
               provider: provider,
               terms_accepted: true,
-              company: document.getElementById('company').value,
-              email: document.getElementById('email').value,
-              whatsapp: document.getElementById('whatsapp').value,
+              company: document.getElementById('company').value.trim(),
+              cpf_cnpj: document.getElementById('cpf_cnpj').value.trim(),
+              email: document.getElementById('email').value.trim(),
+              whatsapp: document.getElementById('whatsapp').value.trim(),
             }),
           });
           const data = await res.json();
           if (!data.ok) {
-            status.textContent = data.error || 'Falha';
+            status.textContent = data.error || 'Falha ao processar.';
             return;
           }
-          status.textContent = data.message || 'Recebido.';
+          status.textContent = '';
           if (data.checkout_url) {
+            var safeUrl = encodeURI(data.checkout_url);
             status.innerHTML =
-              (data.message || 'Ok') + ' <a href="' + data.checkout_url + '">Pagar</a>';
+              '<div style="margin-top:1.25rem;padding:1.25rem;background:#142417;border:1px solid #22c55e;border-radius:0.75rem;text-align:center;">' +
+              '<p style="color:#4ade80;font-weight:700;font-size:1.1rem;margin:0 0 0.5rem;">Cobrança gerada com sucesso!</p>' +
+              '<p style="color:#d4d4d4;font-size:0.9rem;margin:0 0 1.25rem;">Abrindo a tela de pagamento em instantes...</p>' +
+              '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display:inline-block;background:#22c55e;color:#052e16;font-weight:700;padding:0.85rem 1.75rem;font-size:1rem;text-decoration:none;border-radius:0.5rem;box-shadow:0 4px 14px rgba(34,197,94,0.35);">Pagar fatura (PIX / Cartão) →</a>' +
+              '</div>';
+            setTimeout(function () { location.href = safeUrl; }, 1500);
+          } else {
+            status.textContent = data.message || 'Recebido.';
           }
         } catch (_) {
           status.textContent = 'Falha de rede. Tente de novo.';

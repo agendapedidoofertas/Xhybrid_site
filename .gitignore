@@ -10,12 +10,24 @@ Thumbs.db
 # SQLite
 data/*.sqlite
 data/*.sqlite-journal
-# Local PIX / publish secrets / server path layout
+*.sqlite
+*.sqlite3
+*.db
+
+# Local secrets & credentials
+.env
+*.env
 data/pix_config.php
 data/crm_bridge.php
 data/app_base_path.php
+data/payment_gateway.php
+data/places_api_key.php
+
 # Rate limit / backups
 data/rate/
 data/backups/*
 !data/backups/.gitkeep
 
+# Dependencies & Auth profiles
+node_modules/
+.auth/

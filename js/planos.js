@@ -169,7 +169,15 @@
       const parsed = new DOMParser().parseFromString(html, 'text/html');
       const main = parsed.querySelector('main') || parsed.body;
       const clone = main.cloneNode(true);
-      clone.querySelectorAll('script, style, link, nav, header, footer').forEach((n) => n.remove());
+      clone.querySelectorAll('script, style, link, nav, header, footer, iframe, object, embed').forEach((n) => n.remove());
+      clone.querySelectorAll('*').forEach((el) => {
+        for (let i = el.attributes.length - 1; i >= 0; i--) {
+          const attr = el.attributes[i].name.toLowerCase();
+          if (attr.startsWith('on') || (attr === 'href' && el.attributes[i].value.trim().toLowerCase().startsWith('javascript:'))) {
+            el.removeAttribute(el.attributes[i].name);
+          }
+        }
+      });
       fullCache[legalKind] = clone.innerHTML;
       if (modalBody) modalBody.innerHTML = fullCache[legalKind];
     } catch (e) {

@@ -21,6 +21,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     exit;
 }
 
+// Rate limit por IP (12 tentativas a cada 10 minutos)
+$ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+$rateDir = dirname(__DIR__) . '/data/rate';
+if (!is_dir($rateDir)) {
+    @mkdir($rateDir, 0755, true);
+}
+$rateFile = $rateDir . '/checkout-' . hash('sha256', $ip) . '.json';
+$now = time();
+$hits = [];
+if (is_file($rateFile)) {
+    $prev = json_decode((string) file_get_contents($rateFile), true);
+    if (is_array($prev)) {
+        $hits = array_values(array_filter($prev, static fn ($t) => is_int($t) && ($now - $t) < 600));
+    }
+}
+if (count($hits) >= 12) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'error' => 'Muitas tentativas. Aguarde alguns minutos.']);
+    exit;
+}
+$hits[] = $now;
+@file_put_contents($rateFile, json_encode($hits));
+
 $raw = file_get_contents('php://input') ?: '';
 $data = json_decode($raw, true);
 if (!is_array($data)) {
@@ -48,10 +71,23 @@ if (!in_array($provider, ['asaas', 'stripe'], true)) {
 $company = trim(str_replace(['<', '>'], '', (string) ($data['company'] ?? '')));
 $email = trim((string) ($data['email'] ?? ''));
 $whatsapp = preg_replace('/\D+/', '', (string) ($data['whatsapp'] ?? '')) ?? '';
+$cpfCnpj = preg_replace('/\D+/', '', (string) ($data['cpf_cnpj'] ?? '')) ?? '';
 
 if ($company === '' || strlen($company) < 2) {
     http_response_code(422);
     echo json_encode(['ok' => false, 'error' => 'Informe a empresa.']);
+    exit;
+}
+
+if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Informe um e-mail válido.']);
+    exit;
+}
+
+if (strlen($whatsapp) < 10 || strlen($whatsapp) > 15) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Informe um número de WhatsApp válido com DDD.']);
     exit;
 }
 
@@ -67,6 +103,12 @@ try {
     require_once $crmRoot . '/lib/crm/bootstrap.php';
     require_once $crmRoot . '/lib/payment/PaymentService.php';
 
+    if ($provider === 'asaas' && payment_mode() === 'live' && strlen($cpfCnpj) !== 11 && strlen($cpfCnpj) !== 14) {
+        http_response_code(422);
+        echo json_encode(['ok' => false, 'error' => 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.']);
+        exit;
+    }
+
     $pdo = db();
     $id = crm_lead_save_manual($pdo, [
         'company_name' => $company,
@@ -76,12 +118,16 @@ try {
         'plan_tier' => $plan,
         'payment_status' => 'pending',
         'status' => 'NOVO',
+        'notes' => $cpfCnpj !== '' ? ('Documento: ' . $cpfCnpj) : '',
     ]);
 
     $checkout = '';
     $msg = 'Lead #' . $id . ' criado. Em modo manual a equipe confirma o pagamento.';
     if (payment_mode() !== 'manual') {
-        $created = payment_create_charge_for_lead($pdo, $id, $plan, $provider);
+        $created = payment_create_charge_for_lead($pdo, $id, $plan, $provider, [
+            'cpf_cnpj' => $cpfCnpj,
+            'whatsapp' => $whatsapp,
+        ]);
         $checkout = $created['checkout_url'];
         $msg = 'Lead criado. Conclua o pagamento no link (' . $provider . ').';
     }
@@ -89,6 +135,7 @@ try {
         'plan' => $plan,
         'provider' => $provider,
         'terms_accepted' => true,
+        'has_cpf_cnpj' => $cpfCnpj !== '',
     ]);
 
     echo json_encode([
@@ -100,5 +147,6 @@ try {
 } catch (Throwable $e) {
     error_log('[checkout_stub] ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'Falha ao criar lead.']);
+    $detail = payment_mode() !== 'manual' ? $e->getMessage() : 'Falha ao criar lead.';
+    echo json_encode(['ok' => false, 'error' => $detail]);
 }

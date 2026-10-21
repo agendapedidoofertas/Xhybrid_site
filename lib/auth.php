@@ -138,6 +138,12 @@ function require_admin(): array
     return $user;
 }
 
+/** Alias para compatibilidade com áreas de cliente / CRM. */
+function require_login(): array
+{
+    return require_admin();
+}
+
 /** Somente role admin (gestão de usuários / fábrica). */
 function require_role_admin(): array
 {

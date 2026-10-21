@@ -112,7 +112,7 @@
       claimBtn.disabled = true;
       setStatus("Verificando…", "");
       try {
-        const res = await fetch("/api/payment_claim.php", {
+        const endpoint = (window.__xhybridAppBase || "") + "/api/payment_claim.php"; const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

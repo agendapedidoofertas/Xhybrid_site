@@ -70,8 +70,15 @@ function invite_consume(PDO $pdo, string $token, string $username, string $passw
     if ((string) $row['expires_at'] < gmdate('c')) {
         throw new RuntimeException('Convite expirado.');
     }
+
+    // Marca como utilizado de forma atômica para barrar requisições concorrentes
+    $now = gmdate('c');
+    $upd = $pdo->prepare("UPDATE user_invites SET used_at = :u WHERE id = :id AND (used_at = '' OR used_at IS NULL)");
+    $upd->execute([':u' => $now, ':id' => (int) $row['id']]);
+    if ($upd->rowCount() !== 1) {
+        throw new RuntimeException('Convite já utilizado.');
+    }
+
     require_once __DIR__ . '/auth.php';
     create_user($username, $password, (string) $row['role'], (int) $row['crm_lead_id']);
-    $pdo->prepare('UPDATE user_invites SET used_at = :u WHERE id = :id')
-        ->execute([':u' => gmdate('c'), ':id' => (int) $row['id']]);
 }
