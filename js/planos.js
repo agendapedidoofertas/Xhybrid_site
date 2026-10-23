@@ -2,7 +2,7 @@
   const fallback = window.XH_PLANOS;
   if (!fallback) return;
 
-  const state = { plan: '', provider: '', accepted: false, offer: null };
+  const state = { plan: '', provider: 'asaas', accepted: false, offer: null };
   const grid = document.getElementById('planos-grid');
   const hint = document.getElementById('planos-hint');
   const continueBtn = document.getElementById('planos-continue');
@@ -72,14 +72,31 @@
     const highlight = cfg.highlight || 'pleno';
     grid.innerHTML = '';
 
-    Object.values(plans).forEach((p) => {
+    const visiblePlans = Object.values(plans).filter((p) => !p.hidden);
+    const countStr = String(visiblePlans.length);
+    grid.dataset.count = countStr;
+    const shell = document.querySelector('.planos-shell');
+    if (shell) {
+      shell.dataset.count = countStr;
+    }
+
+    if (visiblePlans.length === 0) {
+      grid.innerHTML = '<p class="text-muted" style="text-align:center;grid-column:1/-1;">Nenhum plano disponível no momento.</p>';
+      return;
+    }
+
+    if (!state.plan || (plans[state.plan] && plans[state.plan].hidden)) {
+      const hasHighlight = visiblePlans.some((p) => p.id === highlight);
+      state.plan = hasHighlight ? highlight : visiblePlans[0].id;
+    }
+
+    visiblePlans.forEach((p) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'plan-pick' + (p.id === highlight ? ' is-highlight' : '');
       btn.dataset.plan = p.id;
-      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-pressed', p.id === state.plan ? 'true' : 'false');
 
-      const total = (p.planCents || 0) + (p.maintenanceCents || 0);
       const badge =
         p.id === highlight
           ? '<span class="plan-pick__badge">Mais escolhido</span>'
@@ -92,12 +109,9 @@
         '</h2>' +
         '<p class="plan-pick__price">' +
         money(p.planCents) +
-        ' <span>/mês</span></p>' +
+        '</p>' +
         '<p class="plan-pick__maint">Manutenção: ' +
         money(p.maintenanceCents) +
-        ' /mês</p>' +
-        '<p class="plan-pick__total">Total aproximado: ' +
-        money(total) +
         ' /mês</p>' +
         '<ul>' +
         (p.bullets || []).map((b) => '<li>' + escapeHtml(b) + '</li>').join('') +
@@ -236,8 +250,9 @@
       showHint('Escolha um plano.');
       return;
     }
-    if (!state.provider) {
-      showHint('Escolha Asaas ou Stripe.');
+    const cfg = offer();
+    if (cfg.plans && cfg.plans[state.plan] && cfg.plans[state.plan].hidden) {
+      showHint('O plano selecionado não está disponível.');
       return;
     }
     if (!state.accepted) {
@@ -246,7 +261,7 @@
     }
     const q = new URLSearchParams({
       plan: state.plan,
-      provider: state.provider,
+      provider: 'asaas',
       terms: '1',
     });
     location.href = '/checkout.html?' + q.toString();

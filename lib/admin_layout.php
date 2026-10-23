@@ -25,6 +25,7 @@ function admin_icon_paths(string $key): string
         'leads' => '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
         'backup' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
         'users' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+        'webhooks' => '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
         'password' => '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
         'lead_site' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
         'painel' => '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
@@ -87,6 +88,7 @@ function admin_agency_hub_links(array $user): array
         ['href' => 'services.php', 'icon' => 'services', 'label' => 'Serviços', 'desc' => 'Catálogo de serviços', 'show' => user_can_page($user, 'services')],
         ['href' => 'texts.php', 'icon' => 'texts', 'label' => 'Textos', 'desc' => 'Editar textos da vitrine', 'show' => user_can_page($user, 'texts')],
         ['href' => 'users.php', 'icon' => 'users', 'label' => 'Usuários', 'desc' => 'Contas e permissões', 'show' => user_is_admin($user)],
+        ['href' => 'webhooks.php', 'icon' => 'webhooks', 'label' => 'Webhooks', 'desc' => 'Auditoria Asaas em tempo real', 'show' => user_is_admin($user)],
         ['href' => 'account.php', 'icon' => 'password', 'label' => 'Minha assinatura', 'desc' => 'Plano e pagamento', 'show' => user_is_client($user)],
         ['href' => 'sections.php', 'icon' => 'sections', 'label' => 'Visibilidade', 'desc' => 'Seções do site', 'show' => user_can_page($user, 'sections')],
     ];

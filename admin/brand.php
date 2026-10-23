@@ -44,7 +44,7 @@ $flash = '';
 $error = '';
 $defs = settings_definitions();
 $values = $leadRow ? lead_admin_settings($leadRow) : settings_all(db());
-$groups = ['brand', 'seo', 'analytics'];
+$groups = ['brand', 'faq', 'seo', 'analytics'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
@@ -59,6 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input[$key] = (string) ($_POST[$key] ?? '');
         }
     }
+    // Ativação / visibilidade do acordeão (section_faq) na tela de marca
+    $input['section_faq'] = isset($_POST['section_faq']) ? '1' : '0';
+
     try {
         if ($leadId) {
             lead_admin_save_settings(db(), $leadId, $input);
@@ -74,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (isset($_GET['ok'])) {
-    $flash = 'Marca, SEO e analytics salvos.';
+    $flash = 'Marca, acordeão, SEO e analytics salvos com sucesso.';
     $values = $leadId
         ? lead_admin_settings(lead_admin_resolve($leadId) ?? $leadRow)
         : settings_all(db());
@@ -82,6 +85,7 @@ if (isset($_GET['ok'])) {
 
 $sectionTitles = [
     'brand' => 'Identidade',
+    'faq' => 'Acordeão / FAQ (Dúvidas Frequentes)',
     'seo' => 'SEO por página (vazio = usa SEO global)',
     'analytics' => 'Analytics',
 ];
@@ -91,7 +95,7 @@ admin_header('Marca', $user);
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
         <h1 class="font-display">Marca</h1>
-        <p>Identidade, SEO por página, Analytics.</p>
+        <p>Identidade, Acordeão / FAQ, SEO por página e Analytics.</p>
       </header>
 
       <?php if ($flash): ?><p class="admin-flash"><?= h($flash) ?></p><?php endif; ?>
@@ -101,7 +105,16 @@ admin_header('Marca', $user);
         <?= csrf_field() ?>
         <?php if ($leadId): ?><input type="hidden" name="lead_id" value="<?= (int) $leadId ?>"><?php endif; ?>
         <?php foreach ($groups as $group): ?>
-          <h2 class="admin-appearance__label" style="margin-top:<?= $group === 'brand' ? '0' : '1.5rem' ?>;"><?= h($sectionTitles[$group]) ?></h2>
+          <h2 class="admin-appearance__label" style="margin-top:<?= $group === 'brand' ? '0' : '2rem' ?>;"><?= h($sectionTitles[$group]) ?></h2>
+          <?php if ($group === 'faq'): ?>
+            <div style="margin-bottom:1.25rem;padding:0.85rem 1.1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:8px;">
+              <label class="admin-check" style="margin:0;cursor:pointer;">
+                <input type="checkbox" name="section_faq" value="1" <?= ($values['section_faq'] ?? '0') === '1' ? 'checked' : '' ?>>
+                <span><strong>Exibir seção de Acordeão / FAQ na página inicial</strong></span>
+              </label>
+              <p style="font-size:0.85rem;color:var(--text-muted, #94a3b8);margin:0.35rem 0 0 1.75rem;">Quando ativado, os itens de perguntas e respostas abaixo serão exibidos no site.</p>
+            </div>
+          <?php endif; ?>
           <?php foreach ($defs as $key => $def): ?>
             <?php if (($def['group'] ?? '') !== $group) continue; ?>
             <?php if (($def['type'] ?? '') === 'choice'): ?>
@@ -113,7 +126,7 @@ admin_header('Marca', $user);
               <div class="form-group">
                 <label for="<?= h($key) ?>"><?= h($def['label']) ?> <span class="admin-charlimit" data-for="<?= h($key) ?>">0/<?= (int) $def['max'] ?></span></label>
                 <?php if (($def['type'] ?? '') === 'text' && (int) $def['max'] > 80): ?>
-                  <textarea id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" rows="2" maxlength="<?= (int) $def['max'] ?>"><?= h($values[$key] ?? '') ?></textarea>
+                  <textarea id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" rows="<?= (int) $def['max'] > 200 ? '4' : '2' ?>" maxlength="<?= (int) $def['max'] ?>"><?= h($values[$key] ?? '') ?></textarea>
                 <?php else: ?>
                   <input id="<?= h($key) ?>" name="<?= h($key) ?>" class="form-input" maxlength="<?= (int) $def['max'] ?>" value="<?= h($values[$key] ?? '') ?>">
                 <?php endif; ?>
@@ -121,7 +134,7 @@ admin_header('Marca', $user);
             <?php endif; ?>
           <?php endforeach; ?>
         <?php endforeach; ?>
-        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Salvar marca</button>
+        <button type="submit" class="btn btn-primary" style="margin-top:1.25rem;">Salvar alterações</button>
       </form>
       <script src="admin-limits.js"></script>
 <?php

@@ -12,7 +12,7 @@ Este ambiente faz parte de um ecossistema multi-repositório composto por 4 proj
 
 3. **`xhybrid_wa_bot`** (`C:\Users\Bosco\Documents\GitHub\xhybrid_wa_bot`)
    - **Função**: Robô de automação para WhatsApp e envio de mensagens/notificações.
-   - **Stack**: Node.js, Playwright.
+   - **Stack**: Node.js, Baileys (WebSocket nativo sem navegador).
 
 4. **`xhybrid_site`** (`C:\Users\Bosco\Documents\GitHub\xhybrid_site`)
    - **Função**: Site principal da Xhybrid (landing page, checkout, páginas institucionais e router PHP).

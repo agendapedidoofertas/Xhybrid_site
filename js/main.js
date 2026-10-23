@@ -875,23 +875,49 @@ function setupTestimonials() {
   if (section && count === 0) section.hidden = true;
 }
 
+function formatFaqAnswer(raw) {
+  let text = escapeHtml(raw);
+  // Converte links markdown [Texto](url) em botões/links estilizados
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
+    const isPlan = href.includes("planos");
+    const cls = isPlan ? "btn btn-primary btn-sm" : "faq-link";
+    const st = isPlan
+      ? "display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.75rem;padding:0.5rem 1.15rem;font-size:0.875rem;border-radius:0.45rem;text-decoration:none;font-weight:600;"
+      : "";
+    return `<a href="${href}" class="${cls}" style="${st}">${label} &rarr;</a>`;
+  });
+  // Se o texto tiver "acessar planos" sem link, adiciona o botão automaticamente
+  if (text.toLowerCase().includes("acessar planos") && !text.includes('href="planos')) {
+    text = text.replace(
+      /(?:-\s*)?acessar\s+planos/i,
+      '<a href="planos.html" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.75rem;padding:0.5rem 1.15rem;font-size:0.875rem;border-radius:0.45rem;text-decoration:none;font-weight:600;">Acessar planos &rarr;</a>'
+    );
+  }
+  return `<div class="faq-answer"><p>${text}</p></div>`;
+}
+
 function setupFaq() {
   const list = document.getElementById("faq-list");
   if (!list) return;
   list.innerHTML = "";
   let count = 0;
-  for (let i = 1; i <= 4; i += 1) {
+  for (let i = 1; i <= 6; i += 1) {
     const q = site(`faq_${i}_q`).trim();
     const a = site(`faq_${i}_a`).trim();
     if (!q || !a) continue;
     count += 1;
     const details = document.createElement("details");
     details.className = "faq-item reveal";
-    details.innerHTML = `<summary>${escapeHtml(q)}</summary><p>${escapeHtml(a)}</p>`;
+    if (count === 1) {
+      details.open = true;
+    }
+    details.innerHTML = `<summary>${escapeHtml(q)}</summary>${formatFaqAnswer(a)}`;
     list.appendChild(details);
   }
   const section = document.querySelector("[data-section='faq']");
-  if (section && count === 0) section.hidden = true;
+  if (section) {
+    section.hidden = count === 0 || site("section_faq") === "0";
+  }
 }
 
 function setupContactForm() {

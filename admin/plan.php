@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $input["offer_{$pid}_plan_cents"] = $centsPlan !== '' ? $centsPlan : (string) ($_POST["offer_{$pid}_plan_cents"] ?? '');
                 $input["offer_{$pid}_maint_cents"] = $centsMaint !== '' ? $centsMaint : (string) ($_POST["offer_{$pid}_maint_cents"] ?? '');
                 $input["offer_{$pid}_bullets"] = (string) ($_POST["offer_{$pid}_bullets"] ?? '');
+                $input["offer_{$pid}_hidden"] = !empty($_POST["offer_{$pid}_hidden"]) ? '1' : '0';
             }
             public_offer_save(db(), $input);
             header('Location: plan.php?ok=offer');
@@ -271,13 +272,19 @@ admin_header('Plano', $user);
                   continue;
               }
           ?>
-          <h2 class="admin-appearance__label" style="margin-top:1.25rem;"><?= h((string) $op['label']) ?></h2>
-          <div class="form-group">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.5rem;padding-bottom:0.35rem;border-bottom:1px solid #2a2a2a;">
+            <h2 class="admin-appearance__label" style="margin:0;"><?= h((string) $op['label']) ?></h2>
+            <label class="admin-check" style="cursor:pointer;margin:0;font-size:0.875rem;">
+              <input type="checkbox" name="offer_<?= h($pid) ?>_hidden" value="1" <?= !empty($op['hidden']) ? 'checked' : '' ?>>
+              <span>Ocultar este plano</span>
+            </label>
+          </div>
+          <div class="form-group" style="margin-top:0.75rem;">
             <label for="offer_<?= h($pid) ?>_label">Rótulo</label>
             <input id="offer_<?= h($pid) ?>_label" name="offer_<?= h($pid) ?>_label" class="form-input" maxlength="24" value="<?= h((string) $op['label']) ?>">
           </div>
           <div class="form-group">
-            <label for="offer_<?= h($pid) ?>_plan_brl">Preço do plano (R$ / mês)</label>
+            <label for="offer_<?= h($pid) ?>_plan_brl">Preço do site / criação (R$)</label>
             <input id="offer_<?= h($pid) ?>_plan_brl" name="offer_<?= h($pid) ?>_plan_brl" class="form-input" inputmode="decimal" value="<?= h($fmtOfferBrl((int) $op['planCents'])) ?>">
           </div>
           <div class="form-group">

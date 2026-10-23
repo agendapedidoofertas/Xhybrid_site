@@ -29,6 +29,12 @@
       </header>
 
       <form id="checkout-form" class="contact-form admin-form" style="margin-top:1.5rem;">
+        <div style="display:none !important;" aria-hidden="true">
+          <input type="text" name="hp_token" id="hp_token" tabindex="-1" autocomplete="off">
+        </div>
+        <div style="display:none !important;" aria-hidden="true">
+          <input type="text" name="hp_token" id="hp_token" tabindex="-1" autocomplete="off">
+        </div>
         <div class="form-group">
           <label for="company">Nome da empresa</label>
           <input id="company" name="company" class="form-input" required>
@@ -93,19 +99,45 @@
       let plan = (params.get('plan') || 'basic').toLowerCase();
       if (aliases[plan]) plan = aliases[plan];
       const allowed = ['basic', 'pleno', 'plus'];
-      const p = allowed.includes(plan) ? plan : 'basic';
-      let provider = (params.get('provider') || 'asaas').toLowerCase();
-      if (!['asaas', 'stripe'].includes(provider)) provider = 'asaas';
+      let p = allowed.includes(plan) ? plan : 'basic';
+      let provider = 'asaas';
       const termsOk = params.get('terms') === '1';
 
       document.getElementById('plan').value = p;
-      document.getElementById('provider').value = provider;
+      document.getElementById('provider').value = 'asaas';
       const labels = { basic: 'Basic', pleno: 'Pleno', plus: 'Plus' };
-      document.getElementById('plan-label').textContent =
-        'Plano: ' + labels[p] + ' · Pagamento: ' + (provider === 'stripe' ? 'Stripe' : 'Asaas');
+      function updatePlanDisplay(name) {
+        document.getElementById('plan-label').textContent =
+          'Plano: ' + name + ' · Pagamento: Asaas (PIX / Cartão)';
+      }
+      updatePlanDisplay(labels[p] || p);
       if (termsOk) {
         document.getElementById('terms_accepted').checked = true;
       }
+
+      let offerCache = null;
+      fetch('api/planos_offer.php')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data) return;
+          offerCache = data;
+          const plans = data.plans || {};
+          if (plans[p] && plans[p].hidden) {
+            const visible = Object.keys(plans).filter(function (id) {
+              return !plans[id].hidden;
+            });
+            if (visible.length > 0) {
+              p = visible[0];
+              document.getElementById('plan').value = p;
+            } else {
+              location.href = 'planos.html';
+              return;
+            }
+          }
+          const activeLabel = (plans[p] && plans[p].label) || labels[p] || p;
+          updatePlanDisplay(activeLabel);
+        })
+        .catch(function () {});
 
       const modal = document.getElementById('legal-modal');
       const modalBody = document.getElementById('legal-modal-body');
@@ -113,7 +145,6 @@
       const fullBtn = document.getElementById('legal-modal-full');
       let kind = 'terms';
       let mode = 'summary';
-      let offerCache = null;
       const fullCache = { terms: '', privacy: '' };
 
       function escapeHtml(s) {
@@ -252,6 +283,7 @@
               cpf_cnpj: document.getElementById('cpf_cnpj').value.trim(),
               email: document.getElementById('email').value.trim(),
               whatsapp: document.getElementById('whatsapp').value.trim(),
+              hp_token: (document.getElementById('hp_token') || {}).value || '',
             }),
           });
           const data = await res.json();

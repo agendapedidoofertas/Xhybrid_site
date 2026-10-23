@@ -9,7 +9,8 @@ require_once dirname(__DIR__) . '/lib/admin_layout.php';
 auth_boot_session();
 
 if (user_count() > 0) {
-    header('Location: login.php');
+    http_response_code(404);
+    echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>404 Not Found</title></head><body><h1>404 Not Found</h1><p>The requested URL was not found on this server.</p></body></html>';
     exit;
 }
 

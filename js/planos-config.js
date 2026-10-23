@@ -20,6 +20,7 @@ window.XH_PLANOS = {
       label: 'Basic',
       planCents: 49700,
       maintenanceCents: 5990,
+      hidden: false,
       bullets: [
         'Subdomínio *.8xd.com.br',
         'Site completo com personalização mínima',
@@ -32,6 +33,7 @@ window.XH_PLANOS = {
       label: 'Pleno',
       planCents: 69700,
       maintenanceCents: 7999,
+      hidden: false,
       bullets: [
         'Domínio próprio (taxa de registro à parte, se houver)',
         'Personalização limitada',
@@ -44,6 +46,7 @@ window.XH_PLANOS = {
       label: 'Plus',
       planCents: 99700,
       maintenanceCents: 7999,
+      hidden: false,
       bullets: [
         'Domínio próprio',
         'Personalização total · looks premium',

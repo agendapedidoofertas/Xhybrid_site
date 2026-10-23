@@ -59,6 +59,15 @@ function login_rate_hit(string $ip): void
 }
 
 $error = '';
+$info = '';
+if (!empty($_GET['expired'])) {
+    $info = 'Sua sessão expirou por inatividade. Faça login novamente.';
+} elseif (($_GET['error'] ?? '') === 'google_not_configured') {
+    $error = 'Login com Google ainda não configurado (chaves não encontradas em data/google_auth.php).';
+} elseif (($_GET['error'] ?? '') === 'google_cancelled') {
+    $info = 'Autenticação com Google cancelada.';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
@@ -84,8 +93,9 @@ admin_header('Login');
         <h1 class="font-display">Entrar</h1>
         <p>Área restrita da Xhybrid.</p>
       </header>
+      <?php if ($info): ?><p class="admin-flash admin-flash--info"><?= h($info) ?></p><?php endif; ?>
       <?php if ($error): ?><p class="admin-flash admin-flash--error"><?= h($error) ?></p><?php endif; ?>
-      <form method="post" class="contact-form admin-form" style="margin:2rem auto 0;">
+      <form method="post" class="contact-form admin-form" style="margin:2rem auto 0;max-width:28rem;">
         <?= csrf_field() ?>
         <div class="form-group">
           <label for="username">Usuário</label>
@@ -103,7 +113,18 @@ admin_header('Login');
             </button>
           </span>
         </div>
-        <button type="submit" class="btn btn-primary" style="margin-top:1.5rem;">Entrar</button>
+        <button type="submit" class="btn btn-primary" style="margin-top:1.5rem;width:100%;">Entrar</button>
+
+        <div style="margin-top:1.25rem;display:flex;justify-content:center;font-size:0.9rem;">
+          <a href="forgot_password.php" style="color:var(--text-muted);text-decoration:none;">Esqueci minha senha</a>
+        </div>
+
+        <div style="margin-top:1.75rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1);text-align:center;">
+          <a href="google_login.php" class="btn" style="display:inline-flex;align-items:center;justify-content:center;gap:0.75rem;width:100%;background:#ffffff;color:#1f2937;font-weight:600;border-radius:0.5rem;padding:0.75rem;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,0.2);">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+            Entrar com Google
+          </a>
+        </div>
       </form>
       <script>
       (function () {

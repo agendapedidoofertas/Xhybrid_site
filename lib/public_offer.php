@@ -39,6 +39,7 @@ function public_offer_defaults(): array
                 'label' => 'Basic',
                 'planCents' => 49700,
                 'maintenanceCents' => 5990,
+                'hidden' => false,
                 'bullets' => [
                     'Subdomínio *.8xd.com.br',
                     'Site completo com personalização mínima',
@@ -51,6 +52,7 @@ function public_offer_defaults(): array
                 'label' => 'Pleno',
                 'planCents' => 69700,
                 'maintenanceCents' => 7999,
+                'hidden' => false,
                 'bullets' => [
                     'Domínio próprio (taxa de registro à parte, se houver)',
                     'Personalização limitada',
@@ -63,6 +65,7 @@ function public_offer_defaults(): array
                 'label' => 'Plus',
                 'planCents' => 99700,
                 'maintenanceCents' => 7999,
+                'hidden' => false,
                 'bullets' => [
                     'Domínio próprio',
                     'Personalização total · looks premium',
@@ -97,6 +100,7 @@ function public_offer_setting_keys(): array
         $keys[] = "offer_{$id}_plan_cents";
         $keys[] = "offer_{$id}_maint_cents";
         $keys[] = "offer_{$id}_bullets";
+        $keys[] = "offer_{$id}_hidden";
     }
     return $keys;
 }
@@ -167,6 +171,11 @@ function public_offer_settings_definitions(): array
             'group' => 'offer', 'label' => "Bullets {$id} (1 por linha)", 'max' => 1200, 'type' => 'text',
             'default' => implode("\n", $p['bullets']),
         ];
+        $defs["offer_{$id}_hidden"] = [
+            'group' => 'offer', 'label' => "Ocultar plano {$id}", 'max' => 2, 'type' => 'choice',
+            'choices' => ['0', '1'],
+            'default' => '0',
+        ];
     }
 
     return $defs;
@@ -222,12 +231,15 @@ function public_offer_get(PDO $pdo): array
         if ($label === '') {
             $label = (string) $d['label'];
         }
+        $hiddenRaw = (string) ($all["offer_{$id}_hidden"] ?? '');
+        $hidden = $hiddenRaw === '1' || $hiddenRaw === 'true' || $hiddenRaw === 'on';
         $plans[$id] = [
             'id' => $id,
             'label' => $label,
             'planCents' => public_offer_parse_cents((string) ($all["offer_{$id}_plan_cents"] ?? ''), (int) $d['planCents']),
             'maintenanceCents' => public_offer_parse_cents((string) ($all["offer_{$id}_maint_cents"] ?? ''), (int) $d['maintenanceCents']),
             'bullets' => $bullets,
+            'hidden' => $hidden,
         ];
     }
 

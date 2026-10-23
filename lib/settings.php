@@ -559,40 +559,40 @@ function settings_definitions(): array
 
         /* FAQ */
         'faq_title' => [
-            'group' => 'faq', 'label' => 'Título da seção', 'max' => 40, 'type' => 'short',
+            'group' => 'faq', 'label' => 'Título da seção', 'max' => 60, 'type' => 'short',
             'default' => 'Perguntas frequentes',
         ],
         'faq_1_q' => [
-            'group' => 'faq', 'label' => 'FAQ 1 — pergunta', 'max' => 80, 'type' => 'short',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 1 — pergunta', 'max' => 120, 'type' => 'short',
+            'default' => 'Ficou interessado? Teste grátis e planos',
         ],
         'faq_1_a' => [
-            'group' => 'faq', 'label' => 'FAQ 1 — resposta', 'max' => 280, 'type' => 'text',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 1 — resposta', 'max' => 500, 'type' => 'text',
+            'default' => 'Ficou interessado? Ganhe acesso vitalício ao seu site com teste grátis de site próprio por 30 dias e planos sob medida para seu negócio. [Acessar planos](planos.html)',
         ],
         'faq_2_q' => [
-            'group' => 'faq', 'label' => 'FAQ 2 — pergunta', 'max' => 80, 'type' => 'short',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 2 — pergunta', 'max' => 120, 'type' => 'short',
+            'default' => 'Como funciona a criação do site pela Xhybrid?',
         ],
         'faq_2_a' => [
-            'group' => 'faq', 'label' => 'FAQ 2 — resposta', 'max' => 280, 'type' => 'text',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 2 — resposta', 'max' => 500, 'type' => 'text',
+            'default' => 'Cuidamos de tudo: do visual moderno à performance e publicação. Você passa as informações e entregamos o site rápido e pronto para divulgar seus serviços e receber clientes.',
         ],
         'faq_3_q' => [
-            'group' => 'faq', 'label' => 'FAQ 3 — pergunta', 'max' => 80, 'type' => 'short',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 3 — pergunta', 'max' => 120, 'type' => 'short',
+            'default' => 'O que está incluído na manutenção mensal?',
         ],
         'faq_3_a' => [
-            'group' => 'faq', 'label' => 'FAQ 3 — resposta', 'max' => 280, 'type' => 'text',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 3 — resposta', 'max' => 500, 'type' => 'text',
+            'default' => 'Hospedagem de alta performance, certificado de segurança SSL, monitoramento contra quedas, suporte direto no WhatsApp e atualizações periódicas.',
         ],
         'faq_4_q' => [
-            'group' => 'faq', 'label' => 'FAQ 4 — pergunta', 'max' => 80, 'type' => 'short',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 4 — pergunta', 'max' => 120, 'type' => 'short',
+            'default' => 'Posso usar meu próprio domínio no site?',
         ],
         'faq_4_a' => [
-            'group' => 'faq', 'label' => 'FAQ 4 — resposta', 'max' => 280, 'type' => 'text',
-            'default' => '',
+            'group' => 'faq', 'label' => 'FAQ 4 — resposta', 'max' => 500, 'type' => 'text',
+            'default' => 'Sim! Nos planos com domínio você utiliza sua marca própria (ex: suaempresa.com.br) ou subdomínio exclusivo, transmitindo máxima autoridade e confiança.',
         ],
 
         /* Plano comercial */

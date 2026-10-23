@@ -4,13 +4,7 @@ declare(strict_types=1);
 
 function db_path(): string
 {
-    $dir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR;
-    $path = $dir . 'site.sqlite';
-    $legacy = $dir . 'atelier.sqlite';
-    if (!is_file($path) && is_file($legacy)) {
-        @rename($legacy, $path);
-    }
-    return $path;
+    return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'site.sqlite';
 }
 
 function sqlite_driver_loaded(): bool
@@ -129,6 +123,40 @@ function db_migrate(PDO $pdo): void
         $pdo->exec('ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT \'admin\'');
         $pdo->exec('UPDATE users SET role = \'admin\' WHERE role IS NULL OR role = \'\'');
     }
+
+        $cols = $pdo->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_ASSOC);
+    $colNames = array_column($cols, 'name');
+    if (!in_array('email', $colNames, true)) {
+        $pdo->exec('ALTER TABLE users ADD COLUMN email TEXT NULL');
+    }
+    if (!in_array('google_id', $colNames, true)) {
+        $pdo->exec('ALTER TABLE users ADD COLUMN google_id TEXT NULL');
+    }
+
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS password_resets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token_hash TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            used_at TEXT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )'
+    );
+
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS webhook_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            provider TEXT NOT NULL,
+            event TEXT NOT NULL,
+            lead_id INTEGER NULL,
+            value_cents INTEGER NULL,
+            status TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )'
+    );
 
     $pdo->exec(
         'CREATE TABLE IF NOT EXISTS images (

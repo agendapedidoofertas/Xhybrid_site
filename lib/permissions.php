@@ -27,6 +27,7 @@ function permissions_page_catalog(): array
         'plan' => ['label' => 'Plano', 'group' => 'Agência'],
         'backup' => ['label' => 'Backup', 'group' => 'Agência'],
         'users' => ['label' => 'Usuários', 'group' => 'Agência'],
+        'webhooks' => ['label' => 'Webhooks Asaas', 'group' => 'Agência'],
     ];
 }
 

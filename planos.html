@@ -66,12 +66,35 @@
       gap: 1.15rem;
       margin-top: 2rem;
       width: 100%;
+      justify-content: center;
+    }
+    body[data-page="admin"].planos-page .planos-grid[data-count="1"] {
+      max-width: 24rem;
+      margin-inline: auto;
+    }
+    body[data-page="admin"].planos-page .planos-grid[data-count="2"] {
+      max-width: 48rem;
+      margin-inline: auto;
     }
     @media (min-width: 720px) {
       body[data-page="admin"].planos-page .planos-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1.25rem;
         align-items: stretch;
+      }
+      body[data-page="admin"].planos-page .planos-grid[data-count="2"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      body[data-page="admin"].planos-page .planos-grid[data-count="1"] {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      body[data-page="admin"].planos-page .planos-shell[data-count="2"] .planos-actions {
+        max-width: 48rem;
+        margin-inline: auto;
+      }
+      body[data-page="admin"].planos-page .planos-shell[data-count="1"] .planos-actions {
+        max-width: 28rem;
+        margin-inline: auto;
       }
     }
     body[data-page="admin"].planos-page .planos-actions {
@@ -326,8 +349,8 @@
           <h2 id="pay-title" class="font-display">Como prefere pagar?</h2>
           <p class="text-muted" style="margin:0;font-size:0.9rem;">Escolha Asaas ou Stripe. O link de cobrança usa o provedor selecionado.</p>
           <div class="pay-options" role="group" aria-label="Provedor de pagamento">
-            <button type="button" class="pay-option" data-provider="asaas">Asaas</button>
-            <button type="button" class="pay-option" data-provider="stripe">Stripe</button>
+            <button type="button" class="pay-option is-selected" data-provider="asaas">PIX / Cartão (Asaas)</button>
+            
           </div>
         </section>
 

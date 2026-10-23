@@ -466,10 +466,13 @@ function roboto_planos_public_payload(?PDO $pdo = null): array
 
     $planLines = [];
     foreach ($offer['plans'] as $p) {
+        if (!empty($p['hidden'])) {
+            continue;
+        }
         $price = number_format(((int) $p['planCents']) / 100, 2, ',', '.');
         $maint = number_format(((int) $p['maintenanceCents']) / 100, 2, ',', '.');
         $bits = implode('; ', array_slice($p['bullets'], 0, 3));
-        $planLines[] = "{$p['label']} — R$ {$price}/mês + manutenção R$ {$maint}. {$bits}.";
+        $planLines[] = "{$p['label']} — R$ {$price} + manutenção R$ {$maint}/mês. {$bits}.";
     }
     $summaryBody = "Resumo da oferta atual:\n" . implode("\n", $planLines)
         . "\n\nO plano Pleno costuma ser o mais escolhido. No checkout você escolhe Asaas ou Stripe.";

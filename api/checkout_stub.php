@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Captura pública mínima → CRM (cria lead + cobrança se stub/live).
+ * Captura pública mínima -> CRM (cria lead + cobrança se stub/live).
  * Requer CRM bridge configurado.
  */
 
@@ -50,6 +50,51 @@ if (!is_array($data)) {
     $data = $_POST;
 }
 
+// Anti-bot: Verificação do campo Honeypot invisível
+if (!empty($data['hp_token'])) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Falha na verificação de segurança.']);
+    exit;
+}
+
+// Anti-bot: Verificação do Cloudflare Turnstile (se configurado)
+$turnstileSecret = getenv('CLOUDFLARE_TURNSTILE_SECRET_KEY') ?: '';
+$turnstileFile = dirname(__DIR__) . '/data/turnstile_config.php';
+if ($turnstileSecret === '' && is_file($turnstileFile)) {
+    $tcfg = include $turnstileFile;
+    if (is_array($tcfg) && !empty($tcfg['secret_key'])) {
+        $turnstileSecret = (string) $tcfg['secret_key'];
+    }
+}
+
+if ($turnstileSecret !== '') {
+    $turnstileToken = (string) ($data['cf-turnstile-response'] ?? '');
+    if ($turnstileToken === '') {
+        http_response_code(422);
+        echo json_encode(['ok' => false, 'error' => 'Por favor, confirme que você não é um robô.']);
+        exit;
+    }
+    $ch = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query([
+            'secret' => $turnstileSecret,
+            'response' => $turnstileToken,
+            'remoteip' => $ip,
+        ]),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 5,
+    ]);
+    $cfRes = curl_exec($ch);
+    curl_close($ch);
+    $cfData = json_decode((string) $cfRes, true);
+    if (empty($cfData['success'])) {
+        http_response_code(422);
+        echo json_encode(['ok' => false, 'error' => 'Verificação anti-robô falhou. Tente recarregar a página.']);
+        exit;
+    }
+}
+
 $termsAccepted = !empty($data['terms_accepted']) && (
     $data['terms_accepted'] === true
     || $data['terms_accepted'] === 1
@@ -63,9 +108,15 @@ if (!$termsAccepted) {
 }
 
 $plan = plan_normalize((string) ($data['plan'] ?? 'basic'));
-$provider = strtolower(trim((string) ($data['provider'] ?? 'asaas')));
-if (!in_array($provider, ['asaas', 'stripe'], true)) {
-    $provider = 'asaas';
+$provider = 'asaas';
+
+require_once dirname(__DIR__) . '/lib/db.php';
+require_once dirname(__DIR__) . '/lib/public_offer.php';
+$publicOffer = public_offer_get(db());
+if (!empty($publicOffer['plans'][$plan]['hidden'])) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Este plano não está disponível no momento.']);
+    exit;
 }
 
 $company = trim(str_replace(['<', '>'], '', (string) ($data['company'] ?? '')));
@@ -137,6 +188,18 @@ try {
         'terms_accepted' => true,
         'has_cpf_cnpj' => $cpfCnpj !== '',
     ]);
+
+    // Notificação imediata para admin via WhatsApp Bot
+    try {
+        require_once $crmRoot . '/lib/whatsapp/WhatsAppService.php';
+        whatsapp_notify_lead_created($id, [
+            'company_name' => $company,
+            'plan_tier' => $plan,
+            'whatsapp' => $whatsapp,
+        ]);
+    } catch (Throwable $e) {
+        error_log('[checkout whatsapp] ' . $e->getMessage());
+    }
 
     echo json_encode([
         'ok' => true,
