@@ -1,5 +1,5 @@
 /**
- * Página de site suspenso: PIX + claim de pagamento.
+ * Página de site suspenso: Pagamento via Asaas / PIX.
  */
 (function () {
   const ctxEl = document.getElementById("xh-inactive-ctx");
@@ -12,7 +12,7 @@
   }
 
   const statusEl = document.getElementById("inactive-status");
-  const claimBtn = document.getElementById("inactive-claim");
+  const checkoutBtn = document.getElementById("inactive-checkout");
   const waBtn = document.getElementById("inactive-whatsapp");
   const copyBtn = document.getElementById("inactive-copy-pix");
   const pixInput = document.getElementById("inactive-pix-payload");
@@ -24,63 +24,14 @@
     statusEl.className = "inactive-status" + (kind ? " inactive-status--" + kind : "");
   }
 
-  function applyState(state) {
-    const needWa = state === "need_whatsapp";
-    if (claimBtn) {
-      claimBtn.hidden = needWa;
-      claimBtn.disabled = state === "pending_confirm";
-      if (state === "pending_confirm") {
-        claimBtn.textContent = "Aguardando confirmação (72h)";
-      } else {
-        claimBtn.textContent = "Já paguei — reativar site";
-      }
-    }
-    if (waBtn) {
-      waBtn.hidden = !ctx.whatsapp_url;
-      if (needWa) {
-        waBtn.classList.add("btn-primary");
-        waBtn.classList.remove("btn-outline");
-      }
-    }
-    if (needWa) {
-      setStatus(
-        "Reativação automática esgotada. Envie mensagem no WhatsApp — só o admin libera o site.",
-        "warn",
-      );
-    } else if (state === "pending_confirm") {
-      setStatus(
-        "Site reativado provisoriamente. Confirme o pagamento no prazo de 72h ou o acesso cai de novo.",
-        "ok",
-      );
-    }
-  }
-
-  applyState(ctx.state || "can_claim");
-
-  const checkoutBtn = document.getElementById("inactive-checkout");
-  if (checkoutBtn && ctx.checkout_url) {
-    checkoutBtn.href = ctx.checkout_url;
+  // Botão Pagar agora: direciona diretamente para o checkout / Asaas
+  if (checkoutBtn) {
+    const targetUrl = ctx.checkout_url || ('/checkout.html?lead_id=' + (ctx.lead_id || '') + '&plan=' + encodeURIComponent(ctx.plan_tier || 'basic') + '&terms=1');
+    checkoutBtn.href = targetUrl;
     checkoutBtn.hidden = false;
   }
-  if (ctx.allow_claim === false && claimBtn) {
-    claimBtn.hidden = true;
-  }
-  if (ctx.payment_mode && ctx.payment_mode !== "manual") {
-    const pixBox = document.getElementById("inactive-pix-block");
-    if (pixBox) {
-      const frame = pixBox.querySelector(".inactive-pix__frame");
-      const hint = pixBox.querySelector(".inactive-pix__hint");
-      const label = pixBox.querySelector(".inactive-pix__copy-label");
-      const ta = document.getElementById("inactive-pix-payload");
-      const copy = document.getElementById("inactive-copy-pix");
-      if (frame) frame.hidden = true;
-      if (hint) hint.hidden = true;
-      if (label) label.hidden = true;
-      if (ta) ta.hidden = true;
-      if (copy) copy.hidden = true;
-    }
-  }
 
+  // QR Code e Copia-e-cola do PIX
   const qrImg = document.getElementById("inactive-qr");
   if (qrImg && ctx.pix_qr_url) {
     qrImg.src = ctx.pix_qr_url;
@@ -88,6 +39,8 @@
   if (pixInput && ctx.pix_payload) {
     pixInput.value = ctx.pix_payload;
   }
+
+  // Botão WhatsApp comercial de suporte
   if (waBtn && ctx.whatsapp_url) {
     waBtn.href = ctx.whatsapp_url;
     waBtn.hidden = false;
@@ -98,51 +51,11 @@
       const text = pixInput.value || ctx.pix_payload || "";
       try {
         await navigator.clipboard.writeText(text);
-        setStatus("Código PIX copiado.", "ok");
+        setStatus("Código PIX copiado com sucesso.", "ok");
       } catch (_) {
         pixInput.focus();
         pixInput.select();
-        setStatus("Selecione e copie o código PIX manualmente.", "warn");
-      }
-    });
-  }
-
-  if (claimBtn) {
-    claimBtn.addEventListener("click", async () => {
-      claimBtn.disabled = true;
-      setStatus("Verificando…", "");
-      try {
-        const endpoint = (window.__xhybridAppBase || "") + "/api/payment_claim.php"; const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lead_id: ctx.lead_id,
-            slug: ctx.slug,
-            code: ctx.code,
-          }),
-        });
-        const data = await res.json();
-        if (data.ok && (data.code === "claimed" || data.code === "already_paid" || data.code === "already_pending")) {
-          setStatus(data.message || "Ok", "ok");
-          if (data.code === "claimed" || data.code === "already_paid") {
-            window.setTimeout(() => {
-              window.location.reload();
-            }, 1200);
-          } else {
-            applyState("pending_confirm");
-          }
-          return;
-        }
-        if (data.code === "need_whatsapp") {
-          applyState("need_whatsapp");
-          setStatus(data.message || "Fale no WhatsApp.", "warn");
-          return;
-        }
-        setStatus(data.message || data.error || "Não foi possível reativar.", "warn");
-        claimBtn.disabled = false;
-      } catch (_) {
-        setStatus("Falha de rede. Tente de novo ou fale no WhatsApp.", "warn");
-        claimBtn.disabled = false;
+        setStatus("Selecione e copie o código PIX acima.", "warn");
       }
     });
   }

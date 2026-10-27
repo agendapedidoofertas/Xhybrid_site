@@ -13,7 +13,7 @@ header('Cache-Control: no-store, max-age=0');
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Método não permitido'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error' => 'MÃ©todo nÃ£o permitido'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -62,7 +62,7 @@ $leadId = (int) ($data['lead_id'] ?? $data['id'] ?? 0);
 
 if ($slug === '' || !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug) || !preg_match('/^[a-z]$/', $code) || $leadId <= 0) {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'code' => 'bad_request', 'message' => 'Parâmetros inválidos'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'code' => 'bad_request', 'message' => 'Parâmetros válidos'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

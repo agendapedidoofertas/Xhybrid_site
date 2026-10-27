@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/db.php';
 require_once dirname(__DIR__) . '/lib/services.php';
+require_once dirname(__DIR__) . '/lib/images.php';
 require_once dirname(__DIR__) . '/lib/security.php';
 
 security_send_headers();
@@ -26,6 +27,7 @@ try {
             echo '[]';
             exit;
         }
+        images_ensure_lead_preset_images(db(), $leadId, (string) ($row['site_preset'] ?? ''));
     }
     $rows = services_list(db(), true, $leadId);
     $out = array_map(static function (array $row): array {

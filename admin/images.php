@@ -141,6 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $ok = isset($_GET['ok']) ? (string) $_GET['ok'] : '';
 $pdo = db();
+if ($leadId !== null) {
+    images_ensure_lead_preset_images($pdo, $leadId, (string) ($leadRow['site_preset'] ?? ''));
+}
 $autoOff = images_deactivate_unavailable($pdo, $leadId);
 if ($autoOff > 0 && $ok === '') {
     $ok = $autoOff === 1

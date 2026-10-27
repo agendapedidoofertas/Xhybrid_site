@@ -82,7 +82,7 @@ $pageLabels = [
     'feature_page_contato' => 'Contato — menu, rodapé e página',
 ];
 
-admin_header('Seções', $user);
+admin_header('Visibilidade das Seções', $user);
 ?>
       <header class="page-header" style="padding-top:0;text-align:left;margin:0;max-width:none;">
         <p class="eyebrow"><?= $leadId ? 'Lead #' . (int) $leadId : 'Admin' ?></p>
@@ -107,14 +107,30 @@ admin_header('Seções', $user);
 
         <h2 class="admin-appearance__label" style="margin-top:1.5rem;">Seções da home</h2>
         <?php foreach ($defs as $key => $def): ?>
-          <?php if (($def['group'] ?? '') !== 'sections') continue; ?>
+          <?php if (($def['group'] ?? '') !== 'sections' || $key === 'section_faq') continue; ?>
           <label class="admin-check">
             <input type="checkbox" name="<?= h($key) ?>" value="1" <?= ($values[$key] ?? '1') === '1' ? 'checked' : '' ?>>
             Mostrar <?= h($def['label']) ?>
           </label>
         <?php endforeach; ?>
 
-        <button type="submit" class="btn btn-primary" style="margin-top:1.25rem;">Salvar visibilidade</button>
+        <h2 class="admin-appearance__label" style="margin-top:1.75rem;">Acordeão / FAQ (Dúvidas Frequentes)</h2>
+        <div style="margin-top:0.5rem;padding:1rem 1.25rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;">
+          <label class="admin-check" style="margin:0;cursor:pointer;">
+            <input type="checkbox" name="section_faq" value="1" <?= ($values['section_faq'] ?? '0') === '1' ? 'checked' : '' ?>>
+            <span><strong>Exibir seção de Acordeão / FAQ na página inicial</strong></span>
+          </label>
+          <p style="font-size:0.875rem;color:var(--text-muted, #94a3b8);margin:0.5rem 0 0 1.75rem;">
+            Quando ativado, os itens de perguntas e respostas abaixo serão exibidos no site.
+          </p>
+          <div style="margin:0.75rem 0 0 1.75rem;">
+            <a href="texts.php?<?= $leadId ? lead_admin_qs($leadId) . '&' : '' ?>tab=faq" class="btn btn-outline btn-sm" style="font-size:0.8rem;padding:0.35rem 0.75rem;">
+              Editar perguntas e respostas do Acordeão →
+            </a>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top:1.75rem;">Salvar visibilidade</button>
       </form>
 <?php
 admin_footer();

@@ -91,7 +91,7 @@ function payment_expire_if_needed(PDO $xhybrid, int $crmLeadId): bool
 }
 
 /**
- * Cliente declara pagamento (1ª vez).
+ * Cliente declara pagamento (1Ã‚Âª vez).
  *
  * @return array{ok:bool,code:string,message:string,grace_until?:string,whatsapp?:string}
  */
@@ -105,14 +105,14 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
         return [
             'ok' => false,
             'code' => 'no_crm',
-            'message' => 'Não foi possível validar o pagamento agora. Fale no WhatsApp.',
+            'message' => 'NÃƒÂ£o foi possÃƒÂ­vel validar o pagamento agora. Fale no WhatsApp.',
             'whatsapp' => $wa,
         ];
     }
 
     $row = published_site_find_public($xhybrid, $slug, $crmLeadId, $letter);
     if (!$row) {
-        return ['ok' => false, 'code' => 'not_found', 'message' => 'Site não encontrado.'];
+        return ['ok' => false, 'code' => 'not_found', 'message' => 'Site nÃƒÂ£o encontrado.'];
     }
 
     payment_expire_if_needed($xhybrid, $crmLeadId);
@@ -123,14 +123,14 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
         return [
             'ok' => false,
             'code' => 'no_crm',
-            'message' => 'CRM indisponível. Fale no WhatsApp.',
+            'message' => 'CRM indisponÃƒÂ­vel. Fale no WhatsApp.',
             'whatsapp' => $wa,
         ];
     }
 
     $lead = payment_crm_lead($crm, $crmLeadId);
     if (!$lead) {
-        return ['ok' => false, 'code' => 'not_found', 'message' => 'Lead não encontrado no CRM.'];
+        return ['ok' => false, 'code' => 'not_found', 'message' => 'Lead nÃƒÂ£o encontrado no CRM.'];
     }
 
     $status = strtolower(trim((string) ($lead['payment_status'] ?? 'pending')));
@@ -148,7 +148,7 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
         return [
             'ok' => true,
             'code' => 'already_paid',
-            'message' => 'Pagamento já confirmado. Recarregando o site…',
+            'message' => 'Pagamento jÃƒÂ¡ confirmado. Recarregando o siteÃ¢â‚¬Â¦',
         ];
     }
 
@@ -156,7 +156,7 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
         return [
             'ok' => false,
             'code' => 'need_whatsapp',
-            'message' => 'A reativação automática já foi usada. Envie mensagem no WhatsApp para o comercial liberar o site.',
+            'message' => 'A reativaÃƒÂ§ÃƒÂ£o automÃƒÂ¡tica jÃƒÂ¡ foi usada. Envie mensagem no WhatsApp para o comercial liberar o site.',
             'whatsapp' => $wa,
         ];
     }
@@ -165,12 +165,12 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
         return [
             'ok' => true,
             'code' => 'already_pending',
-            'message' => 'Site já reativado provisoriamente. Aguarde a confirmação do pagamento (até 72h).',
+            'message' => 'Site jÃƒÂ¡ reativado provisoriamente. Aguarde a confirmaÃƒÂ§ÃƒÂ£o do pagamento (atÃƒÂ© 72h).',
             'grace_until' => $grace,
         ];
     }
 
-    // Já usou a 1ª tentativa (claims >= 1) e não está pago → bloqueia
+    // JÃƒÂ¡ usou a 1Ã‚Âª tentativa (claims >= 1) e nÃƒÂ£o estÃƒÂ¡ pago Ã¢â€ â€™ bloqueia
     if ($claims >= 1) {
         $now = gmdate('c');
         $crm->prepare(
@@ -181,12 +181,12 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
         return [
             'ok' => false,
             'code' => 'need_whatsapp',
-            'message' => 'Segunda tentativa sem confirmação de pagamento. Fale no WhatsApp — só o admin libera o site.',
+            'message' => 'Segunda tentativa sem confirmaÃƒÂ§ÃƒÂ£o de pagamento. Fale no WhatsApp Ã¢â‚¬â€ sÃƒÂ³ o admin libera o site.',
             'whatsapp' => $wa,
         ];
     }
 
-    // 1ª reivindicação
+    // 1Ã‚Âª reivindicaÃƒÂ§ÃƒÂ£o
     $now = gmdate('c');
     $graceUntil = gmdate('c', time() + PAYMENT_GRACE_HOURS * 3600);
     $crm->prepare(
@@ -207,13 +207,13 @@ function payment_claim_self(PDO $xhybrid, int $crmLeadId, string $slug, string $
     return [
         'ok' => true,
         'code' => 'claimed',
-        'message' => 'Site reativado por 72 horas. O pagamento será conferido no CRM; se não confirmar, o site desativa de novo.',
+        'message' => 'Site reativado por 72 horas. O pagamento serÃƒÂ¡ conferido no CRM; se nÃƒÂ£o confirmar, o site desativa de novo.',
         'grace_until' => $graceUntil,
     ];
 }
 
 /**
- * Estado para a página inativa.
+ * Estado para a pÃƒÂ¡gina inativa.
  *
  * @return array<string, mixed>
  */
@@ -258,22 +258,49 @@ function payment_inactive_context(PDO $xhybrid, array $publishedRow): array
         }
     }
 
-    $waMsg = 'Olá! Sou o lead #' . $leadId . ' (' . $company . '). Precisei regularizar o pagamento do site e gostaria que liberassem o acesso.';
+    $waMsg = 'Olá! Sou o lead #' . $leadId . ' (' . $company . '). Gostaria de regularizar o pagamento do site.';
 
-    $paymentMode = getenv('PAYMENT_MODE');
-    $paymentMode = is_string($paymentMode) && trim($paymentMode) !== '' ? strtolower(trim($paymentMode)) : 'manual';
+    $gwConfig = [];
+    if (crm_bridge_configured()) {
+        $gwFile = crm_bridge_root() . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'payment_gateway.php';
+        if (is_file($gwFile)) {
+            $gwLoaded = include $gwFile;
+            if (is_array($gwLoaded)) {
+                $gwConfig = $gwLoaded;
+            }
+        }
+    }
+    $paymentMode = getenv('PAYMENT_MODE') ?: ($gwConfig['mode'] ?? 'live');
+    $paymentMode = is_string($paymentMode) && trim($paymentMode) !== '' ? strtolower(trim($paymentMode)) : 'live';
     $checkoutUrl = '';
-    if ($paymentMode !== 'manual' && crm_bridge_configured()) {
+
+    if (crm_bridge_configured()) {
         try {
             $crm = crm_bridge_pdo();
+            // Busca cobrança pendente do Asaas/gateway
             $ch = $crm->prepare(
-                "SELECT checkout_url FROM payment_charges WHERE lead_id = :id AND status = 'pending' ORDER BY id DESC LIMIT 1"
+                "SELECT checkout_url FROM payment_charges WHERE lead_id = :id AND status = 'pending' AND checkout_url LIKE 'http%' ORDER BY id DESC LIMIT 1"
             );
             $ch->execute([':id' => $leadId]);
             $checkoutUrl = (string) ($ch->fetchColumn() ?: '');
+
+            // Se não tiver pendente, busca a última URL de cobrança válida para este lead
+            if ($checkoutUrl === '') {
+                $ch2 = $crm->prepare(
+                    "SELECT checkout_url FROM payment_charges WHERE lead_id = :id AND checkout_url LIKE 'http%' ORDER BY id DESC LIMIT 1"
+                );
+                $ch2->execute([':id' => $leadId]);
+                $checkoutUrl = (string) ($ch2->fetchColumn() ?: '');
+            }
         } catch (Throwable $e) {
             // ignore
         }
+    }
+
+    // Se ainda não existir fatura Asaas gerada, direciona para o checkout direto do plano
+    if ($checkoutUrl === '') {
+        $planTier = strtolower(trim((string) ($publishedRow['plan_tier'] ?? 'basic')));
+        $checkoutUrl = '/checkout.html?lead_id=' . $leadId . '&plan=' . urlencode($planTier) . '&terms=1';
     }
 
     return [
@@ -281,6 +308,7 @@ function payment_inactive_context(PDO $xhybrid, array $publishedRow): array
         'slug' => $slug,
         'code' => $code,
         'company' => $company,
+        'plan_tier' => (string) ($publishedRow['plan_tier'] ?? 'basic'),
         'state' => $state,
         'payment_status' => $payStatus,
         'claims' => $claims,
@@ -290,7 +318,7 @@ function payment_inactive_context(PDO $xhybrid, array $publishedRow): array
         'pix_key' => $paymentMode === 'manual' ? $cfg['key'] : '',
         'payment_mode' => $paymentMode,
         'checkout_url' => $checkoutUrl,
-        'allow_claim' => $paymentMode === 'manual',
+        'allow_claim' => false,
         'support_whatsapp' => $cfg['support_whatsapp'],
         'whatsapp_url' => $cfg['support_whatsapp'] !== ''
             ? 'https://wa.me/' . preg_replace('/\D+/', '', $cfg['support_whatsapp']) . '?text=' . rawurlencode($waMsg)

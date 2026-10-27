@@ -72,7 +72,7 @@
               <circle cx="162" cy="178" r="4" fill="rgba(255,255,255,0.2)"/>
             </g>
 
-            <!-- Braços curtos/grossos + pinça estática na altura do ombro (levemente separados do corpo) -->
+            <!-- BraÃ§os curtos/grossos + pinÃ§a estÃ¡tica na altura do ombro (levemente separados do corpo) -->
             <g class="buddy-arm-l">
               <g transform="translate(84 174)">
                 <circle r="6.5" fill="#1a1a1a" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
@@ -113,7 +113,7 @@
         <p class="badge">Acesso suspenso</p>
         <h1 class="font-display">Indisponível</h1>
         <h2>Site temporariamente indisponível</h2>
-        <p>Este site encontra-se desativado em razão de pendência de pagamento. Pague via PIX e confirme abaixo para reativar provisoriamente, ou fale com o comercial.</p>
+        <p>Este site encontra-se desativado em razÃ£o de pendência de pagamento. Pague via PIX e confirme abaixo para reativar provisoriamente, ou fale com o comercial.</p>
 
         <div class="inactive-pix" id="inactive-pix-block">
           <div class="inactive-pix__frame">
@@ -131,7 +131,7 @@
                   </linearGradient>
                 </defs>
                 <rect width="120" height="140" rx="18" fill="#121212"/>
-                <!-- Mesmo robô do topo, escala estática -->
+                <!-- Mesmo robÃ´ do topo, escala estÃ¡tica -->
                 <g transform="translate(10 12) scale(0.36)">
                   <g>
                     <line x1="140" y1="58" x2="140" y2="34" stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round"/>
@@ -188,12 +188,10 @@
           <textarea id="inactive-pix-payload" class="inactive-pix__payload" rows="3" readonly></textarea>
           <div class="inactive-pix__actions">
             <button type="button" class="btn btn-outline" id="inactive-copy-pix">Copiar PIX</button>
-            <button type="button" class="btn btn-primary" id="inactive-claim">Já paguei — reativar site</button>
-            <a class="btn btn-primary" id="inactive-checkout" href="#" target="_blank" rel="noopener noreferrer" hidden>Pagar agora</a>
+            <a class="btn btn-primary" id="inactive-checkout" href="#" target="_blank" rel="noopener noreferrer">Pagar agora</a>
             <a class="btn btn-outline" id="inactive-whatsapp" href="#" target="_blank" rel="noopener noreferrer" hidden>WhatsApp comercial</a>
           </div>
           <p class="inactive-status" id="inactive-status" hidden></p>
-          <p class="inactive-pix__note">1ª confirmação: reativa por 72h até o admin marcar como pago. Na 2ª tentativa sem pagamento confirmado, só o comercial libera.</p>
         </div>
 
         <script type="application/json" id="xh-inactive-ctx">{}</script>

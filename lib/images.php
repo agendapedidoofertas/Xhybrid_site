@@ -235,6 +235,73 @@ function images_deactivate_unlisted_for_lead(PDO $pdo, int $crmLeadId, array $ke
 }
 
 /**
+ * Garante que o lead possua imagens do seu preset de nicho no banco.
+ * Se o lead não possuir nenhuma imagem ativa na tabela images, preenche com o catálogo do preset.
+ *
+ * @return list<array<string, mixed>>
+ */
+function images_ensure_lead_preset_images(PDO $pdo, int $crmLeadId, ?string $presetId = null): array
+{
+    if ($crmLeadId <= 0) {
+        return [];
+    }
+
+    $existingActive = (int) $pdo->query(
+        'SELECT COUNT(*) FROM images WHERE crm_lead_id = ' . (int) $crmLeadId . ' AND active = 1'
+    )->fetchColumn();
+
+    if ($existingActive > 0) {
+        return images_list($pdo, false, $crmLeadId);
+    }
+
+    require_once __DIR__ . '/presets.php';
+    require_once __DIR__ . '/services.php';
+
+    $map = preset_function_map();
+    $presetKey = strtolower(trim((string) $presetId));
+
+    if ($presetKey === '' || !isset($map[$presetKey])) {
+        $st = $pdo->prepare('SELECT site_preset FROM published_sites WHERE crm_lead_id = :lead LIMIT 1');
+        $st->execute([':lead' => $crmLeadId]);
+        $dbPreset = strtolower(trim((string) $st->fetchColumn()));
+        if ($dbPreset !== '' && isset($map[$dbPreset])) {
+            $presetKey = $dbPreset;
+        } else {
+            $presetKey = 'eletricista';
+        }
+    }
+
+    $fn = $map[$presetKey] ?? ($map['eletricista'] ?? null);
+    if (!is_callable($fn)) {
+        return images_list($pdo, false, $crmLeadId);
+    }
+
+    $preset = $fn();
+
+    if (!empty($preset['images']) && is_array($preset['images'])) {
+        images_upsert_by_slug_for_lead($pdo, $crmLeadId, $preset['images']);
+        $keep = [];
+        foreach ($preset['images'] as $img) {
+            if (!empty($img['slug'])) {
+                $keep[] = (string) $img['slug'];
+            }
+        }
+        images_deactivate_unlisted_for_lead($pdo, $crmLeadId, $keep);
+    }
+
+    // Se o lead também não possuir serviços cadastrados, preenche com os serviços padrão do preset
+    $srvActive = (int) $pdo->query(
+        'SELECT COUNT(*) FROM services WHERE crm_lead_id = ' . (int) $crmLeadId . ' AND active = 1'
+    )->fetchColumn();
+
+    if ($srvActive === 0 && !empty($preset['services']) && is_array($preset['services'])) {
+        services_replace_for_lead($pdo, $crmLeadId, $preset['services']);
+    }
+
+    return images_list($pdo, false, $crmLeadId);
+}
+
+/**
  * @param array<string, array{title?: string, description?: string, position?: int, file?: string}> $map
  * @return list<array{slug: string, url: string, title: string, description: string, position: int}>
  */

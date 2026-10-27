@@ -27,6 +27,7 @@ try {
             echo '[]';
             exit;
         }
+        images_ensure_lead_preset_images($pdo, $leadId, (string) ($row['site_preset'] ?? ''));
     }
     images_deactivate_unavailable($pdo, $leadId);
     $rows = [];
