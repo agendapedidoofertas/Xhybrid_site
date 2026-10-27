@@ -1,0 +1,328 @@
+/**
+ * Xhybrid Scrollytelling & Apple-Style Design System
+ */
+
+:root {
+  --scrolly-bg: #0a0c10;
+  --scrolly-text: #f5f5f7;
+  --scrolly-muted: #86868b;
+  --scrolly-accent-cyan: #00d2ff;
+  --scrolly-accent-orange: #f8ab5e;
+  --scrolly-glass-bg: rgba(22, 24, 29, 0.72);
+  --scrolly-glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   1. Scrollytelling Hero Section (Sticky Pin)
+   ========================================================================== */
+.scrolly-container {
+  position: relative;
+  width: 100%;
+  height: 320vh; /* Permite rolagem gradual e imersiva */
+  background: var(--scrolly-bg);
+}
+
+.scrolly-sticky {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrolly-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Barra de Carregamento Sutil */
+.scrolly-loader {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 20;
+  transition: opacity 0.6s ease;
+}
+
+.scrolly-loader.is-loaded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scrolly-loader__bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--scrolly-accent-cyan), #0071e3);
+  transition: width 0.2s ease-out;
+}
+
+/* Indicador de Scroll */
+.scrolly-indicator {
+  position: absolute;
+  bottom: 30px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--scrolly-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.scrolly-indicator__mouse {
+  width: 18px;
+  height: 28px;
+  border: 1.5px solid var(--scrolly-muted);
+  border-radius: 12px;
+  position: relative;
+}
+
+.scrolly-indicator__mouse::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 6px;
+  background: var(--scrolly-accent-cyan);
+  border-radius: 2px;
+  animation: scrollyBounce 1.8s infinite;
+}
+
+@keyframes scrollyBounce {
+  0% { transform: translate(-50%, 0); opacity: 1; }
+  100% { transform: translate(-50%, 8px); opacity: 0; }
+}
+
+/* Passos Narrativos Apple-Style */
+.scrolly-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.scrolly-step {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateY(20px);
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s ease;
+  pointer-events: none;
+  max-width: 520px;
+  padding: 32px;
+  background: var(--scrolly-glass-bg);
+  border: 1px solid var(--scrolly-glass-border);
+  border-radius: 22px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.scrolly-step.is-active {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.scrolly-step--left {
+  left: 8%;
+}
+
+.scrolly-step--right {
+  right: 8%;
+}
+
+.scrolly-step--center {
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(20px);
+  text-align: center;
+}
+
+.scrolly-step--center.is-active {
+  transform: translate(-50%, -50%) translateY(0);
+}
+
+.scrolly-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--scrolly-accent-cyan);
+  margin-bottom: 8px;
+}
+
+.scrolly-title {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.scrolly-desc {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--scrolly-muted);
+  margin-bottom: 20px;
+}
+
+.scrolly-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #0071e3;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 980px;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.scrolly-btn:hover {
+  background: #0077ed;
+  transform: scale(1.02);
+}
+
+/* ==========================================================================
+   2. Apple Store Style Cards Shelf (Horizontal Carousel & Grid)
+   ========================================================================== */
+.apple-shelf-section {
+  padding: 80px 24px;
+  background: #050608;
+  color: var(--scrolly-text);
+}
+
+.apple-shelf-header {
+  max-width: 1200px;
+  margin: 0 auto 40px auto;
+}
+
+.apple-shelf-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.apple-shelf-subtitle {
+  font-size: 1.25rem;
+  color: var(--scrolly-muted);
+}
+
+.apple-shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.apple-card {
+  position: relative;
+  background: #12151b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.apple-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+.apple-card__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--scrolly-accent-orange);
+  margin-bottom: 8px;
+}
+
+.apple-card__headline {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.apple-card__subheadline {
+  font-size: 0.95rem;
+  color: var(--scrolly-muted);
+  line-height: 1.45;
+}
+
+.apple-card__footer {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apple-card__price {
+  font-size: 0.9rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.apple-card__link {
+  color: #2997ff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-card__link:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade Mobile */
+@media (max-width: 768px) {
+  .scrolly-step {
+    left: 16px !important;
+    right: 16px !important;
+    max-width: calc(100% - 32px);
+    padding: 24px;
+    border-radius: 18px;
+  }
+  .scrolly-indicator {
+    display: none;
+  }
+}

@@ -22,6 +22,7 @@ data/crm_bridge.php
 data/app_base_path.php
 data/payment_gateway.php
 data/places_api_key.php
+data/gemini_api_key.php
 
 # Rate limit / backups
 data/rate/
@@ -31,3 +32,5 @@ data/backups/*
 # Dependencies & Auth profiles
 node_modules/
 .auth/
+
+metadata.php

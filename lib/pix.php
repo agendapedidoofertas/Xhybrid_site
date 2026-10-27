@@ -14,9 +14,10 @@ function pix_config(): array
         'merchant_name' => 'XHYBRID',
         'merchant_city' => 'SAO PAULO',
         'amount' => '', // vazio = cliente informa o valor
-        'support_whatsapp' => '5511999999999',
+        'support_whatsapp' => '5511975438477',
         'txid_prefix' => 'XH',
     ];
+
     $path = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'pix_config.php';
     if (is_file($path)) {
         $cfg = include $path;
@@ -28,6 +29,26 @@ function pix_config(): array
             }
         }
     }
+
+    // Carrega chave e dados bancários de metadata.php se existir
+    $metaPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'metadata.php';
+    if (is_file($metaPath)) {
+        $meta = include $metaPath;
+        if (is_array($meta) && !empty($meta['bank'])) {
+            if (!empty($meta['bank']['pix_key'])) {
+                $defaults['key'] = (string) $meta['bank']['pix_key'];
+            }
+            if (!empty($meta['bank']['merchant_name'])) {
+                $defaults['merchant_name'] = (string) $meta['bank']['merchant_name'];
+            } elseif (!empty($meta['bank']['beneficiary_name'])) {
+                $defaults['merchant_name'] = (string) $meta['bank']['beneficiary_name'];
+            }
+            if (!empty($meta['bank']['merchant_city'])) {
+                $defaults['merchant_city'] = (string) $meta['bank']['merchant_city'];
+            }
+        }
+    }
+
     // Fallback: WhatsApp da agência no settings
     if ($defaults['support_whatsapp'] === '' || $defaults['support_whatsapp'] === '5511999999999') {
         try {

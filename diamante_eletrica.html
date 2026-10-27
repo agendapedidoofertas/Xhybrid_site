@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voltaic Pro | Engenharia Elétrica & Automação de Alto Padrão</title>
+  <meta name="description" content="Engenharia elétrica de alta precisão, quadros inteligentes, automação residencial e eletromobilidade com padrão internacional." />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="assets/css/scrollytelling.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0a0c10;
+      color: #f5f5f7;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Apple-Style Global Nav */
+    .apple-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 48px;
+      background: rgba(10, 12, 16, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+    .apple-nav__brand {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #ffffff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .apple-nav__brand span {
+      color: var(--scrolly-accent-cyan);
+    }
+    .apple-nav__menu {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+    .apple-nav__link {
+      color: #a1a1a6;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .apple-nav__link:hover {
+      color: #ffffff;
+    }
+    .apple-nav__cta {
+      padding: 6px 14px;
+      background: #0071e3;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 980px;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+    .apple-nav__cta:hover {
+      background: #0077ed;
+    }
+
+    /* Sub-header Banner */
+    .hero-banner {
+      padding: 120px 24px 60px 24px;
+      text-align: center;
+      background: radial-gradient(circle at 50% 20%, rgba(0, 210, 255, 0.08) 0%, transparent 60%);
+    }
+    .hero-banner__tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 980px;
+      background: rgba(248, 171, 94, 0.12);
+      border: 1px solid rgba(248, 171, 94, 0.3);
+      color: var(--scrolly-accent-orange);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero-banner__title {
+      font-size: clamp(2.4rem, 6vw, 4.4rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      max-width: 900px;
+      margin: 0 auto 16px auto;
+    }
+    .hero-banner__sub {
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      color: var(--scrolly-muted);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.45;
+    }
+
+    /* Tech Specs Ribbon */
+    .tech-ribbon {
+      background: #0e1117;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 40px 24px;
+    }
+    .tech-ribbon__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .tech-ribbon__item h3 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--scrolly-accent-cyan);
+      margin-bottom: 4px;
+    }
+    .tech-ribbon__item p {
+      font-size: 0.9rem;
+      color: var(--scrolly-muted);
+    }
+
+    /* Apple-style Footer */
+    .apple-footer {
+      background: #050608;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 60px 24px 40px 24px;
+      color: #6e6e73;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    .apple-footer__content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .apple-footer__notes {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+    .apple-footer__bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Navigation -->
+  <nav class="apple-nav">
+    <a href="#" class="apple-nav__brand">VOLTAIC<span>PRO</span></a>
+    <ul class="apple-nav__menu">
+      <li><a href="#experiencia" class="apple-nav__link">Tecnologia</a></li>
+      <li><a href="#solucoes" class="apple-nav__link">Sistemas</a></li>
+      <li><a href="#especificacoes" class="apple-nav__link">Engenharia</a></li>
+      <li><a href="https://wa.me/5511975438477?text=Olá,%20gostaria%20de%20um%20orçamento%20de%20engenharia%20elétrica%20Plano%20Diamante" class="apple-nav__cta" target="_blank">Falar com Engenheiro</a></li>
+    </ul>
+  </nav>
+
+  <!-- Introductory Banner -->
+  <header class="hero-banner">
+    <div class="hero-banner__tag">Plano Diamante • Tecnologia Scrollytelling</div>
+    <h1 class="hero-banner__title">Infraestrutura Elétrica de Alta Precisão.</h1>
+    <p class="hero-banner__sub">A engenharia que alimenta os empreendimentos mais exigentes. Interaja com a rolagem para explorar nossos sistemas em detalhes ou assista ao clipe em vídeo.</p>
+    
+    <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a href="#experiencia" class="scrolly-btn">⚡ Explorar Animação por Rolagem</a>
+      <a href="#video-showcase" class="scrolly-btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);">🎬 Ver Vídeo em Alta Definição</a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       SCROLLYTELLING HERO CANVAS (Apple-Style Scrubbing)
+       ======================================================================== -->
+  <section class="scrolly-container" data-scrolly-container id="experiencia">
+    <div class="scrolly-sticky">
+      <canvas id="scrolly-canvas" class="scrolly-canvas"></canvas>
+
+      <!-- Loader de Frames -->
+      <div class="scrolly-loader">
+        <div class="scrolly-loader__bar" data-scrolly-progress></div>
+      </div>
+
+      <!-- Mouse Indicator -->
+      <div class="scrolly-indicator">
+        <div class="scrolly-indicator__mouse"></div>
+        <span>Role para Explorar</span>
+      </div>
+
+      <!-- Overlay Narrativo em Fases de Rolagem -->
+      <div class="scrolly-overlay">
+        <!-- Passo 1 (0% a 30% do Scroll) -->
+        <div class="scrolly-step scrolly-step--left" data-scrolly-step data-step-start="0.0" data-step-end="0.28">
+          <span class="scrolly-eyebrow">QGBT & Distribuição</span>
+          <h2 class="scrolly-title">Projetado para Potência Ininterrupta.</h2>
+          <p class="scrolly-desc">Barramentos de cobre com termografia calibrada e disjuntores inteligentes que previnem paradas críticas em ambientes industriais e corporativos.</p>
+          <a href="#solucoes" class="scrolly-btn">Ver Especificações</a>
+        </div>
+
+        <!-- Passo 2 (33% a 65% do Scroll) -->
+        <div class="scrolly-step scrolly-step--right" data-scrolly-step data-step-start="0.33" data-step-end="0.65">
+          <span class="scrolly-eyebrow">Normas NBR 5410 & Laudo SPDA</span>
+          <h2 class="scrolly-title">Segurança Absoluta e Homologação.</h2>
+          <p class="scrolly-desc">Cada circuito é certificado com emissão de ART, proteção contra surtos elétricos (DPS Classe I e II) e aterramento em malha fechada.</p>
+          <a href="#solucoes" class="scrolly-btn">Conhecer Certificações</a>
+        </div>
+
+        <!-- Passo 3 (70% a 100% do Scroll) -->
+        <div class="scrolly-step scrolly-step--center" data-scrolly-step data-step-start="0.70" data-step-end="1.0">
+          <span class="scrolly-eyebrow">Smart Home & Eletromobilidade</span>
+          <h2 class="scrolly-title">O Futuro Conectado da Sua Obra.</h2>
+          <p class="scrolly-desc">Carregadores veiculares Wallbox de recarga ultrarrápida e automação residencial completa controlada por voz e smartphone.</p>
+          <a href="https://wa.me/5511975438477?text=Quero%20um%20projeto%20de%20engenharia%20elétrica%20Plano%20Diamante" class="scrolly-btn" target="_blank">Solicitar Orçamento VIP</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Video Showcase Section (Vídeo em Alta Definição) -->
+  <section class="video-showcase-section" id="video-showcase" style="padding: 80px 24px; background: #07090d; text-align: center;">
+    <div style="max-width: 1100px; margin: 0 auto;">
+      <span class="scrolly-eyebrow" style="color: var(--scrolly-accent-orange);">Cinemática em Vídeo</span>
+      <h2 style="font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 700; color: #ffffff; margin-bottom: 12px;">Visualização Completa dos Sistemas em Movimento</h2>
+      <p style="color: var(--scrolly-muted); font-size: 1.1rem; max-width: 650px; margin: 0 auto 36px auto;">Do diagrama conceitual aos quadros QGBT e estações Wallbox, assista à evolução contínua da engenharia em vídeo.</p>
+      
+      <div style="position: relative; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 24px 60px rgba(0,0,0,0.7); background: #000;">
+        <video controls loop playsinline style="width: 100%; height: auto; display: block; max-height: 620px; object-fit: cover;">
+          <source src="assets/scrollytelling/raw_videos/eletrica_flow.mp4" type="video/mp4" />
+          Seu navegador não suporta a tag de vídeo.
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Ribbon Specs -->
+  <section class="tech-ribbon" id="especificacoes">
+    <div class="tech-ribbon__grid">
+      <div class="tech-ribbon__item">
+        <h3>100%</h3>
+        <p>Conforme Normas ABNT & NBR 5410</p>
+      </div>
+      <div class="tech-ribbon__item">
+        <h3>0.02s</h3>
+        <p>Tempo de Resposta em Disparo DPS</p>
+      </div>
+      <div class="tech-ribbon__item">
+        <h3>+15 Anos</h3>
+        <p>De Experiência em Obras Complexas</p>
+      </div>
+      <div class="tech-ribbon__item">
+        <h3>24h</h3>
+        <p>Plantão de Emergência para Clientes VIP</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       APPLE STORE STYLE CARDS SHELF (Vitrine de Serviços)
+       ======================================================================== -->
+  <section class="apple-shelf-section" id="solucoes">
+    <div class="apple-shelf-header">
+      <h2 class="apple-shelf-title">Soluções Especializadas.</h2>
+      <p class="apple-shelf-subtitle">Tecnologia avançada para condomínios, indústrias e residências de alto padrão.</p>
+    </div>
+
+    <div class="apple-shelf-grid">
+      <!-- Card 1 -->
+      <article class="apple-card">
+        <div>
+          <div class="apple-card__eyebrow">Indústria & Comércio</div>
+          <h3 class="apple-card__headline">Quadros QGBT & Subestações</h3>
+          <p class="apple-card__subheadline">Montagem e modernização de quadros elétricos de alta demanda com laudos termográficos periódicos e balanceamento de cargas.</p>
+        </div>
+        <div class="apple-card__footer">
+          <span class="apple-card__price">A partir de R$ 8.900</span>
+          <a href="https://wa.me/5511975438477?text=Interesse%20em%20Quadros%20QGBT" class="apple-card__link" target="_blank">Consultar &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="apple-card">
+        <div>
+          <div class="apple-card__eyebrow">Automação Residencial</div>
+          <h3 class="apple-card__headline">Smart Home & Iluminação</h3>
+          <p class="apple-card__subheadline">Cenas de iluminação arquitetônica, dimerização suave, controle de climatização e integração completa com assistentes virtuais.</p>
+        </div>
+        <div class="apple-card__footer">
+          <span class="apple-card__price">A partir de R$ 14.500</span>
+          <a href="https://wa.me/5511975438477?text=Interesse%20em%20Smart%20Home" class="apple-card__link" target="_blank">Consultar &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="apple-card">
+        <div>
+          <div class="apple-card__eyebrow">Veículos Elétricos</div>
+          <h3 class="apple-card__headline">Carregadores Wallbox</h3>
+          <p class="apple-card__subheadline">Instalação certificada de carregadores rápidos para frotas e residências com proteção térmica dedicada e homologação na concessionária.</p>
+        </div>
+        <div class="apple-card__footer">
+          <span class="apple-card__price">A partir de R$ 3.200</span>
+          <a href="https://wa.me/5511975438477?text=Interesse%20em%20Wallbox" class="apple-card__link" target="_blank">Consultar &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="apple-card">
+        <div>
+          <div class="apple-card__eyebrow">Sustentabilidade</div>
+          <h3 class="apple-card__headline">Energia Solar Fotovoltaica</h3>
+          <p class="apple-card__subheadline">Projetos de micro e minigeração de energia solar com inversores de alta eficiência e monitoramento em tempo real por aplicativo.</p>
+        </div>
+        <div class="apple-card__footer">
+          <span class="apple-card__price">A partir de R$ 18.000</span>
+          <a href="https://wa.me/5511975438477?text=Interesse%20em%20Energia%20Solar" class="apple-card__link" target="_blank">Consultar &rarr;</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Apple-Style Footer -->
+  <footer class="apple-footer">
+    <div class="apple-footer__content">
+      <div class="apple-footer__notes">
+        <p>1. Todos os projetos acompanham Anotação de Responsabilidade Técnica (ART) emitida por engenheiro eletricista registrado no CREA.</p>
+        <p>2. Os valores exibidos são estimativas base para projetos padrão e podem variar de acordo com a topologia e complexidade da edificação.</p>
+      </div>
+      <div class="apple-footer__bottom">
+        <p>&copy; 2026 Voltaic Pro Engenharia Elétrica. Desenvolvido com tecnologia Xhybrid Scrollytelling.</p>
+        <p>Padrão Internacional • 60 FPS Canvas Performance</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/scrollytelling.js"></script>
+</body>
+</html>

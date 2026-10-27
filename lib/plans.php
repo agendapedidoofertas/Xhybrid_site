@@ -25,6 +25,9 @@ function plan_aliases(): array
         'pleno' => 'pleno',
         'pro' => 'plus',
         'plus' => 'plus',
+        'diamond' => 'plus',
+        'diamante' => 'plus',
+        'scrollytelling' => 'plus',
     ];
 }
 
@@ -65,7 +68,10 @@ function plan_labels(): array
     return [
         'basic' => 'Basic',
         'pleno' => 'Pleno',
-        'plus' => 'Plus',
+        'plus' => 'plus',
+        'diamond' => 'plus',
+        'diamante' => 'plus',
+        'scrollytelling' => 'plus',
         // legado (labels se algum código ainda passar medium/pro cru)
         'medium' => 'Pleno',
         'pro' => 'Plus',
