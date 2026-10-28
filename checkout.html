@@ -262,6 +262,27 @@
         if (e.key === 'Escape' && !modal.hidden) closeLegal();
       });
 
+      // Captura preliminar silenciosa (Anti-abandono de carrinho)
+      function sendDraft() {
+        var waInput = document.getElementById('whatsapp');
+        var wa = waInput ? waInput.value.replace(/\D/g, '') : '';
+        if (wa.length < 10) return;
+        fetch('api/checkout_draft.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan: p,
+            company: (document.getElementById('company') || {}).value || '',
+            email: (document.getElementById('email') || {}).value || '',
+            whatsapp: wa,
+            hp_token: (document.getElementById('hp_token') || {}).value || ''
+          })
+        }).catch(function () {});
+      }
+
+      document.getElementById('whatsapp').addEventListener('blur', sendDraft);
+      document.getElementById('email').addEventListener('blur', sendDraft);
+
       document.getElementById('checkout-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const status = document.getElementById('checkout-status');

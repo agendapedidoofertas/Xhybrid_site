@@ -21,6 +21,8 @@ function plan_aliases(): array
         'profissional' => 'pleno',
         'personalizado' => 'plus',
         'basic' => 'basic',
+        'prata' => 'basic',
+        'ouro' => 'pleno',
         'medium' => 'pleno',
         'pleno' => 'pleno',
         'pro' => 'plus',
@@ -66,7 +68,9 @@ function plan_allows_brand_edit(string $plan): bool
 function plan_labels(): array
 {
     return [
-        'basic' => 'Basic',
+        'basic' => 'basic',
+        'prata' => 'basic',
+        'ouro' => 'pleno',
         'pleno' => 'Pleno',
         'plus' => 'plus',
         'diamond' => 'plus',
