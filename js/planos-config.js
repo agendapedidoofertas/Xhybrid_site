@@ -17,9 +17,9 @@ window.XH_PLANOS = {
   plans: {
     basic: {
       id: 'basic',
-      label: 'Prata',
-      planCents: 29700,
-      maintenanceCents: 5999,
+      label: 'Basic',
+      planCents: 49700,
+      maintenanceCents: 5990,
       hidden: false,
       bullets: [
         'Subdomínio *.8xd.com.br',
@@ -30,9 +30,9 @@ window.XH_PLANOS = {
     },
     pleno: {
       id: 'pleno',
-      label: 'Ouro',
-      planCents: 49700,
-      maintenanceCents: 5999,
+      label: 'Pleno',
+      planCents: 69700,
+      maintenanceCents: 7999,
       hidden: false,
       bullets: [
         'Domínio próprio (taxa de registro à parte, se houver)',
@@ -43,10 +43,10 @@ window.XH_PLANOS = {
     },
     plus: {
       id: 'plus',
-      label: 'Diamante',
+      label: 'Plus',
       planCents: 99700,
       maintenanceCents: 7999,
-      hidden: true,
+      hidden: false,
       bullets: [
         'Domínio próprio',
         'Personalização total · looks premium',

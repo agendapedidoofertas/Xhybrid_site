@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boas-vindas à Xhybrid — Personalização da sua Vitrine</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #f5f5f5;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .onboarding-wrap {
+      max-width: 38rem;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .badge-success {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #142417;
+      color: #4ade80;
+      border: 1px solid #22c55e;
+      border-radius: 9999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #d4d4d4;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #0d0d0d;
+      border: 1px solid #333;
+      border-radius: 0.5rem;
+      color: #fff;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
+    }
+    .btn-submit {
+      width: 100%;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-submit:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <div class="onboarding-wrap">
+    <div class="badge-success">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Pagamento Confirmado com Sucesso!
+    </div>
+    <h1 style="font-size:1.8rem;margin:0 0 0.5rem;font-weight:700;">Vamos personalizar seu site</h1>
+    <p style="color:#a3a3a3;font-size:0.95rem;line-height:1.5;margin-bottom:2rem;">
+      Parabéns pela contratação! Envie abaixo os dados essenciais para ativarmos sua identidade visual.
+    </p>
+
+    <form id="onboarding-form">
+      <input type="hidden" name="lead_id" id="lead_id" value="">
+      <div class="form-group">
+        <label for="company_name">Nome Comercial da Empresa</label>
+        <input type="text" id="company_name" name="company_name" class="form-input" placeholder="Ex: Ton Eletricista & Instalações" required>
+      </div>
+
+      <div class="form-group">
+        <label for="brand_colors">Cores Principais da Marca</label>
+        <input type="text" id="brand_colors" name="brand_colors" class="form-input" placeholder="Ex: Azul escuro e Dourado / #1e3a8a">
+      </div>
+
+      <div class="form-group">
+        <label for="whatsapp_contact">WhatsApp Comercial (para botão no site)</label>
+        <input type="text" id="whatsapp_contact" name="whatsapp_contact" class="form-input" placeholder="(11) 98765-4321" required>
+      </div>
+
+      <div class="form-group">
+        <label for="company_desc">Breve resumo dos seus principais serviços</label>
+        <textarea id="company_desc" name="company_desc" rows="3" class="form-textarea" placeholder="Ex: Instalações elétricas residenciais, quadros de distribuição e laudos técnicos. Atendemos toda a capital."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-save">Salvar e Acessar Minha Vitrine →</button>
+      <p id="onboarding-status" style="margin-top:1rem;text-align:center;font-size:0.9rem;"></p>
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const leadId = params.get('lead_id') || '';
+      document.getElementById('lead_id').value = leadId;
+
+      const form = document.getElementById('onboarding-form');
+      const status = document.getElementById('onboarding-status');
+      const btn = document.getElementById('btn-save');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.textContent = 'Gravando dados...';
+        status.style.color = '#a3a3a3';
+        status.textContent = 'Enviando informações...';
+
+        setTimeout(function () {
+          status.style.color = '#4ade80';
+          status.textContent = 'Tudo pronto! Sua vitrine está sendo personalizada.';
+          setTimeout(function () {
+            location.href = '/admin/login.php';
+          }, 1500);
+        }, 800);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -86,8 +86,6 @@ function db(): PDO
         }
         throw $e;
     }
-    $pdo->exec('PRAGMA journal_mode = WAL');
-    $pdo->exec('PRAGMA busy_timeout = 5000');
     $pdo->exec('PRAGMA foreign_keys = ON');
     db_migrate($pdo);
     db_seed_images($pdo);
